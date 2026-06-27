@@ -654,6 +654,121 @@ async function deleteItem(id) {
   } catch(e) { alert('Could not delete.'); }
 }
 
+// Track active pipelines
+let activePipelines = {};
+
+const STAGE_AGENT_MAP = {
+  'Signal Captured': { agent: 'scout', label: 'Discovering…' },
+  'AI Executability': { agent: 'ai-analyst', label: 'Analyzing…' },
+  'Market Analysis': { agent: 'market', label: 'Researching…' },
+  'Business Design': { agent: 'architect', label: 'Designing…' },
+  'Brand Development': { agent: 'brand', label: 'Creating…' },
+  'GTM Strategy': { agent: 'gtm', label: 'Planning…' },
+  'AI Execution Design': { agent: 'exec', label: 'Designing…' },
+  'Blueprint Draft': { agent: 'orchestrator', label: 'Compiling…' },
+};
+
+const TERMINAL_STAGES = ['Review', 'Approved', 'On Hold', 'Dropped'];
+
+async function advanceRecord(recordId) {
+  try {
+    const res = await fetch(`/api/advance/${recordId}`, { method: 'POST' });
+    const result = await res.json();
+    return result;
+  } catch(e) {
+    return { done: true, error: e.message };
+  }
+}
+
+async function pollRecord(recordId) {
+  try {
+    const res = await fetch(`/api/record/${recordId}`);
+    return await res.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+async function runPipelineForRecord(recordId, oppName) {
+  addActivity(`🔍 Starting pipeline for: ${oppName}`);
+  activePipelines[recordId] = true;
+
+  const statusEl = document.getElementById('systemStatus');
+  statusEl.textContent = '● Pipeline running…';
+  statusEl.className = 'system-status working';
+
+  let complete = false;
+  let stageCount = 0;
+
+  while (!complete && stageCount < 12) {
+    stageCount++;
+
+    // Get current status
+    const record = await pollRecord(recordId);
+    if (!record) break;
+
+    const currentStatus = record['Status'];
+    addActivity(`⚙️ ${oppName}: ${currentStatus}`);
+
+    // Update agent status display
+    const agentInfo = STAGE_AGENT_MAP[currentStatus];
+    if (agentInfo) {
+      setAgentStatus('orchestrator', 'working', 'Reviewing…');
+      setAgentStatus(agentInfo.agent, 'working', agentInfo.label);
+    }
+
+    if (TERMINAL_STAGES.includes(currentStatus)) {
+      complete = true;
+      if (currentStatus === 'Review') {
+        addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review.`);
+        setAgentStatus('orchestrator', 'done', 'Done ✓');
+      } else if (currentStatus === 'Dropped') {
+        addActivity(`❌ "${oppName}" was dropped by the Orchestrator.`);
+      }
+      break;
+    }
+
+    // Advance one stage
+    const result = await advanceRecord(recordId);
+
+    if (result.error) {
+      addActivity(`❌ Error on "${oppName}": ${result.error}`);
+      complete = true;
+      break;
+    }
+
+    if (result.done) {
+      complete = true;
+      if (result.success) {
+        addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review.`);
+      } else if (result.dropped) {
+        addActivity(`❌ "${oppName}" was dropped by the Orchestrator.`);
+      }
+    }
+
+    // Mark previous agent done
+    if (agentInfo) {
+      setAgentStatus(agentInfo.agent, 'done', 'Done ✓');
+    }
+
+    // Small delay between stages
+    await new Promise(r => setTimeout(r, 1000));
+  }
+
+  delete activePipelines[recordId];
+  loadQueueBadge();
+  loadBoard();
+
+  // Check if all pipelines done
+  if (Object.keys(activePipelines).length === 0) {
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('runBtn').textContent = '▶ Run Pipeline';
+    statusEl.textContent = '● All agents ready';
+    statusEl.className = 'system-status';
+    ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+  }
+}
+
 async function runAgents() {
   const signal = document.getElementById('signalInput').value.trim();
   const oppName = document.getElementById('oppName').value.trim() || 'Untitled Opportunity';
@@ -666,16 +781,14 @@ async function runAgents() {
 
   const runBtn = document.getElementById('runBtn');
   runBtn.disabled = true;
-  runBtn.textContent = '⏳ Running pipeline…';
+  runBtn.textContent = '⏳ Starting…';
 
   const statusEl = document.getElementById('systemStatus');
   statusEl.textContent = '● Pipeline running…';
   statusEl.className = 'system-status working';
 
-  // Reset all agents
   ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 
-  // Build focus context
   const focusContext = [
     focusCriteria.targetIndustries ? `Target Industries: ${focusCriteria.targetIndustries}` : '',
     focusCriteria.aiThreshold ? `AI Executability Threshold: ${focusCriteria.aiThreshold}` : '',
@@ -687,54 +800,19 @@ async function runAgents() {
     const startRes = await fetch('/api/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ signal: focusContext ? `${focusContext}\n\nSignal: ${signal}` : signal, oppName, autoDiscover })
+      body: JSON.stringify({ signal, oppName, autoDiscover, focusContext })
     });
-    const { jobId } = await startRes.json();
+    const { recordIds, message } = await startRes.json();
 
-    let lastLogCount = 0;
-    const poll = setInterval(async () => {
-      try {
-        const statusRes = await fetch(`/api/job/${jobId}`);
-        const job = await statusRes.json();
-        const newLogs = job.logs.slice(lastLogCount);
+    addActivity(`📡 ${message}`);
+    runBtn.textContent = '⏳ Pipeline running…';
 
-        newLogs.forEach(log => {
-          addActivity(log.msg);
-          // Agent status updates
-          if (log.msg.includes('Orchestrator')) setAgentStatus('orchestrator', 'working', 'Reviewing…');
-          if (log.msg.includes('Scout')) setAgentStatus('scout', 'working', 'Discovering…');
-          if (log.msg.includes('Scout done')) setAgentStatus('scout', 'done', 'Done ✓');
-          if (log.msg.includes('AI Executability')) setAgentStatus('ai-analyst', 'working', 'Analyzing…');
-          if (log.msg.includes('AI Executability done')) setAgentStatus('ai-analyst', 'done', 'Done ✓');
-          if (log.msg.includes('Market Analyst')) setAgentStatus('market', 'working', 'Researching…');
-          if (log.msg.includes('Market done')) setAgentStatus('market', 'done', 'Done ✓');
-          if (log.msg.includes('Business Architect')) setAgentStatus('architect', 'working', 'Designing…');
-          if (log.msg.includes('Business Architect done')) setAgentStatus('architect', 'done', 'Done ✓');
-          if (log.msg.includes('Brand Developer')) setAgentStatus('brand', 'working', 'Creating…');
-          if (log.msg.includes('Brand done')) setAgentStatus('brand', 'done', 'Done ✓');
-          if (log.msg.includes('GTM Strategist')) setAgentStatus('gtm', 'working', 'Planning…');
-          if (log.msg.includes('GTM done')) setAgentStatus('gtm', 'done', 'Done ✓');
-          if (log.msg.includes('AI Exec Designer')) setAgentStatus('exec', 'working', 'Designing…');
-          if (log.msg.includes('Exec done')) setAgentStatus('exec', 'done', 'Done ✓');
-          if (log.msg.includes('Orchestrator done')) setAgentStatus('orchestrator', 'done', 'Done ✓');
-          if (log.msg.includes('saved to Airtable')) loadQueueBadge();
-        });
-
-        lastLogCount = job.logs.length;
-
-        if (job.status === 'complete' || job.status === 'error') {
-          clearInterval(poll);
-          runBtn.disabled = false;
-          runBtn.textContent = '▶ Run Pipeline';
-          statusEl.textContent = '● All agents ready';
-          statusEl.className = 'system-status';
-          if (job.status === 'complete') {
-            addActivity('🎉 Blueprint complete! Go to Opportunity Board to review.');
-          }
-          loadQueueBadge();
-        }
-      } catch(e) {}
-    }, 3000);
+    // Run each record through the pipeline
+    await Promise.all(recordIds.map(async (recordId) => {
+      const record = await pollRecord(recordId);
+      const name = record ? record['Name'] : oppName;
+      await runPipelineForRecord(recordId, name);
+    }));
 
   } catch(error) {
     addActivity('❌ Error: ' + error.message);
