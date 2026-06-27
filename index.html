@@ -7,19 +7,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F2F4F8; color: #1D1D1F; min-height: 100vh; }
-
-/* TOPBAR */
 .topbar { background: #0F1117; border-bottom: 1px solid #1E2130; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .logo { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.5px; }
 .logo span { color: #00C896; }
 .logo sub { font-size: 10px; font-weight: 500; color: #666; vertical-align: middle; margin-left: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
 .system-status { font-size: 12px; padding: 5px 14px; border-radius: 20px; background: #0D2B22; color: #00C896; font-weight: 600; border: 1px solid #00C89633; }
 .system-status.working { background: #2B1F0D; color: #F59E0B; border-color: #F59E0B33; }
-
-/* LAYOUT */
 .layout { display: grid; grid-template-columns: 210px 1fr; min-height: calc(100vh - 56px); }
-
-/* SIDEBAR */
 .sidebar { background: #0F1117; border-right: 1px solid #1E2130; padding: 20px 0; }
 .nav-label { font-size: 10px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 16px; margin-bottom: 4px; margin-top: 20px; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; font-size: 13px; color: #888; cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
@@ -27,28 +21,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .nav-item.active { background: #0D2B22; color: #00C896; font-weight: 600; border-left: 2px solid #00C896; }
 .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .badge { background: #00C896; color: #0F1117; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: auto; }
-
-/* MAIN */
 .main { padding: 28px; overflow-y: auto; }
-
-/* CARDS */
 .card { background: white; border-radius: 14px; border: 1px solid #E8EAF0; padding: 22px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
 .card-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
-
-/* INPUT PANEL */
 .signal-input { width: 100%; font-size: 14px; color: #1D1D1F; background: #F8F9FC; border: 1.5px solid #E8EAF0; border-radius: 10px; padding: 14px; resize: none; height: 90px; font-family: inherit; line-height: 1.6; transition: border-color 0.2s; }
 .signal-input:focus { outline: none; border-color: #00C896; }
 .opp-name-input { width: 100%; font-size: 14px; color: #1D1D1F; background: #F8F9FC; border: 1.5px solid #E8EAF0; border-radius: 10px; padding: 10px 14px; font-family: inherit; margin-bottom: 12px; transition: border-color 0.2s; }
 .opp-name-input:focus { outline: none; border-color: #00C896; }
 .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; }
-.input-footer-left { display: flex; align-items: center; gap: 12px; }
 .discovery-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
 .discovery-toggle input[type=checkbox] { accent-color: #00C896; width: 14px; height: 14px; }
-.btn-run { background: #00C896; color: #0F1117; border: none; border-radius: 10px; padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; letter-spacing: -0.2px; }
+.btn-run { background: #00C896; color: #0F1117; border: none; border-radius: 10px; padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
 .btn-run:hover { background: #00B384; }
 .btn-run:disabled { background: #A8E8D8; cursor: not-allowed; color: #5A8A7A; }
-
-/* AGENTS GRID */
 .agents-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .agent-card { background: #F8F9FC; border-radius: 10px; padding: 14px; border: 1.5px solid #E8EAF0; transition: all 0.25s; }
 .agent-card.working { border-color: #F59E0B; background: #FFFBEB; }
@@ -60,33 +45,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pill-idle { background: #F0F0F2; color: #888; }
 .pill-working { background: #FEF3CD; color: #7A4F00; }
 .pill-done { background: #D1FAE5; color: #065F46; }
-
-/* ACTIVITY FEED */
-.activity-feed { max-height: 180px; overflow-y: auto; }
+.activity-feed { max-height: 200px; overflow-y: auto; }
 .activity-item { font-size: 12px; color: #555; padding: 7px 0; border-bottom: 1px solid #F5F5F7; display: flex; gap: 10px; align-items: flex-start; }
 .activity-item:last-child { border-bottom: none; }
 .activity-time { color: #BBB; white-space: nowrap; font-size: 11px; padding-top: 1px; }
 .activity-empty { font-size: 13px; color: #CCC; text-align: center; padding: 24px; }
-
-/* KANBAN */
 .kanban-wrapper { overflow-x: auto; padding-bottom: 20px; }
 .kanban-board { display: flex; gap: 14px; align-items: start; min-width: max-content; }
 .kanban-column { background: #EDEEF2; border-radius: 14px; padding: 14px; width: 720px; transition: width 0.3s ease; flex-shrink: 0; }
 .kanban-column.col-empty { width: 160px; }
-.kanban-column.col-empty .kanban-col-title { font-size: 10px; writing-mode: horizontal-tb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 .kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 6px; }
-.kanban-col-title { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.06em; }
+.kanban-col-title { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kanban-col-count { font-size: 11px; background: white; border: 1px solid #E0E0E6; padding: 2px 9px; border-radius: 10px; color: #AAA; font-weight: 600; flex-shrink: 0; }
-.queue-empty { display: none; }
-.kanban-column.col-empty .col-empty-dot { display: flex; justify-content: center; padding: 10px 0; }
-.col-empty-dot { display: none; }
-
-/* OPPORTUNITY CARD */
 .opp-card { background: white; border-radius: 12px; border: 1.5px solid #E8EAF0; margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.2s; }
 .opp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.opp-card.card-open { border-color: #00C896; box-shadow: 0 0 0 3px rgba(0,200,150,0.1), 0 4px 20px rgba(0,200,150,0.15); }
-
-/* CARD HEADER */
+.opp-card.card-open { border-color: #00C896; box-shadow: 0 0 0 3px rgba(0,200,150,0.1); }
 .opp-card-header { padding: 16px 18px; cursor: pointer; }
 .opp-card-name { font-size: 17px; font-weight: 800; color: #0F1117; line-height: 1.3; margin-bottom: 6px; letter-spacing: -0.3px; }
 .opp-card-signal { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -97,13 +70,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .opp-score { font-size: 11px; font-weight: 700; color: #00C896; background: #F0FDF8; padding: 3px 10px; border-radius: 20px; border: 1px solid #00C89633; }
 .ai-score { font-size: 11px; font-weight: 700; color: #6366F1; background: #EEF2FF; padding: 3px 10px; border-radius: 20px; }
 .card-date { font-size: 10px; color: #CCC; margin-left: auto; }
-.expand-btn { background: none; border: none; cursor: pointer; color: #CCC; font-size: 12px; padding: 0; flex-shrink: 0; margin-left: 4px; }
-
-/* CARD EXPANDED */
+.expand-btn { background: none; border: none; cursor: pointer; color: #CCC; font-size: 12px; padding: 0; flex-shrink: 0; }
 .card-expanded { display: none; border-top: 1.5px solid #F0F2F6; }
 .card-expanded.open { display: block; }
-
-/* BLUEPRINT SECTIONS */
 .blueprint-sections { padding: 0; }
 .section-item { border-bottom: 1px solid #F0F2F6; }
 .section-item:last-child { border-bottom: none; }
@@ -115,58 +84,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .section-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
 .section-status.pending { background: #F0F0F2; color: #AAA; }
 .section-status.complete { background: #D1FAE5; color: #065F46; }
-.section-status.in-progress { background: #FEF3CD; color: #7A4F00; }
 .section-arrow { font-size: 10px; color: #CCC; }
 .section-content { display: none; padding: 16px 18px; background: #FAFBFC; border-top: 1px solid #F0F2F6; }
 .section-content.open { display: block; }
-.section-text { font-size: 13px; color: #444; line-height: 1.75; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+.section-text { font-size: 13px; color: #444; line-height: 1.75; white-space: pre-wrap; max-height: 500px; overflow-y: auto; }
 .section-empty { font-size: 12px; color: #CCC; font-style: italic; }
-
-/* ORCHESTRATOR NOTES */
-.orch-notes { margin: 0 18px 14px; background: #EEF2FF; border-radius: 8px; padding: 12px 14px; border-left: 3px solid #6366F1; }
+.orch-notes { margin: 14px 18px; background: #EEF2FF; border-radius: 8px; padding: 12px 14px; border-left: 3px solid #6366F1; }
 .orch-notes-label { font-size: 10px; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.orch-notes-text { font-size: 12px; color: #444; line-height: 1.6; }
-
-/* CARD ACTIONS */
+.orch-notes-text { font-size: 12px; color: #444; line-height: 1.6; max-height: 200px; overflow-y: auto; white-space: pre-wrap; }
 .card-actions { padding: 12px 18px; border-top: 1.5px solid #F0F2F6; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; background: #FAFBFC; }
 .btn-approve { background: #D1FAE5; color: #065F46; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
-.btn-approve:hover { background: #A7F3D0; }
 .btn-revise { background: #F5F5F7; color: #555; border: 1px solid #E5E5E7; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; }
-.btn-revise:hover { background: #E5E5E7; }
 .btn-hold { background: #FEF3C7; color: #92400E; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; }
 .btn-drop { background: #FEE2E2; color: #991B1B; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; }
 .btn-delete { background: #FEE2E2; color: #991B1B; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; margin-left: auto; }
-.btn-delete:hover { background: #FECACA; }
 .revision-note-input { flex: 1; font-size: 12px; border: 1.5px solid #E8EAF0; border-radius: 8px; padding: 7px 10px; font-family: inherit; min-width: 80px; }
 .revision-note-input:focus { outline: none; border-color: #00C896; }
-
-/* FILTER BAR */
 .filter-bar { display: flex; gap: 8px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
 .filter-label { font-size: 12px; color: #AAA; font-weight: 600; }
 .filter-btn { font-size: 11px; padding: 5px 14px; border-radius: 20px; border: 1.5px solid #E8EAF0; background: white; cursor: pointer; color: #666; font-weight: 600; transition: all 0.15s; }
 .filter-btn.active { background: #00C896; color: #0F1117; border-color: #00C896; }
-
-/* VIEWS */
 .view { display: none; }
 .view.active { display: block; }
-
-/* SETTINGS */
-.settings-textarea { width: 100%; font-size: 14px; color: #1D1D1F; background: #F8F9FC; border: 1.5px solid #E8EAF0; border-radius: 10px; padding: 14px; resize: none; height: 140px; font-family: inherit; line-height: 1.6; }
+.settings-textarea { width: 100%; font-size: 14px; color: #1D1D1F; background: #F8F9FC; border: 1.5px solid #E8EAF0; border-radius: 10px; padding: 14px; resize: none; height: 100px; font-family: inherit; line-height: 1.6; }
 .settings-textarea:focus { outline: none; border-color: #00C896; }
 .settings-row { margin-bottom: 18px; }
 .settings-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; }
 .settings-hint { font-size: 11px; color: #AAA; margin-top: 4px; }
-
-/* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #E0E0E6; border-radius: 2px; }
-
-@media (max-width: 768px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .agents-grid { grid-template-columns: repeat(2, 1fr); }
-}
 </style>
 </head>
 <body>
@@ -179,196 +126,91 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <div class="layout">
   <div class="sidebar">
     <div class="nav-label">Workspace</div>
-    <div class="nav-item active" onclick="showView('dashboard')">
-      <div class="nav-dot" style="background:#00C896"></div> Dashboard
-    </div>
-    <div class="nav-item" onclick="showView('board')">
-      <div class="nav-dot" style="background:#F59E0B"></div> Opportunity Board
-      <span class="badge" id="queueBadge">0</span>
-    </div>
-
+    <div class="nav-item active" onclick="showView('dashboard')"><div class="nav-dot" style="background:#00C896"></div>Dashboard</div>
+    <div class="nav-item" onclick="showView('board');loadBoard()"><div class="nav-dot" style="background:#F59E0B"></div>Opportunity Board<span class="badge" id="queueBadge">0</span></div>
     <div class="nav-label">Agents</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div> Orchestrator</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#00C896"></div> Scout</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#F59E0B"></div> AI Executability</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#3B82F6"></div> Market Analyst</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div> Business Architect</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#EC4899"></div> Brand Developer</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#EF4444"></div> GTM Strategist</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#06B6D4"></div> AI Exec Designer</div>
-
+    <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div>Orchestrator</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#00C896"></div>Scout</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#F59E0B"></div>AI Executability</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#3B82F6"></div>Market Analyst</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div>Business Architect</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#EC4899"></div>Brand Developer</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#EF4444"></div>GTM Strategist</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#06B6D4"></div>AI Exec Designer</div>
     <div class="nav-label">Settings</div>
-    <div class="nav-item" onclick="showView('settings')">
-      <div class="nav-dot" style="background:#666"></div> Focus Criteria
-    </div>
+    <div class="nav-item" onclick="showView('settings')"><div class="nav-dot" style="background:#666"></div>Focus Criteria</div>
   </div>
 
   <div class="main">
 
-    <!-- DASHBOARD VIEW -->
+    <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
-
       <div class="card">
         <div class="card-title">New Opportunity Signal</div>
         <input class="opp-name-input" id="oppName" placeholder="Opportunity name (e.g. AI-Powered Pest Control for Homeowners)">
         <textarea class="signal-input" id="signalInput" placeholder="Describe the opportunity signal, idea, problem, or market trend you want to evaluate…"></textarea>
         <div class="input-footer">
-          <div class="input-footer-left">
-            <label class="discovery-toggle">
-              <input type="checkbox" id="autoDiscover"> Let Scout discover the opportunity
-            </label>
-          </div>
-          <button class="btn-run" id="runBtn" onclick="runAgents()">▶ Run Pipeline</button>
+          <label class="discovery-toggle"><input type="checkbox" id="autoDiscover"> Let Scout discover the opportunity</label>
+          <button class="btn-run" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Agent Status</div>
         <div class="agents-grid">
-          <div class="agent-card orchestrator" id="agent-orchestrator">
-            <div class="agent-name">Orchestrator</div>
-            <div class="agent-role">Managing Consultant</div>
-            <span class="agent-status-pill pill-idle" id="status-orchestrator">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-scout">
-            <div class="agent-name">Scout</div>
-            <div class="agent-role">Opportunity Discovery</div>
-            <span class="agent-status-pill pill-idle" id="status-scout">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-ai-analyst">
-            <div class="agent-name">AI Executability</div>
-            <div class="agent-role">Gate 1 Filter</div>
-            <span class="agent-status-pill pill-idle" id="status-ai-analyst">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-market">
-            <div class="agent-name">Market Analyst</div>
-            <div class="agent-role">Market & Competition</div>
-            <span class="agent-status-pill pill-idle" id="status-market">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-architect">
-            <div class="agent-name">Business Architect</div>
-            <div class="agent-role">Model & Financials</div>
-            <span class="agent-status-pill pill-idle" id="status-architect">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-brand">
-            <div class="agent-name">Brand Developer</div>
-            <div class="agent-role">Brand & Identity</div>
-            <span class="agent-status-pill pill-idle" id="status-brand">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-gtm">
-            <div class="agent-name">GTM Strategist</div>
-            <div class="agent-role">Go-To-Market</div>
-            <span class="agent-status-pill pill-idle" id="status-gtm">Idle</span>
-          </div>
-          <div class="agent-card" id="agent-exec">
-            <div class="agent-name">AI Exec Designer</div>
-            <div class="agent-role">AI Stack & Operations</div>
-            <span class="agent-status-pill pill-idle" id="status-exec">Idle</span>
-          </div>
+          <div class="agent-card orchestrator" id="agent-orchestrator"><div class="agent-name">Orchestrator</div><div class="agent-role">Managing Consultant</div><span class="agent-status-pill pill-idle" id="status-orchestrator">Idle</span></div>
+          <div class="agent-card" id="agent-scout"><div class="agent-name">Scout</div><div class="agent-role">Opportunity Discovery</div><span class="agent-status-pill pill-idle" id="status-scout">Idle</span></div>
+          <div class="agent-card" id="agent-ai-analyst"><div class="agent-name">AI Executability</div><div class="agent-role">Gate 1 Filter</div><span class="agent-status-pill pill-idle" id="status-ai-analyst">Idle</span></div>
+          <div class="agent-card" id="agent-market"><div class="agent-name">Market Analyst</div><div class="agent-role">Market & Competition</div><span class="agent-status-pill pill-idle" id="status-market">Idle</span></div>
+          <div class="agent-card" id="agent-architect"><div class="agent-name">Business Architect</div><div class="agent-role">Model & Financials</div><span class="agent-status-pill pill-idle" id="status-architect">Idle</span></div>
+          <div class="agent-card" id="agent-brand"><div class="agent-name">Brand Developer</div><div class="agent-role">Brand & Identity</div><span class="agent-status-pill pill-idle" id="status-brand">Idle</span></div>
+          <div class="agent-card" id="agent-gtm"><div class="agent-name">GTM Strategist</div><div class="agent-role">Go-To-Market</div><span class="agent-status-pill pill-idle" id="status-gtm">Idle</span></div>
+          <div class="agent-card" id="agent-exec"><div class="agent-name">AI Exec Designer</div><div class="agent-role">AI Stack & Operations</div><span class="agent-status-pill pill-idle" id="status-exec">Idle</span></div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Pipeline Activity</div>
-        <div class="activity-feed" id="activityFeed">
-          <div class="activity-empty">No activity yet — submit your first opportunity signal above</div>
-        </div>
+        <div class="activity-feed" id="activityFeed"><div class="activity-empty">No activity yet — submit your first opportunity signal above</div></div>
       </div>
-
     </div>
 
-    <!-- BOARD VIEW -->
+    <!-- BOARD -->
     <div class="view" id="view-board">
       <div class="filter-bar">
         <span class="filter-label">Filter:</span>
-        <button class="filter-btn active" onclick="filterStatus('all', this)">All</button>
-        <button class="filter-btn" onclick="filterStatus('active', this)">In Pipeline</button>
-        <button class="filter-btn" onclick="filterStatus('review', this)">Needs Review</button>
-        <button class="filter-btn" onclick="filterStatus('approved', this)">Approved</button>
+        <button class="filter-btn active" onclick="filterStatus('all',this)">All</button>
+        <button class="filter-btn" onclick="filterStatus('active',this)">In Pipeline</button>
+        <button class="filter-btn" onclick="filterStatus('review',this)">Needs Review</button>
+        <button class="filter-btn" onclick="filterStatus('approved',this)">Approved</button>
       </div>
       <div class="kanban-wrapper">
         <div class="kanban-board">
-          <div class="kanban-column col-empty" id="colwrap-signal">
-            <div class="kanban-col-header"><span class="kanban-col-title">📡 Signal Captured</span><span class="kanban-col-count" id="count-signal">0</span></div>
-            <div id="col-signal"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-ai-exec">
-            <div class="kanban-col-header"><span class="kanban-col-title">🤖 AI Executability</span><span class="kanban-col-count" id="count-ai-exec">0</span></div>
-            <div id="col-ai-exec"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-market">
-            <div class="kanban-col-header"><span class="kanban-col-title">📊 Market Analysis</span><span class="kanban-col-count" id="count-market">0</span></div>
-            <div id="col-market"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-business">
-            <div class="kanban-col-header"><span class="kanban-col-title">🏗️ Business Design</span><span class="kanban-col-count" id="count-business">0</span></div>
-            <div id="col-business"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-brand">
-            <div class="kanban-col-header"><span class="kanban-col-title">🎨 Brand Development</span><span class="kanban-col-count" id="count-brand">0</span></div>
-            <div id="col-brand"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-gtm">
-            <div class="kanban-col-header"><span class="kanban-col-title">🚀 GTM Strategy</span><span class="kanban-col-count" id="count-gtm">0</span></div>
-            <div id="col-gtm"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-exec">
-            <div class="kanban-col-header"><span class="kanban-col-title">⚙️ AI Execution Design</span><span class="kanban-col-count" id="count-exec">0</span></div>
-            <div id="col-exec"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-blueprint">
-            <div class="kanban-col-header"><span class="kanban-col-title">📋 Blueprint Draft</span><span class="kanban-col-count" id="count-blueprint">0</span></div>
-            <div id="col-blueprint"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-review">
-            <div class="kanban-col-header"><span class="kanban-col-title">🔍 Review</span><span class="kanban-col-count" id="count-review">0</span></div>
-            <div id="col-review"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-approved">
-            <div class="kanban-col-header"><span class="kanban-col-title">✅ Approved</span><span class="kanban-col-count" id="count-approved">0</span></div>
-            <div id="col-approved"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-hold">
-            <div class="kanban-col-header"><span class="kanban-col-title">⏸ On Hold</span><span class="kanban-col-count" id="count-hold">0</span></div>
-            <div id="col-hold"></div>
-          </div>
-          <div class="kanban-column col-empty" id="colwrap-dropped">
-            <div class="kanban-col-header"><span class="kanban-col-title">🚫 Dropped</span><span class="kanban-col-count" id="count-dropped">0</span></div>
-            <div id="col-dropped"></div>
-          </div>
+          <div class="kanban-column col-empty" id="colwrap-signal"><div class="kanban-col-header"><span class="kanban-col-title">📡 Signal Captured</span><span class="kanban-col-count" id="count-signal">0</span></div><div id="col-signal"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-ai-exec"><div class="kanban-col-header"><span class="kanban-col-title">🤖 AI Executability</span><span class="kanban-col-count" id="count-ai-exec">0</span></div><div id="col-ai-exec"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-market"><div class="kanban-col-header"><span class="kanban-col-title">📊 Market Analysis</span><span class="kanban-col-count" id="count-market">0</span></div><div id="col-market"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-business"><div class="kanban-col-header"><span class="kanban-col-title">🏗️ Business Design</span><span class="kanban-col-count" id="count-business">0</span></div><div id="col-business"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-brand"><div class="kanban-col-header"><span class="kanban-col-title">🎨 Brand Development</span><span class="kanban-col-count" id="count-brand">0</span></div><div id="col-brand"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-gtm"><div class="kanban-col-header"><span class="kanban-col-title">🚀 GTM Strategy</span><span class="kanban-col-count" id="count-gtm">0</span></div><div id="col-gtm"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-exec"><div class="kanban-col-header"><span class="kanban-col-title">⚙️ AI Execution Design</span><span class="kanban-col-count" id="count-exec">0</span></div><div id="col-exec"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-blueprint"><div class="kanban-col-header"><span class="kanban-col-title">📋 Blueprint Draft</span><span class="kanban-col-count" id="count-blueprint">0</span></div><div id="col-blueprint"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-review"><div class="kanban-col-header"><span class="kanban-col-title">🔍 Review</span><span class="kanban-col-count" id="count-review">0</span></div><div id="col-review"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-approved"><div class="kanban-col-header"><span class="kanban-col-title">✅ Approved</span><span class="kanban-col-count" id="count-approved">0</span></div><div id="col-approved"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-hold"><div class="kanban-col-header"><span class="kanban-col-title">⏸ On Hold</span><span class="kanban-col-count" id="count-hold">0</span></div><div id="col-hold"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-dropped"><div class="kanban-col-header"><span class="kanban-col-title">🚫 Dropped</span><span class="kanban-col-count" id="count-dropped">0</span></div><div id="col-dropped"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- SETTINGS VIEW -->
+    <!-- SETTINGS -->
     <div class="view" id="view-settings">
       <div class="card">
         <div class="card-title">Focus Criteria</div>
         <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6">These parameters are injected into every agent to focus the pipeline on the right types of opportunities.</p>
-
-        <div class="settings-row">
-          <div class="settings-label">Target Industries / Markets</div>
-          <textarea class="settings-textarea" id="targetIndustries" style="height:80px" placeholder="e.g. Consumer products, Home services, Health & wellness, B2B SaaS micro-niches…"></textarea>
-          <div class="settings-hint">Tell the Scout where to look. Leave blank to search broadly.</div>
-        </div>
-
-        <div class="settings-row">
-          <div class="settings-label">AI Executability Threshold</div>
-          <textarea class="settings-textarea" id="aiThreshold" style="height:60px" placeholder="e.g. Only proceed with opportunities that score 7/10 or higher on AI executability…"></textarea>
-          <div class="settings-hint">Opportunities below this threshold will be flagged for your review rather than dropped automatically.</div>
-        </div>
-
-        <div class="settings-row">
-          <div class="settings-label">Business Model Preferences</div>
-          <textarea class="settings-textarea" id="bizPreferences" style="height:80px" placeholder="e.g. Prefer product businesses over services. Favor white-label or dropship models. Low capital requirements preferred. Target $500K-$5M revenue potential…"></textarea>
-        </div>
-
-        <div class="settings-row">
-          <div class="settings-label">Additional Orchestrator Instructions</div>
-          <textarea class="settings-textarea" id="orchInstructions" placeholder="e.g. Always challenge financial projections for realism. Flag any opportunity requiring more than 2 hours/day of human attention. Be skeptical of crowded markets unless there is a clear AI-execution advantage…"></textarea>
-          <div class="settings-hint">These instructions are given directly to the Orchestrator as standing operating guidelines.</div>
-        </div>
-
+        <div class="settings-row"><div class="settings-label">Target Industries / Markets</div><textarea class="settings-textarea" id="targetIndustries" style="height:70px" placeholder="e.g. Consumer products, Home services, Health & wellness…"></textarea></div>
+        <div class="settings-row"><div class="settings-label">AI Executability Threshold</div><textarea class="settings-textarea" id="aiThreshold" style="height:60px" placeholder="e.g. Only proceed with opportunities scoring 7/10 or higher on AI executability…"></textarea></div>
+        <div class="settings-row"><div class="settings-label">Business Model Preferences</div><textarea class="settings-textarea" id="bizPreferences" placeholder="e.g. Prefer product businesses. Favor white-label. Low capital required. Target $500K-$5M revenue potential…"></textarea></div>
+        <div class="settings-row"><div class="settings-label">Additional Orchestrator Instructions</div><textarea class="settings-textarea" id="orchInstructions" placeholder="e.g. Always challenge financial projections for realism. Flag opportunities requiring more than 2 hours/day human attention…"></textarea></div>
         <button class="btn-run" onclick="saveFocusCriteria()">Save Focus Criteria</button>
       </div>
     </div>
@@ -377,16 +219,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <script>
-// STATE
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let ANTHROPIC_API_KEY = '';
 let focusCriteria = JSON.parse(localStorage.getItem('focusCriteria') || '{}');
 let allItems = [];
 let activeFilter = 'all';
 
-// Load saved focus criteria
+// Load saved settings
 if (focusCriteria.targetIndustries) document.getElementById('targetIndustries').value = focusCriteria.targetIndustries;
 if (focusCriteria.aiThreshold) document.getElementById('aiThreshold').value = focusCriteria.aiThreshold;
 if (focusCriteria.bizPreferences) document.getElementById('bizPreferences').value = focusCriteria.bizPreferences;
 if (focusCriteria.orchInstructions) document.getElementById('orchInstructions').value = focusCriteria.orchInstructions;
+
+// Load API key from server
+async function loadConfig() {
+  try {
+    const res = await fetch('/api/config');
+    const config = await res.json();
+    ANTHROPIC_API_KEY = config.apiKey;
+  } catch(e) { console.error('Config load failed:', e); }
+}
+loadConfig();
 
 function saveFocusCriteria() {
   focusCriteria = {
@@ -403,14 +256,13 @@ function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
-  if (view === 'board') loadBoard();
 }
 
 function setAgentStatus(agent, status, label) {
   const card = document.getElementById('agent-' + agent);
   const pill = document.getElementById('status-' + agent);
   if (!card || !pill) return;
-  card.className = 'agent-card' + (agent === 'orchestrator' ? ' orchestrator' : '') + ' ' + status;
+  card.className = 'agent-card' + (agent === 'orchestrator' ? ' orchestrator' : '') + (status !== 'idle' ? ' ' + status : '');
   pill.className = 'agent-status-pill pill-' + status;
   pill.textContent = label;
 }
@@ -426,55 +278,689 @@ function addActivity(message) {
   feed.insertBefore(item, feed.firstChild);
 }
 
-// BLUEPRINT SECTIONS CONFIG
-const SECTIONS = [
-  { key: 'aiExec',   icon: '🤖', label: 'AI Executability Analysis',  field: 'AI Executability Notes',    scoreField: 'AI Executability Score' },
-  { key: 'market',   icon: '📊', label: 'Market Analysis',             field: 'Market Analysis' },
-  { key: 'compete',  icon: '🔍', label: 'Competitive Landscape',       field: 'Competitive Landscape' },
-  { key: 'customer', icon: '👤', label: 'Target Customer',             field: 'Target Customer' },
-  { key: 'model',    icon: '🏗️', label: 'Business Model',             field: 'Business Model' },
-  { key: 'revenue',  icon: '💰', label: 'Revenue Projections',         field: 'Revenue Projections' },
-  { key: 'financial',icon: '📈', label: 'Financial Analysis',          field: 'Financial Analysis' },
-  { key: 'brand',    icon: '🎨', label: 'Brand Name & Positioning',    field: 'Brand Name & Positioning' },
-  { key: 'identity', icon: '✨', label: 'Brand Identity Direction',    field: 'Brand Identity Direction' },
-  { key: 'gtm',      icon: '🚀', label: 'GTM Plan',                    field: 'GTM Plan' },
-  { key: 'aistack',  icon: '⚙️', label: 'AI Stack Plan',              field: 'AI Stack Plan' },
-  { key: 'roadmap',  icon: '🗺️', label: 'Execution Roadmap',          field: 'Execution Roadmap' },
-  { key: 'risks',    icon: '⚠️', label: 'Risks & Challenges',         field: 'Risks & Challenges' },
-];
+// ─── CLAUDE API CALL (BROWSER-SIDE) ──────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch = true) {
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }]
+  };
 
-function getSectionStatus(item, section) {
-  const val = item[section.field];
-  if (!val || val.trim() === '') return 'pending';
-  return 'complete';
+  if (useSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Claude API error');
+  }
+
+  const data = await response.json();
+
+  // Handle tool use — if web search was used, get the final text response
+  if (data.stop_reason === 'tool_use') {
+    const toolUseBlocks = data.content.filter(b => b.type === 'tool_use');
+    const messages = [
+      { role: 'user', content: userMessage },
+      { role: 'assistant', content: data.content },
+      {
+        role: 'user',
+        content: toolUseBlocks.map(t => ({
+          type: 'tool_result',
+          tool_use_id: t.id,
+          content: 'Search completed successfully. Use the search results to inform your analysis.'
+        }))
+      }
+    ];
+
+    const followUp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({ ...body, messages })
+    });
+
+    const followData = await followUp.json();
+    return followData.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+  }
+
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
 }
+
+// ─── AIRTABLE HELPERS ─────────────────────────────────────────────────────────
+async function saveToAirtable(id, fields) {
+  await fetch(`/api/opportunities/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields)
+  });
+}
+
+async function createOpportunity(name, signal) {
+  const res = await fetch('/api/opportunities', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, signal })
+  });
+  return await res.json();
+}
+
+// ─── AGENT PROMPTS ────────────────────────────────────────────────────────────
+const ORCHESTRATOR_PROMPT = `You are a senior managing consultant and venture analyst with 20+ years of experience evaluating, launching, and scaling businesses. You think like a partner at McKinsey who also deeply understands AI-first business design, e-commerce, and modern go-to-market execution.
+
+Your job is not to create — it is to evaluate, challenge, and enforce quality at every stage of the opportunity pipeline. You are direct, decisive, and skeptical by default. You do not accept vague analysis, optimistic projections without evidence, or generic recommendations.
+
+You cycle back to an agent for revision until output scores 7 or above. Maximum 3 revision attempts per stage.
+
+UNIVERSAL SCORING RUBRIC:
+10 — Exceptional. Specific, evidence-based, internally consistent, immediately actionable.
+9 — Excellent. Strong across all dimensions.
+8 — Strong. Solid with minor areas that could be sharper.
+7 — Acceptable. Sound reasoning, clear logic. Minimum pass threshold.
+6 — Marginal. Send back with precise fix instructions.
+5 — Weak. Significant gaps. Send back with detailed corrections.
+4 — Poor. Full rewrite directive.
+3 or below — Failing. Flag for human review.
+
+DOMAIN STANDARDS:
+Scout: A 7 means clearly defined opportunity, specific target market, credible hypothesis.
+AI Executability: A 7 means specific operations identified, specific tools named, percentage estimate with reasoning, clear recommendation.
+Market Analysis: A 7 means demand validated with real signals, 3+ specific competitors with weaknesses, clear gap named.
+Business Architecture: A 7 means specific pricing and unit economics, realistic path to breakeven, all assumptions stated.
+Brand Development: A 7 means 10 name options with availability, specific positioning, brand voice with examples, distinct visual direction.
+GTM Strategy: A 7 means specific channels with reasoning, nano-influencer strategy, 90-day plan, path to first 100 customers.
+AI Execution Design: A 7 means specific tools for every function with pricing, workflow mapped end to end, human owner daily procedure in hours.`;
+
+const SCOUT_PROMPT = `You are an elite business opportunity scout with deep expertise in identifying emerging markets, underserved niches, and high-potential products. You use web search to research current market trends and real market signals.
+
+You operate across four discovery lenses:
+1. Niche Product Ideation — underserved micro-markets larger players ignore
+2. Problem/Solution Spotting — real problems where solutions don't exist or are poor
+3. White Label & Manufacturable Products — products distributable with minimal human effort
+4. Hot Market Trends — categories gaining rapid traction with room to enter
+
+CAPITAL FILTER: Strong preference for opportunities with a path to breakeven under $5,000 total. Opportunities potentially requiring $5,000-$25,000 flagged as Higher Capital. Over $25,000 is out of scope.
+
+For each opportunity produce a structured Opportunity Signal containing:
+- Clear specific opportunity name
+- Which discovery lens it came from and which market segment
+- One paragraph description of the opportunity and why it exists now
+- Specific target customer — who they are, what they want, why they buy
+- Why now — what changed in market, technology, or behavior
+- Initial hypothesis on AI executability
+- Brief competitive landscape — wide open, lightly contested, or crowded with specific gap
+- Estimated capital requirement to reach breakeven
+- Confidence level — High, Medium, or Speculative — with reasoning`;
+
+const AI_ANALYST_PROMPT = `You are a senior AI systems analyst and automation architect. You evaluate how effectively AI can execute, operate, and scale a business. You use web search to verify current tool capabilities and pricing.
+
+Your north star: can this business run primarily on AI with maximum 4 hours per week of human time at steady state — the four hour workweek ideal.
+
+Produce a structured AI Executability Analysis containing:
+- Overall AI Executability Score 1-10
+- Operations Breakdown — every major function: Fully Automatable, Partially Automatable, or Requires Human
+- Specific AI Tools — for each function, 2-3 specific tools with current monthly cost, ease of implementation (Easy/Moderate/Complex), recommended starting tool with reasoning, advanced alternatives
+- Human Involvement Estimate — hours per week at launch, 3 months, 12 months. Target under 4 hours steady state
+- AI Stack Cost Estimate — total monthly cost
+- Capital Efficiency Assessment — how AI contributes to $5,000 path-to-breakeven. Flag Higher Capital if $5K-$25K needed
+- Near-Term Automation Opportunities — functions AI will handle within 12 months
+- Critical Automation Risks and fallbacks
+- Recommendation — Go, Flag for Review, or Drop with clear reasoning
+
+SCORING:
+9-10: 80%+ automatable, under 2hrs/week steady state, stack under $300/month
+7-8: 60-80% automatable, under 4hrs/week, stack under $800/month
+5-6: 40-60% automatable, exceeds 4hrs/week. Flag for review.
+4 or below: Under 40% automatable. Recommend Drop.`;
+
+const MARKET_ANALYST_PROMPT = `You are a senior market research analyst and competitive intelligence specialist. You find real signal in messy data. You use web search extensively — Reddit, Amazon reviews, forums, Trustpilot, app stores, social media.
+
+PHILOSOPHY: Qualitative validation is more important than TAM numbers. A $150M market where you can capture 10% is worth more than a $10B market where you are invisible.
+
+Produce a structured Market Analysis containing:
+
+Market Validation — qualitative first:
+- Real demonstrable demand with specific evidence from research
+- Is the market reachable on a lean budget?
+- Realistic revenue potential at 10% market penetration or 1,000 customers
+- Market size figure if credible
+
+Market Timing — early, growing, mature, or declining with specific signals.
+
+Competitive Landscape — all direct competitors:
+- Few competitors is a positive signal
+- For each: positioning, pricing, primary weakness, approximate scale
+- Specific gap that makes entry viable
+
+Market Gap Analysis — specific unmet need, must be precise not generic.
+
+Target Customer Profile:
+- Demographics, psychographics, where they spend time online/offline
+- What they currently use to solve this problem
+- What would make them switch, price sensitivity
+
+Customer Validation Signals — real evidence from research.
+
+Market Entry Barriers and how this opportunity navigates them.
+
+Capital Reachability — can this market be reached within $5,000?
+
+Market Viability Score 1-10 with reasoning.
+
+SCORING:
+9-10: Demand clearly validated, competitive landscape well understood, precise gap named, target customer described in enough detail to write an ad
+7-8: Strong validation, competitive landscape clear, gap specific and credible
+5-6: Market exists but validation thin or customer too broadly defined
+4 or below: Unvalidated, overcrowded without clear gap, or customer too vague`;
+
+const BUSINESS_ARCHITECT_PROMPT = `You are a senior business architect and financial modeler. You build realistic models with conservative assumptions. You are brutally honest about whether numbers work. You use web search to verify current costs and benchmarks.
+
+You adapt the financial model to fit the business type — product, subscription, service, or marketplace.
+
+Produce a structured Business Architecture containing:
+
+Business Model Design:
+- Revenue model — product sales, subscription, service, marketplace, licensing, or hybrid
+- Specific pricing with reasoning
+- Revenue streams primary and secondary
+- Gross margin target and why achievable
+- Unit economics adapted to business type
+
+Path to Breakeven — most important section:
+- Total startup costs itemized
+- Monthly operating costs itemized
+- Monthly revenue needed to cover costs
+- Units or customers needed per month to break even
+- Realistic timeline to breakeven
+- Total capital required — within $5,000 or flagged as Higher Capital
+
+Revenue Projections — three scenarios with all assumptions stated:
+- Conservative, Base, and Upside
+- Month by month first 6 months, quarterly to 24 months
+- If seasonal, extend to cover two full cycles and show cash flow gaps
+
+Capital Allocation Plan.
+
+Scaling Economics at $10K, $50K, $100K monthly revenue.
+
+Key Financial Risks — top 3 with early warning signals.
+
+Financial Viability Score 1-10 with reasoning.
+
+SCORING:
+9-10: Path to breakeven clearly achievable, unit economics strong, all assumptions grounded in real data
+7-8: Solid model, realistic assumptions, path to breakeven clear
+5-6: Directionally correct but assumptions unverified or unit economics thin
+4 or below: Numbers don't work within capital constraint`;
+
+const BRAND_DEVELOPER_PROMPT = `You are a senior brand strategist and creative director. You build brands that connect, convert, and endure. You never produce generic brands. You use web search to check name availability, domain availability, social handle availability, and existing brand landscape.
+
+Produce a structured Brand Development Brief containing:
+
+Brand Name Development:
+- 10 name options with rationale for each
+- Each evaluated on: memorability, distinctiveness, relevance to customer, brand feel
+- Availability check: .com (preferred), .co and .io alternatives, Instagram, TikTok, Facebook, YouTube handles, trademark conflicts
+- Primary recommendation with full reasoning
+- Secondary recommendation as backup
+- Naming approach for each
+
+Brand Positioning:
+- Positioning statement — specific enough that removing the brand name makes it unrecognizable as generic
+- Category definition
+- 3 key differentiators
+- Brand promise
+
+Brand Voice & Personality:
+- 4-5 personality traits with what each means in practice and explicitly is not
+- Tone of voice in different contexts
+- Language guidelines — words used and never used
+- 3 sample headlines or taglines in brand voice
+- 1 sample product description in brand voice
+
+Visual Identity Direction:
+- Brand aesthetic specific enough a designer could execute without a briefing call
+- Color direction with psychological reasoning
+- Typography direction with specific font recommendations
+- Imagery style
+- What the brand should NOT look like
+- 3 well-known reference brands with what specifically to borrow and not copy
+
+Brand Architecture — how brand scales with product line expansion.
+
+Brand Viability Score 1-10 with reasoning.
+
+SCORING:
+9-10: Name distinctive and available across all channels, positioning razor sharp, voice fully developed, visual direction specific enough to execute immediately
+7-8: Strong foundation, all key elements present, minor refinements possible
+5-6: Elements present but lack distinctiveness or names have availability issues
+4 or below: Generic, interchangeable. Full revision required.`;
+
+const GTM_STRATEGIST_PROMPT = `You are a senior go-to-market strategist who launches products from zero to first revenue with minimal capital. You use web search to verify channel costs, influencer rates, and current best practices. Every tactic you recommend should be automatable with AI tools.
+
+Produce a structured GTM Plan containing:
+
+GTM Strategy Overview — single core insight in one paragraph.
+
+Customer Acquisition Strategy:
+- Primary acquisition channel with full reasoning
+- Secondary channel for backup
+- How first 100 customers get acquired — specific and tactical
+- Customer acquisition cost estimate per channel
+- Conversion strategy
+
+Influencer Strategy — LEAD WITH NANO-INFLUENCERS:
+- Nano-influencers under 10,000 followers are the primary launch vehicle — work for product only, no cash
+- Goal first 30 days: 10-20 nano-influencers in exact niche
+- Specific type, where to find them, outreach approach, product-only compensation
+- Micro-influencers come after first revenue
+- Relevant communities — subreddits, Facebook groups, forums, Discord
+
+Paid Advertising: NOT recommended at launch within $5,000 constraint. Small test budget $200-$500 only after organic traction proven.
+
+Content & Messaging:
+- Core message
+- Message hierarchy
+- 3 sample headlines or social captions for this customer
+
+Launch Sequence — 90 day plan:
+- Pre-launch, Launch week, Days 8-30, Days 31-60, Days 61-90
+- Key milestones and metrics at each phase
+
+Retention Strategy:
+- Email or SMS based on target customer with reasoning. Both AI-automated from day one.
+- Loyalty or referral mechanism
+
+GTM Budget Allocation across channels and phases.
+
+GTM Risk Assessment — what could fail, early warning signals, pivot plan.
+
+GTM Viability Score 1-10 with reasoning.
+
+SCORING:
+9-10: Primary channel specific and proven for this customer, first 100 customers plan tactical, 90-day plan detailed, nano-influencer strategy specific
+7-8: Strong GTM, clear channels, solid 90-day plan, minor tactical gaps
+5-6: Logical but tactics vague, acquisition plan lacks specificity
+4 or below: Generic, could apply to any product, no clear path to first customer`;
+
+const AI_EXEC_DESIGNER_PROMPT = `You are a senior AI systems architect and operational designer. You build businesses that run primarily on AI. You use web search to verify current tool capabilities, pricing, and integration options. You always present two implementation paths.
+
+Your north star: the human owner spends no more than 4 hours per week at steady state.
+
+Produce a structured AI Execution Design containing:
+
+System Architecture Overview — plain English customer journey from discovery to purchase to fulfillment to retention showing where AI handles each step.
+
+Core AI Stack:
+- For each tool: name, current pricing, specific function, integration with other tools, ease of implementation, alternatives
+- Total monthly stack cost, one-time setup costs, complexity rating
+
+Operational Workflow Design:
+- Customer Acquisition & Marketing Automation — content creation, social scheduling, influencer outreach, email/SMS automation
+- Sales & Conversion — customer journey automation, product pages, abandoned cart
+- Fulfillment & Operations — order processing, supplier integration, inventory, shipping
+- Customer Service & Retention — AI customer service tool with pricing, post-purchase sequences, review collection
+- Financial Operations — revenue tracking, expense monitoring, accounting tools
+- Business Intelligence — what gets tracked, performance monitoring, human alert triggers
+
+Implementation Approach — TWO paths:
+Path 1 — No-Code/Low-Code: Fastest path for non-technical operator
+Path 2 — Coded/Advanced: More powerful, may require technical resource
+
+Outsourcing Strategy for steps requiring technical skill:
+- Specific task description, platform (Fiverr/Upwork), estimated cost and time, what to look for
+
+Human Owner Daily Operating Procedure:
+- Specific daily tasks and time
+- Weekly and monthly responsibilities
+- Total hours at launch, 3 months, 12 months
+- Flag clearly if 4-hour target not achievable
+
+Implementation Roadmap:
+- Phase 1 Week 1-2: Core infrastructure
+- Phase 2 Week 3-4: Automation layer
+- Phase 3 Month 2: Full operational mode
+- Phase 4 Month 3+: Optimization and scaling
+
+Integration Map — TWO formats:
+Format 1 — Written narrative for non-technical operator
+Format 2 — Visual workflow: START → [Trigger] → [Tool A: Action] → [Tool B: Action] → [Output]
+
+Scaling Design at 10x current volume.
+
+Total System Cost at launch, 6 months, 12 months.
+
+Near-Term Automation Opportunities.
+
+AI Execution Design Score 1-10 with reasoning.
+
+SCORING:
+9-10: Complete system with specific tools for every function, under 4hrs/week, stack within budget, roadmap executable by non-technical operator
+7-8: Strong design, all major functions covered, human time target achievable
+5-6: Incomplete system or human time exceeds target
+4 or below: Cannot achieve 4-hour target or stack makes business unviable`;
+
+// ─── ORCHESTRATOR REVIEW ──────────────────────────────────────────────────────
+async function orchestratorReview(stage, agentOutput, opportunityContext) {
+  const prompt = `Review this ${stage} output.
+
+OPPORTUNITY CONTEXT (summary):
+${opportunityContext.substring(0, 1500)}
+
+${stage.toUpperCase()} OUTPUT:
+${agentOutput.substring(0, 2500)}
+
+Respond in EXACTLY this format:
+SCORE: [number 1-10]
+VERDICT: [PASS or REVISE or DROP]
+REASONING: [2-3 sentences]
+REVISION_INSTRUCTIONS: [If REVISE or DROP — specific instructions. If PASS — leave blank]`;
+
+  const review = await callClaude(ORCHESTRATOR_PROMPT, prompt, 600, false);
+
+  const scoreMatch = review.match(/SCORE:\s*(\d+(?:\.\d+)?)/);
+  const verdictMatch = review.match(/VERDICT:\s*(PASS|REVISE|DROP)/);
+  const reasoningMatch = review.match(/REASONING:\s*([\s\S]*?)(?=REVISION_INSTRUCTIONS:|$)/);
+  const revisionMatch = review.match(/REVISION_INSTRUCTIONS:\s*([\s\S]*?)$/);
+
+  return {
+    score: scoreMatch ? parseFloat(scoreMatch[1]) : 5,
+    verdict: verdictMatch ? verdictMatch[1] : 'REVISE',
+    reasoning: reasoningMatch ? reasoningMatch[1].trim() : '',
+    revisionInstructions: revisionMatch ? revisionMatch[1].trim() : ''
+  };
+}
+
+// ─── RUN AGENT WITH GATES ─────────────────────────────────────────────────────
+async function runAgent(stageName, agentPrompt, userMessage, context, maxAttempts = 3) {
+  let attempts = 0;
+  let output = '';
+  let review = null;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    addActivity(`⚙️ ${stageName} working… (attempt ${attempts})`);
+
+    const message = attempts === 1 ? userMessage
+      : `${userMessage}\n\nPREVIOUS ATTEMPT REJECTED.\nREVISION INSTRUCTIONS: ${review.revisionInstructions}\n\nPlease revise accordingly.`;
+
+    output = await callClaude(agentPrompt, message, 4000, true);
+
+    addActivity(`🔍 Orchestrator reviewing ${stageName}…`);
+    setAgentStatus('orchestrator', 'working', 'Reviewing…');
+    review = await orchestratorReview(stageName, output, context);
+
+    addActivity(`📊 ${stageName}: ${review.score}/10 — ${review.verdict}`);
+
+    if (review.verdict === 'PASS') return { output, score: review.score, passed: true };
+    if (review.verdict === 'DROP') return { output, score: review.score, passed: false, dropped: true };
+    if (attempts >= maxAttempts) return { output, score: review.score, passed: false, flagged: true };
+  }
+  return { output, score: 0, passed: false, flagged: true };
+}
+
+// ─── FULL PIPELINE ────────────────────────────────────────────────────────────
+async function runFullPipeline(recordId, oppName, signal, focusCtx) {
+  let context = `Opportunity: ${oppName}\nSignal: ${signal}`;
+  if (focusCtx) context = `Focus Criteria:\n${focusCtx}\n\n${context}`;
+
+  // SCOUT
+  setAgentStatus('scout', 'working', 'Discovering…');
+  addActivity(`🔭 Scout enriching opportunity signal…`);
+  await saveToAirtable(recordId, { 'Status': 'Signal Captured' });
+
+  const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${context}`, context);
+  setAgentStatus('scout', 'done', 'Done ✓');
+
+  if (scout.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Orchestrator Summary': `Dropped at Scout. Score: ${scout.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at Scout stage.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'Signal': scout.output, 'Status': 'AI Executability' });
+  context += `\n\nSCOUT OUTPUT:\n${scout.output}`;
+
+  // AI EXECUTABILITY
+  setAgentStatus('ai-analyst', 'working', 'Analyzing…');
+  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context);
+  setAgentStatus('ai-analyst', 'done', 'Done ✓');
+
+  if (aiAnalyst.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at AI Executability.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
+  context += `\n\nAI EXECUTABILITY:\n${aiAnalyst.output}`;
+
+  // MARKET ANALYSIS
+  setAgentStatus('market', 'working', 'Researching…');
+  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context);
+  setAgentStatus('market', 'done', 'Done ✓');
+
+  if (market.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output, 'Orchestrator Summary': `Dropped at Market Analysis. Score: ${market.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at Market Analysis.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'Market Analysis': market.output, 'Competitive Landscape': market.output, 'Target Customer': market.output, 'Status': 'Business Design' });
+  context += `\n\nMARKET ANALYSIS:\n${market.output}`;
+
+  // BUSINESS ARCHITECT
+  setAgentStatus('architect', 'working', 'Designing…');
+  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context);
+  setAgentStatus('architect', 'done', 'Done ✓');
+
+  if (biz.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Business Model': biz.output, 'Orchestrator Summary': `Dropped at Business Design. Score: ${biz.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at Business Design.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'Business Model': biz.output, 'Revenue Projections': biz.output, 'Financial Analysis': biz.output, 'Status': 'Brand Development' });
+  context += `\n\nBUSINESS MODEL:\n${biz.output}`;
+
+  // BRAND DEVELOPER
+  setAgentStatus('brand', 'working', 'Creating…');
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation.\n\n${context}`, context);
+  setAgentStatus('brand', 'done', 'Done ✓');
+
+  if (brand.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Brand Name & Positioning': brand.output, 'Orchestrator Summary': `Dropped at Brand Development. Score: ${brand.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at Brand Development.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'Brand Name & Positioning': brand.output, 'Brand Identity Direction': brand.output, 'Status': 'GTM Strategy' });
+  context += `\n\nBRAND:\n${brand.output}`;
+
+  // GTM STRATEGIST
+  setAgentStatus('gtm', 'working', 'Planning…');
+  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context);
+  setAgentStatus('gtm', 'done', 'Done ✓');
+
+  if (gtm.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output, 'Orchestrator Summary': `Dropped at GTM Strategy. Score: ${gtm.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at GTM Strategy.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
+  context += `\n\nGTM STRATEGY:\n${gtm.output}`;
+
+  // AI EXECUTION DESIGNER
+  setAgentStatus('exec', 'working', 'Designing…');
+  const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context);
+  setAgentStatus('exec', 'done', 'Done ✓');
+
+  if (exec.dropped) {
+    await saveToAirtable(recordId, { 'Status': 'Dropped', 'AI Stack Plan': exec.output, 'Orchestrator Summary': `Dropped at AI Execution Design. Score: ${exec.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at AI Execution Design.`);
+    return false;
+  }
+  await saveToAirtable(recordId, { 'AI Stack Plan': exec.output, 'Execution Roadmap': exec.output, 'Status': 'Blueprint Draft' });
+  context += `\n\nAI EXECUTION DESIGN:\n${exec.output}`;
+
+  // ORCHESTRATOR FINAL BLUEPRINT
+  setAgentStatus('orchestrator', 'working', 'Compiling Blueprint…');
+  addActivity(`📋 Orchestrator compiling final Blueprint…`);
+
+  const blueprintMsg = `Compile the complete Opportunity Launch Blueprint.
+
+${context.substring(0, 8000)}
+
+Produce the final Blueprint:
+1. EXECUTIVE SUMMARY — 3-5 paragraphs for a decision maker
+2. STAGE SCORES SUMMARY — all stage scores with brief reasoning
+3. KEY STRENGTHS — 3-5 things making this opportunity compelling
+4. KEY RISKS — 3-5 things that could make this fail
+5. CAPITAL SUMMARY — path to breakeven, monthly operating cost, timeline to first revenue
+6. OVERALL OPPORTUNITY SCORE — weighted average. AI Executability and Financial Viability weighted most heavily, Market Analysis and GTM second, Brand Development third. Show weighting and calculation.
+7. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with reasoning
+8. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right`;
+
+  const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
+  setAgentStatus('orchestrator', 'done', 'Done ✓');
+
+  const scoreMatch = blueprint.match(/OVERALL OPPORTUNITY SCORE[:\s]+(\d+(?:\.\d+)?)/i);
+  const overallScore = scoreMatch ? parseFloat(scoreMatch[1]) : null;
+
+  await saveToAirtable(recordId, {
+    'Orchestrator Summary': blueprint,
+    'Opportunity Score': overallScore,
+    'Risks & Challenges': blueprint,
+    'Status': 'Review'
+  });
+
+  addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review. Score: ${overallScore}/10`);
+  loadBoard();
+  loadQueueBadge();
+  return true;
+}
+
+// ─── MAIN RUN FUNCTION ────────────────────────────────────────────────────────
+async function runPipeline() {
+  const signal = document.getElementById('signalInput').value.trim();
+  const oppName = document.getElementById('oppName').value.trim() || 'Untitled Opportunity';
+  const autoDiscover = document.getElementById('autoDiscover').checked;
+
+  if (!signal && !autoDiscover) {
+    alert('Please enter an opportunity signal or check "Let Scout discover the opportunity".');
+    return;
+  }
+
+  if (!ANTHROPIC_API_KEY) {
+    alert('API key not loaded yet. Please wait a moment and try again.');
+    return;
+  }
+
+  const runBtn = document.getElementById('runBtn');
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Pipeline running…';
+  document.getElementById('systemStatus').textContent = '● Pipeline running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+
+  const focusCtx = [
+    focusCriteria.targetIndustries ? `Target Industries: ${focusCriteria.targetIndustries}` : '',
+    focusCriteria.aiThreshold ? `AI Threshold: ${focusCriteria.aiThreshold}` : '',
+    focusCriteria.bizPreferences ? `Business Preferences: ${focusCriteria.bizPreferences}` : '',
+    focusCriteria.orchInstructions ? `Orchestrator Instructions: ${focusCriteria.orchInstructions}` : '',
+  ].filter(Boolean).join('\n');
+
+  try {
+    if (autoDiscover) {
+      addActivity(`🔭 Scout discovering 2 opportunities…`);
+      setAgentStatus('scout', 'working', 'Discovering…');
+
+      const discoveryMsg = `Perform an autonomous opportunity discovery run. Using your four discovery lenses and web search, identify 2 distinct business opportunities meeting the capital constraint.
+
+${focusCtx ? `Focus Criteria:\n${focusCtx}\n\n` : ''}
+
+For each opportunity provide:
+OPPORTUNITY_NAME: [name]
+OPPORTUNITY_SIGNAL: [full signal description]
+
+Separate with ---NEXT---`;
+
+      const discoveries = await callClaude(SCOUT_PROMPT, discoveryMsg, 3000, true);
+      setAgentStatus('scout', 'idle', 'Idle');
+
+      const opps = discoveries.split('---NEXT---').map(o => {
+        const nameMatch = o.match(/OPPORTUNITY_NAME:\s*(.+)/);
+        const sigMatch = o.match(/OPPORTUNITY_SIGNAL:\s*([\s\S]+?)(?=OPPORTUNITY_NAME:|$)/);
+        return { name: nameMatch ? nameMatch[1].trim() : 'New Opportunity', signal: sigMatch ? sigMatch[1].trim() : o.trim() };
+      }).filter(o => o.signal.length > 50).slice(0, 2);
+
+      addActivity(`📡 ${opps.length} opportunities discovered. Running pipelines…`);
+
+      for (const opp of opps) {
+        const record = await createOpportunity(opp.name, opp.signal);
+        await runFullPipeline(record.id, opp.name, opp.signal, focusCtx);
+      }
+
+    } else {
+      const record = await createOpportunity(oppName, signal);
+      addActivity(`📡 Opportunity "${oppName}" created`);
+      addActivity(`🔍 Starting pipeline for: ${oppName}`);
+      await runFullPipeline(record.id, oppName, signal, focusCtx);
+    }
+
+  } catch(err) {
+    addActivity(`❌ Error: ${err.message}`);
+    console.error(err);
+  }
+
+  runBtn.disabled = false;
+  runBtn.textContent = '▶ Run Pipeline';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+// ─── BOARD ────────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  { key: 'aiExec', icon: '🤖', label: 'AI Executability Analysis', field: 'AI Executability Notes', scoreField: 'AI Executability Score' },
+  { key: 'market', icon: '📊', label: 'Market Analysis', field: 'Market Analysis' },
+  { key: 'compete', icon: '🔍', label: 'Competitive Landscape', field: 'Competitive Landscape' },
+  { key: 'customer', icon: '👤', label: 'Target Customer', field: 'Target Customer' },
+  { key: 'model', icon: '🏗️', label: 'Business Model', field: 'Business Model' },
+  { key: 'revenue', icon: '💰', label: 'Revenue Projections', field: 'Revenue Projections' },
+  { key: 'financial', icon: '📈', label: 'Financial Analysis', field: 'Financial Analysis' },
+  { key: 'brand', icon: '🎨', label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
+  { key: 'identity', icon: '✨', label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
+  { key: 'gtm', icon: '🚀', label: 'GTM Plan', field: 'GTM Plan' },
+  { key: 'aistack', icon: '⚙️', label: 'AI Stack Plan', field: 'AI Stack Plan' },
+  { key: 'roadmap', icon: '🗺️', label: 'Execution Roadmap', field: 'Execution Roadmap' },
+  { key: 'risks', icon: '⚠️', label: 'Risks & Challenges', field: 'Risks & Challenges' },
+];
 
 function buildSections(item) {
   return SECTIONS.map(sec => {
     const content = item[sec.field] || '';
     const status = content ? 'complete' : 'pending';
-    const statusLabel = content ? 'Complete' : 'Pending';
     const scoreTag = sec.scoreField && item[sec.scoreField] ? ` <span style="font-size:11px;color:#6366F1;font-weight:700;margin-left:6px">AI Score: ${item[sec.scoreField]}/10</span>` : '';
-    return `
-      <div class="section-item">
-        <div class="section-header" onclick="toggleSection('${item.id}','${sec.key}')">
-          <div class="section-header-left">
-            <span class="section-icon">${sec.icon}</span>
-            <span class="section-label">${sec.label}</span>
-            ${scoreTag}
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="section-status ${status}">${statusLabel}</span>
-            <span class="section-arrow" id="sec-arrow-${item.id}-${sec.key}">▶</span>
-          </div>
-        </div>
-        <div class="section-content" id="sec-${item.id}-${sec.key}">
-          ${content
-            ? `<div class="section-text">${content}</div>`
-            : `<div class="section-empty">This section has not been completed yet.</div>`
-          }
-        </div>
-      </div>`;
+    return `<div class="section-item">
+      <div class="section-header" onclick="toggleSection('${item.id}','${sec.key}')">
+        <div class="section-header-left"><span class="section-icon">${sec.icon}</span><span class="section-label">${sec.label}</span>${scoreTag}</div>
+        <div style="display:flex;align-items:center;gap:8px"><span class="section-status ${status}">${status === 'complete' ? 'Complete' : 'Pending'}</span><span class="section-arrow" id="sec-arrow-${item.id}-${sec.key}">▶</span></div>
+      </div>
+      <div class="section-content" id="sec-${item.id}-${sec.key}">
+        ${content ? `<div class="section-text">${content}</div>` : '<div class="section-empty">Not yet completed.</div>'}
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -484,39 +970,7 @@ function toggleSection(itemId, secKey) {
   if (!content) return;
   const isOpen = content.classList.contains('open');
   content.classList.toggle('open', !isOpen);
-  arrow.textContent = isOpen ? '▶' : '▼';
-}
-
-function getCardActions(item) {
-  const id = item.id;
-  const status = item.Status || 'Signal Captured';
-  const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
-  const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes for revision…">`;
-
-  if (status === 'Review') return `
-    ${note}
-    <button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve Blueprint</button>
-    <button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Request Revision</button>
-    <button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>
-    ${del}`;
-
-  if (status === 'Approved') return `
-    <span style="font-size:12px;color:#00C896;font-weight:700">✅ Blueprint Approved</span>
-    ${del}`;
-
-  if (status === 'On Hold') return `
-    <button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>
-    ${del}`;
-
-  if (status === 'Dropped') return `
-    <button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>
-    ${del}`;
-
-  return `
-    <span style="font-size:12px;color:#AAA">Pipeline running…</span>
-    <button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>
-    <button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>
-    ${del}`;
+  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
 }
 
 function buildCard(item) {
@@ -527,17 +981,15 @@ function buildCard(item) {
   const aiScore = item['AI Executability Score'];
   const orchNotes = item['Orchestrator Summary'] || '';
   const date = item.Created ? new Date(item.Created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-
   const isActive = !['Review','Approved','On Hold','Dropped'].includes(status);
   const isComplete = status === 'Approved';
-  const stageBadgeClass = isComplete ? 'complete-stage' : isActive ? 'active-stage' : '';
 
   return `<div class="opp-card" id="card-${item.id}">
     <div class="opp-card-header" onclick="toggleCard('${item.id}')">
       <div class="opp-card-name">${name}</div>
-      ${signal ? `<div class="opp-card-signal">${signal}</div>` : ''}
+      ${signal ? `<div class="opp-card-signal">${signal.substring(0, 200)}</div>` : ''}
       <div class="opp-card-meta">
-        <span class="stage-badge ${stageBadgeClass}">${status}</span>
+        <span class="stage-badge ${isComplete ? 'complete-stage' : isActive ? 'active-stage' : ''}">${status}</span>
         ${oppScore ? `<span class="opp-score">🎯 ${oppScore}/10</span>` : ''}
         ${aiScore ? `<span class="ai-score">🤖 AI ${aiScore}/10</span>` : ''}
         <span class="card-date">${date}</span>
@@ -545,40 +997,50 @@ function buildCard(item) {
       </div>
     </div>
     <div class="card-expanded" id="expanded-${item.id}">
-      ${orchNotes ? `
-        <div class="orch-notes" style="margin-top:14px">
-          <div class="orch-notes-label">🧠 Orchestrator Summary</div>
-          <div class="orch-notes-text">${orchNotes}</div>
-        </div>` : ''}
+      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes.substring(0, 1000)}${orchNotes.length > 1000 ? '…' : ''}</div></div>` : ''}
       <div class="blueprint-sections">${buildSections(item)}</div>
-      <div class="card-actions">${getCardActions(item)}</div>
+      <div class="card-actions">${buildCardActions(item)}</div>
     </div>
   </div>`;
+}
+
+function buildCardActions(item) {
+  const id = item.id;
+  const status = item.Status || '';
+  const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
+  const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes…">`;
+
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${del}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${del}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${del}`;
+  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${del}`;
+  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${del}`;
 }
 
 function toggleCard(id) {
   const expanded = document.getElementById('expanded-' + id);
   const arrow = document.getElementById('expand-' + id);
   const card = document.getElementById('card-' + id);
+  if (!expanded) return;
   const isOpen = expanded.classList.contains('open');
   expanded.classList.toggle('open', !isOpen);
   card.classList.toggle('card-open', !isOpen);
-  arrow.textContent = isOpen ? '▼' : '▲';
+  if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
 }
 
 const COLUMNS = [
-  { key: 'Signal Captured',    id: 'signal' },
-  { key: 'AI Executability',   id: 'ai-exec' },
-  { key: 'Market Analysis',    id: 'market' },
-  { key: 'Business Design',    id: 'business' },
-  { key: 'Brand Development',  id: 'brand' },
-  { key: 'GTM Strategy',       id: 'gtm' },
-  { key: 'AI Execution Design',id: 'exec' },
-  { key: 'Blueprint Draft',    id: 'blueprint' },
-  { key: 'Review',             id: 'review' },
-  { key: 'Approved',           id: 'approved' },
-  { key: 'On Hold',            id: 'hold' },
-  { key: 'Dropped',            id: 'dropped' },
+  { key: 'Signal Captured', id: 'signal' },
+  { key: 'AI Executability', id: 'ai-exec' },
+  { key: 'Market Analysis', id: 'market' },
+  { key: 'Business Design', id: 'business' },
+  { key: 'Brand Development', id: 'brand' },
+  { key: 'GTM Strategy', id: 'gtm' },
+  { key: 'AI Execution Design', id: 'exec' },
+  { key: 'Blueprint Draft', id: 'blueprint' },
+  { key: 'Review', id: 'review' },
+  { key: 'Approved', id: 'approved' },
+  { key: 'On Hold', id: 'hold' },
+  { key: 'Dropped', id: 'dropped' },
 ];
 
 function filterItems(items) {
@@ -598,13 +1060,7 @@ function renderBoard(items) {
     const colWrapper = document.getElementById('colwrap-' + col.id);
     if (el) el.innerHTML = colItems.length ? colItems.map(buildCard).join('') : '';
     if (countEl) countEl.textContent = colItems.length;
-    if (colWrapper) {
-      if (colItems.length === 0) {
-        colWrapper.classList.add('col-empty');
-      } else {
-        colWrapper.classList.remove('col-empty');
-      }
-    }
+    if (colWrapper) colWrapper.classList.toggle('col-empty', colItems.length === 0);
   });
   document.getElementById('queueBadge').textContent = items.filter(i => i.Status === 'Review').length;
 }
@@ -618,209 +1074,36 @@ function filterStatus(filter, btn) {
 
 async function loadBoard() {
   try {
-    const res = await fetch('/api/queue?all=true');
+    const res = await fetch('/api/opportunities');
     allItems = await res.json();
     renderBoard(allItems);
-  } catch(e) { console.log('Board error:', e); }
+  } catch(e) { console.error('Board error:', e); }
 }
 
 async function loadQueueBadge() {
   try {
-    const res = await fetch('/api/queue?all=true');
+    const res = await fetch('/api/opportunities');
     const items = await res.json();
     document.getElementById('queueBadge').textContent = items.filter(i => i.Status === 'Review').length;
   } catch(e) {}
 }
 
-async function updateItem(id, status, extra = {}) {
+async function updateItem(id, status) {
   const notes = document.getElementById('note-' + id)?.value || '';
-  try {
-    await fetch('/api/queue/' + id, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, notes, ...extra })
-    });
-    addActivity(`📋 Opportunity moved to ${status}`);
-    loadBoard();
-  } catch(e) { alert('Could not update.'); }
+  await fetch(`/api/queue/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, notes })
+  });
+  addActivity(`📋 Opportunity moved to ${status}`);
+  loadBoard();
 }
 
 async function deleteItem(id) {
   if (!confirm('Delete this opportunity? This cannot be undone.')) return;
-  try {
-    await fetch('/api/queue/' + id, { method: 'DELETE' });
-    addActivity('🗑 Opportunity deleted');
-    loadBoard();
-  } catch(e) { alert('Could not delete.'); }
-}
-
-// Track active pipelines
-let activePipelines = {};
-
-const STAGE_AGENT_MAP = {
-  'Signal Captured': { agent: 'scout', label: 'Discovering…' },
-  'AI Executability': { agent: 'ai-analyst', label: 'Analyzing…' },
-  'Market Analysis': { agent: 'market', label: 'Researching…' },
-  'Business Design': { agent: 'architect', label: 'Designing…' },
-  'Brand Development': { agent: 'brand', label: 'Creating…' },
-  'GTM Strategy': { agent: 'gtm', label: 'Planning…' },
-  'AI Execution Design': { agent: 'exec', label: 'Designing…' },
-  'Blueprint Draft': { agent: 'orchestrator', label: 'Compiling…' },
-};
-
-const TERMINAL_STAGES = ['Review', 'Approved', 'On Hold', 'Dropped'];
-
-async function advanceRecord(recordId) {
-  try {
-    const res = await fetch(`/api/advance/${recordId}`, { method: 'POST' });
-    const result = await res.json();
-    return result;
-  } catch(e) {
-    return { done: true, error: e.message };
-  }
-}
-
-async function pollRecord(recordId) {
-  try {
-    const res = await fetch(`/api/record/${recordId}`);
-    return await res.json();
-  } catch(e) {
-    return null;
-  }
-}
-
-async function runPipelineForRecord(recordId, oppName) {
-  addActivity(`🔍 Starting pipeline for: ${oppName}`);
-  activePipelines[recordId] = true;
-
-  const statusEl = document.getElementById('systemStatus');
-  statusEl.textContent = '● Pipeline running…';
-  statusEl.className = 'system-status working';
-
-  let complete = false;
-  let stageCount = 0;
-
-  while (!complete && stageCount < 12) {
-    stageCount++;
-
-    // Get current status
-    const record = await pollRecord(recordId);
-    if (!record) break;
-
-    const currentStatus = record['Status'];
-    addActivity(`⚙️ ${oppName}: ${currentStatus}`);
-
-    // Update agent status display
-    const agentInfo = STAGE_AGENT_MAP[currentStatus];
-    if (agentInfo) {
-      setAgentStatus('orchestrator', 'working', 'Reviewing…');
-      setAgentStatus(agentInfo.agent, 'working', agentInfo.label);
-    }
-
-    if (TERMINAL_STAGES.includes(currentStatus)) {
-      complete = true;
-      if (currentStatus === 'Review') {
-        addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review.`);
-        setAgentStatus('orchestrator', 'done', 'Done ✓');
-      } else if (currentStatus === 'Dropped') {
-        addActivity(`❌ "${oppName}" was dropped by the Orchestrator.`);
-      }
-      break;
-    }
-
-    // Advance one stage
-    const result = await advanceRecord(recordId);
-
-    if (result.error) {
-      addActivity(`❌ Error on "${oppName}": ${result.error}`);
-      complete = true;
-      break;
-    }
-
-    if (result.done) {
-      complete = true;
-      if (result.success) {
-        addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review.`);
-      } else if (result.dropped) {
-        addActivity(`❌ "${oppName}" was dropped by the Orchestrator.`);
-      }
-    }
-
-    // Mark previous agent done
-    if (agentInfo) {
-      setAgentStatus(agentInfo.agent, 'done', 'Done ✓');
-    }
-
-    // Small delay between stages
-    await new Promise(r => setTimeout(r, 1000));
-  }
-
-  delete activePipelines[recordId];
-  loadQueueBadge();
+  await fetch(`/api/queue/${id}`, { method: 'DELETE' });
+  addActivity('🗑 Opportunity deleted');
   loadBoard();
-
-  // Check if all pipelines done
-  if (Object.keys(activePipelines).length === 0) {
-    document.getElementById('runBtn').disabled = false;
-    document.getElementById('runBtn').textContent = '▶ Run Pipeline';
-    statusEl.textContent = '● All agents ready';
-    statusEl.className = 'system-status';
-    ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
-  }
-}
-
-async function runAgents() {
-  const signal = document.getElementById('signalInput').value.trim();
-  const oppName = document.getElementById('oppName').value.trim() || 'Untitled Opportunity';
-  const autoDiscover = document.getElementById('autoDiscover').checked;
-
-  if (!signal && !autoDiscover) {
-    alert('Please enter an opportunity signal or check "Let Scout discover the opportunity".');
-    return;
-  }
-
-  const runBtn = document.getElementById('runBtn');
-  runBtn.disabled = true;
-  runBtn.textContent = '⏳ Starting…';
-
-  const statusEl = document.getElementById('systemStatus');
-  statusEl.textContent = '● Pipeline running…';
-  statusEl.className = 'system-status working';
-
-  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
-
-  const focusContext = [
-    focusCriteria.targetIndustries ? `Target Industries: ${focusCriteria.targetIndustries}` : '',
-    focusCriteria.aiThreshold ? `AI Executability Threshold: ${focusCriteria.aiThreshold}` : '',
-    focusCriteria.bizPreferences ? `Business Preferences: ${focusCriteria.bizPreferences}` : '',
-    focusCriteria.orchInstructions ? `Orchestrator Instructions: ${focusCriteria.orchInstructions}` : '',
-  ].filter(Boolean).join('\n');
-
-  try {
-    const startRes = await fetch('/api/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ signal, oppName, autoDiscover, focusContext })
-    });
-    const { recordIds, message } = await startRes.json();
-
-    addActivity(`📡 ${message}`);
-    runBtn.textContent = '⏳ Pipeline running…';
-
-    // Run each record through the pipeline
-    await Promise.all(recordIds.map(async (recordId) => {
-      const record = await pollRecord(recordId);
-      const name = record ? record['Name'] : oppName;
-      await runPipelineForRecord(recordId, name);
-    }));
-
-  } catch(error) {
-    addActivity('❌ Error: ' + error.message);
-    runBtn.disabled = false;
-    runBtn.textContent = '▶ Run Pipeline';
-    statusEl.textContent = '● All agents ready';
-    statusEl.className = 'system-status';
-  }
 }
 
 loadQueueBadge();
