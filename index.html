@@ -413,8 +413,13 @@ async function saveOpp(id, fields) {
 }
 
 async function createOpp(name, signal, sourceTrend = '') {
-  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.replace(/\*\*/g, '').trim(), signal, sourceTrend }) });
-  return await res.json();
+  const cleanName = name.replace(/\*\*/g, '').trim();
+  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: cleanName, signal, sourceTrend }) });
+  const data = await res.json();
+  console.log('createOpp response:', JSON.stringify(data));
+  if (!data.id) console.error('createOpp missing id:', data);
+  return data;
+}
 }
 
 async function saveTrend(fields) {
