@@ -413,12 +413,8 @@ async function saveOpp(id, fields) {
 }
 
 async function createOpp(name, signal, sourceTrend = '') {
-  const cleanName = name.replace(/\*\*/g, '').trim();
-  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: cleanName, signal, sourceTrend }) });
-  const data = await res.json();
-  console.log('createOpp response:', JSON.stringify(data));
-  if (!data.id) console.error('createOpp missing id:', data);
-  return data;
+  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, signal, sourceTrend }) });
+  return await res.json();
 }
 
 async function saveTrend(fields) {
@@ -997,11 +993,7 @@ For each opportunity use the format specified in your instructions. Separate wit
         const oppSignal = signalMatch ? signalMatch[1].trim() : block.trim();
 
         const record = await createOpp(oppName, oppSignal, sourceTrend);
-if (!record || !record.id) {
-  addActivity(`❌ Failed to create Airtable record for: ${oppName}`);
-  continue;
-}
-addActivity(`🔍 Starting pipeline for: ${oppName}`);
+        addActivity(`🔍 Starting pipeline for: ${oppName}`);
 
         // Mark source trend as In Progress
         const sourceTrendRecord = trends.find(t => t['Name'] && t['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
@@ -1075,11 +1067,127 @@ function buildCardActions(item) {
   const status = item.Status || '';
   const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
   const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes…">`;
-  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${del}`;
-  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${del}`;
-  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${del}`;
+  const exportBtns = `
+    <button class="btn-revise" onclick="printBlueprint('${id}')" title="Print or save as PDF">🖨️ Print PDF</button>
+    <button class="btn-revise" onclick="downloadWord('${id}')" title="Download Word document">📄 Word Doc</button>
+  `;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${exportBtns}${del}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${exportBtns}${del}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${exportBtns}${del}`;
   if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${del}`;
   return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${del}`;
+}
+
+// ─── EXPORT FUNCTIONS ─────────────────────────────────────────────────────────
+async function downloadWord(id) {
+  window.open(`/api/opportunities/${id}/export`, '_blank');
+}
+
+function markdownToHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+async function printBlueprint(id) {
+  try {
+    const res = await fetch(`/api/opportunities/${id}`);
+    const item = await res.json();
+
+    const SECTIONS = [
+      { label: 'Orchestrator Summary & Blueprint', field: 'Orchestrator Summary' },
+      { label: 'AI Executability Analysis', field: 'AI Executability Notes' },
+      { label: 'Market Analysis', field: 'Market Analysis' },
+      { label: 'Competitive Landscape', field: 'Competitive Landscape' },
+      { label: 'Target Customer', field: 'Target Customer' },
+      { label: 'Business Model', field: 'Business Model' },
+      { label: 'Revenue Projections', field: 'Revenue Projections' },
+      { label: 'Financial Analysis', field: 'Financial Analysis' },
+      { label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
+      { label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
+      { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'AI Stack Plan', field: 'AI Stack Plan' },
+      { label: 'Execution Roadmap', field: 'Execution Roadmap' },
+      { label: 'Risks & Challenges', field: 'Risks & Challenges' },
+    ];
+
+    const sectionsHtml = SECTIONS.map(sec => {
+      const content = item[sec.field];
+      if (!content || content.trim() === '') return '';
+      return `
+        <div class="section">
+          <div class="section-divider"></div>
+          <h2>${sec.label}</h2>
+          <div class="section-body">${markdownToHtml(content)}</div>
+        </div>
+      `;
+    }).filter(Boolean).join('');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${item.Name || 'Blueprint'} — OpportunityAI Blueprint</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; color: #1D1D1F; line-height: 1.7; font-size: 13px; }
+  .cover { text-align: center; padding: 80px 60px 60px; border-bottom: 4px solid #00C896; margin-bottom: 40px; }
+  .cover .label { font-size: 11px; font-weight: 700; color: #00C896; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; }
+  .cover h1 { font-size: 32px; font-weight: 800; color: #0F1117; line-height: 1.2; margin-bottom: 16px; }
+  .cover .scores { display: flex; justify-content: center; gap: 24px; margin: 20px 0; }
+  .cover .score-pill { background: #F0FDF8; border: 1.5px solid #00C896; border-radius: 20px; padding: 6px 18px; font-size: 13px; font-weight: 700; color: #065F46; }
+  .cover .score-pill.ai { background: #EEF2FF; border-color: #6366F1; color: #4F46E5; }
+  .cover .meta { font-size: 12px; color: #999; margin-top: 16px; }
+  .cover .trend { font-size: 12px; color: #8B5CF6; margin-top: 8px; font-weight: 600; }
+  .section { padding: 0 60px 40px; page-break-before: always; }
+  .section:first-child { page-break-before: avoid; }
+  .section-divider { height: 3px; background: linear-gradient(to right, #00C896, #6366F1); border-radius: 2px; margin-bottom: 20px; }
+  h2 { font-size: 20px; font-weight: 800; color: #0F1117; margin-bottom: 16px; }
+  h3 { font-size: 15px; font-weight: 700; color: #333; margin: 16px 0 8px; }
+  .section-body { color: #333; }
+  .section-body p { margin-bottom: 12px; }
+  .section-body ul { margin: 8px 0 12px 24px; }
+  .section-body li { margin-bottom: 6px; }
+  .section-body strong { color: #0F1117; }
+  .footer { text-align: center; padding: 40px 60px 60px; border-top: 2px solid #F0F0F2; margin-top: 40px; font-size: 11px; color: #CCC; }
+  @media print {
+    .section { page-break-before: always; }
+    .cover { page-break-after: always; }
+    @page { margin: 0.75in; }
+  }
+</style>
+</head>
+<body>
+  <div class="cover">
+    <div class="label">OpportunityAI by QLMAgentic</div>
+    <h1>${item.Name || 'Opportunity Blueprint'}</h1>
+    <div class="scores">
+      ${item['Opportunity Score'] ? `<span class="score-pill">🎯 Overall: ${item['Opportunity Score']}/10</span>` : ''}
+      ${item['AI Executability Score'] ? `<span class="score-pill ai">🤖 AI Exec: ${item['AI Executability Score']}/10</span>` : ''}
+    </div>
+    ${item['Source Trend'] ? `<div class="trend">📈 Source Trend: ${item['Source Trend']}</div>` : ''}
+    <div class="meta">Generated ${item.Created || ''} · Confidential · QLMAgentic OpportunityAI</div>
+  </div>
+  ${sectionsHtml}
+  <div class="footer">QLMAgentic · OpportunityAI · Confidential · ${item.Created || ''}</div>
+  <script>window.onload = () => window.print();</script>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  } catch(err) {
+    alert('Export error: ' + err.message);
+  }
 }
 
 function buildCard(item) {
@@ -1108,7 +1216,7 @@ function buildCard(item) {
       </div>
     </div>
     <div class="card-expanded" id="expanded-${item.id}">
-      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes.substring(0,1500)}${orchNotes.length > 1500 ? '…' : ''}</div></div>` : ''}
+      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes}</div></div>` : ''}
       <div class="blueprint-sections">${buildSections(item)}</div>
       <div class="card-actions">${buildCardActions(item)}</div>
     </div>

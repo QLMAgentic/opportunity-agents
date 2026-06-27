@@ -1,6 +1,7 @@
 const express = require('express');
 const Airtable = require('airtable');
 const path = require('path');
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, PageBreak } = require('docx');
 
 const app = express();
 app.use(express.json());
@@ -69,6 +70,166 @@ app.delete('/api/opportunities/:id', async (req, res) => {
   }
 });
 
+// ─── WORD DOC EXPORT ──────────────────────────────────────────────────────────
+app.get('/api/opportunities/:id/export', async (req, res) => {
+  try {
+    const record = await base('Opportunities').find(req.params.id);
+    const item = { id: record.id, ...record.fields };
+
+    const name = item['Name'] || 'Opportunity Blueprint';
+    const score = item['Opportunity Score'];
+    const aiScore = item['AI Executability Score'];
+    const sourceTrend = item['Source Trend'] || '';
+    const created = item['Created'] || '';
+
+    const divider = new Paragraph({
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '00C896', space: 1 } },
+      spacing: { before: 300, after: 300 },
+      children: []
+    });
+
+    function h1(text) {
+      return new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text, bold: true, size: 36, font: 'Arial', color: '0F1117' })],
+        spacing: { before: 400, after: 200 }
+      });
+    }
+
+    function h2(text) {
+      return new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        children: [new TextRun({ text, bold: true, size: 26, font: 'Arial', color: '00C896' })],
+        spacing: { before: 300, after: 150 }
+      });
+    }
+
+    function body(text) {
+      if (!text) return [];
+      // Convert markdown to paragraphs
+      return text.split('\n').filter(line => line.trim()).map(line => {
+        const isBold = line.startsWith('**') || line.startsWith('###') || line.startsWith('##') || line.startsWith('#');
+        const clean = line.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+        if (!clean) return null;
+        return new Paragraph({
+          children: [new TextRun({
+            text: clean,
+            size: 22,
+            font: 'Arial',
+            bold: isBold,
+            color: '1D1D1F'
+          })],
+          spacing: { after: 120 }
+        });
+      }).filter(Boolean);
+    }
+
+    const SECTIONS = [
+      { label: 'Orchestrator Summary & Blueprint', field: 'Orchestrator Summary' },
+      { label: 'AI Executability Analysis', field: 'AI Executability Notes' },
+      { label: 'Market Analysis', field: 'Market Analysis' },
+      { label: 'Competitive Landscape', field: 'Competitive Landscape' },
+      { label: 'Target Customer', field: 'Target Customer' },
+      { label: 'Business Model', field: 'Business Model' },
+      { label: 'Revenue Projections', field: 'Revenue Projections' },
+      { label: 'Financial Analysis', field: 'Financial Analysis' },
+      { label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
+      { label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
+      { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'AI Stack Plan', field: 'AI Stack Plan' },
+      { label: 'Execution Roadmap', field: 'Execution Roadmap' },
+      { label: 'Risks & Challenges', field: 'Risks & Challenges' },
+    ];
+
+    const children = [
+      // Cover
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 800, after: 200 },
+        children: [new TextRun({ text: 'OPPORTUNITY LAUNCH BLUEPRINT', bold: true, size: 48, font: 'Arial', color: '0F1117' })]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+        children: [new TextRun({ text: name, bold: true, size: 36, font: 'Arial', color: '00C896' })]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+        children: [new TextRun({ text: `Overall Score: ${score ? score + '/10' : 'Pending'} | AI Executability: ${aiScore ? aiScore + '/10' : 'Pending'}`, size: 24, font: 'Arial', color: '666666' })]
+      }),
+      ...(sourceTrend ? [new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+        children: [new TextRun({ text: `Source Trend: ${sourceTrend}`, size: 22, font: 'Arial', color: '8B5CF6' })]
+      })] : []),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 600 },
+        children: [new TextRun({ text: `Generated: ${created} | QLMAgentic OpportunityAI`, size: 20, font: 'Arial', color: '999999' })]
+      }),
+      divider,
+    ];
+
+    // Add each section
+    for (const sec of SECTIONS) {
+      const content = item[sec.field];
+      if (!content || content.trim() === '') continue;
+
+      children.push(
+        new Paragraph({ children: [new PageBreak()] }),
+        h2(sec.label),
+        divider,
+        ...body(content),
+      );
+    }
+
+    // Footer
+    children.push(
+      divider,
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 400 },
+        children: [new TextRun({ text: `QLMAgentic · OpportunityAI · ${created} · Confidential`, size: 18, font: 'Arial', color: '999999' })]
+      })
+    );
+
+    const doc = new Document({
+      styles: {
+        default: { document: { run: { font: 'Arial', size: 22 } } },
+        paragraphStyles: [
+          { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true,
+            run: { size: 36, bold: true, font: 'Arial', color: '0F1117' },
+            paragraph: { spacing: { before: 400, after: 200 }, outlineLevel: 0 } },
+          { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true,
+            run: { size: 26, bold: true, font: 'Arial', color: '00C896' },
+            paragraph: { spacing: { before: 300, after: 150 }, outlineLevel: 1 } },
+        ]
+      },
+      sections: [{
+        properties: {
+          page: {
+            size: { width: 12240, height: 15840 },
+            margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
+          }
+        },
+        children
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const filename = name.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}_Blueprint.docx"`);
+    res.send(buffer);
+
+  } catch (err) {
+    console.error('Export error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── TRENDS ───────────────────────────────────────────────────────────────────
 app.post('/api/trends', async (req, res) => {
   try {
@@ -108,12 +269,10 @@ app.delete('/api/trends/:id', async (req, res) => {
   }
 });
 
-// ─── LEGACY ENDPOINTS ─────────────────────────────────────────────────────────
+// ─── LEGACY ───────────────────────────────────────────────────────────────────
 app.get('/api/queue', async (req, res) => {
   try {
-    const records = await base('Opportunities').select({
-      sort: [{ field: 'Created', direction: 'desc' }]
-    }).all();
+    const records = await base('Opportunities').select({ sort: [{ field: 'Created', direction: 'desc' }] }).all();
     res.json(records.map(r => ({ id: r.id, ...r.fields })));
   } catch (err) {
     res.status(500).json({ error: err.message });
