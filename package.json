@@ -1,0 +1,29 @@
+{
+  "name": "marketing-agents",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/QLMAgentic/marketing-agents.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/QLMAgentic/marketing-agents/issues"
+  },
+  "homepage": "https://github.com/QLMAgentic/marketing-agents#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.2",
+    "airtable": "^0.12.2",
+    "anthropic": "^0.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

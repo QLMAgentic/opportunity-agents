@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgencyAI Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F5F7; color: #1D1D1F; min-height: 100vh; }
+
+    .topbar { background: white; border-bottom: 1px solid #E5E5E7; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 16px; font-weight: 700; }
+    .logo span { color: #7C5CFC; }
+    .system-status { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: #E1F5EE; color: #085041; font-weight: 500; }
+
+    .layout { display: grid; grid-template-columns: 200px 1fr; min-height: calc(100vh - 52px); }
+
+    .sidebar { background: white; border-right: 1px solid #E5E5E7; padding: 20px 0; }
+    .nav-label { font-size: 10px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 16px; margin-bottom: 4px; margin-top: 16px; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 13px; color: #555; cursor: pointer; transition: background 0.1s; }
+    .nav-item:hover { background: #F5F5F7; }
+    .nav-item.active { background: #F0EDFE; color: #7C5CFC; font-weight: 500; border-right: 2px solid #7C5CFC; }
+    .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .badge { background: #7C5CFC; color: white; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+
+    .main { padding: 24px; overflow-y: auto; }
+
+    .card { background: white; border-radius: 12px; border: 1px solid #E5E5E7; padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+
+    .brief-textarea { width: 100%; font-size: 14px; color: #1D1D1F; background: #F5F5F7; border: 1px solid #E5E5E7; border-radius: 8px; padding: 12px; resize: none; height: 80px; font-family: inherit; line-height: 1.5; }
+    .brief-textarea:focus { outline: none; border-color: #7C5CFC; }
+    .campaign-input { width: 100%; font-size: 13px; color: #1D1D1F; background: #F5F5F7; border: 1px solid #E5E5E7; border-radius: 8px; padding: 8px 12px; font-family: inherit; margin-bottom: 10px; }
+    .campaign-input:focus { outline: none; border-color: #7C5CFC; }
+
+    .brief-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .btn-run { background: #7C5CFC; color: white; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-run:hover { background: #6A4AE8; }
+    .btn-run:disabled { background: #C4B5FD; cursor: not-allowed; }
+
+    .agents-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .agent-card { background: #F5F5F7; border-radius: 10px; padding: 14px; border: 1px solid #E5E5E7; transition: border-color 0.3s; }
+    .agent-card.working { border-color: #F59E0B; background: #FFFBEB; }
+    .agent-card.done { border-color: #10B981; background: #ECFDF5; }
+    .agent-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .agent-role { font-size: 11px; color: #999; margin-bottom: 10px; }
+    .agent-status-pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+    .pill-idle { background: #E5E5E7; color: #666; }
+    .pill-working { background: #FEF3CD; color: #7A4F00; }
+    .pill-done { background: #D1FAE5; color: #065F46; }
+
+    .activity-feed { max-height: 160px; overflow-y: auto; }
+    .activity-item { font-size: 12px; color: #555; padding: 6px 0; border-bottom: 1px solid #F5F5F7; display: flex; gap: 8px; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time { color: #999; white-space: nowrap; }
+    .activity-empty { font-size: 13px; color: #999; text-align: center; padding: 20px; }
+
+    .kanban-wrapper { overflow-x: auto; padding-bottom: 16px; }
+    .kanban-board { display: grid; grid-template-columns: repeat(9, 460px); gap: 12px; align-items: start; min-width: max-content; }
+    .kanban-column { background: #F0F0F2; border-radius: 12px; padding: 14px; }
+    .kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .kanban-col-title { font-size: 11px; font-weight: 600; color: #555; }
+    .kanban-col-count { font-size: 11px; background: white; border: 1px solid #E5E5E7; padding: 2px 8px; border-radius: 10px; color: #999; }
+
+    .content-card { background: white; border-radius: 10px; border: 1px solid #E5E5E7; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
+    .content-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .content-card.card-open { border: 2px solid #2E7D32; box-shadow: 0 0 0 3px rgba(46,125,50,0.15), 0 0 16px rgba(46,125,50,0.25); }
+
+    .content-card-header { padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+    .content-card-campaign { font-size: 10px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.06em; }
+    .content-card-title { font-size: 13px; font-weight: 600; color: #1D1D1F; line-height: 1.4; }
+    .content-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .type-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+    .type-educational { background: #E1F5EE; color: #065F46; }
+    .type-inspirational { background: #EDE9FE; color: #5B21B6; }
+    .type-product { background: #FEE2E2; color: #991B1B; }
+    .type-social-proof { background: #FEF3C7; color: #92400E; }
+    .type-tips { background: #E0F2FE; color: #0C4A6E; }
+    .type-behind-the-scenes { background: #FCE7F3; color: #9D174D; }
+
+    .score-badge { font-size: 10px; font-weight: 600; color: #7C5CFC; background: #F0EDFE; padding: 2px 8px; border-radius: 20px; }
+    .date-label { font-size: 10px; color: #999; margin-left: auto; }
+    .expand-btn { background: none; border: none; cursor: pointer; color: #999; font-size: 14px; padding: 0; line-height: 1; flex-shrink: 0; }
+
+    .card-expanded { display: none; border-top: 1px solid #F5F5F7; }
+    .card-expanded.open { display: block; }
+
+    .visual-placeholder { background: #F5F5F7; padding: 12px; border-bottom: 1px solid #E5E5E7; }
+    .visual-placeholder-label { font-size: 10px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .visual-placeholder-box { background: #E5E5E7; border-radius: 8px; padding: 12px; text-align: center; border: 2px dashed #CCC; }
+    .visual-placeholder-desc { font-size: 11px; color: #666; line-height: 1.5; margin-top: 6px; text-align: left; }
+    .visual-image { width: 100%; border-radius: 6px; }
+
+    .platform-tabs { display: flex; gap: 4px; padding: 10px 12px 0; border-top: 1px solid #F5F5F7; overflow-x: auto; }
+    .platform-tab { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px 6px 0 0; border: 1px solid #E5E5E7; border-bottom: none; cursor: pointer; background: #F5F5F7; color: #999; white-space: nowrap; }
+    .platform-tab.active { background: white; color: #1D1D1F; border-bottom: 1px solid white; margin-bottom: -1px; }
+    .platform-tab-instagram.active { color: #E1306C; }
+    .platform-tab-facebook.active { color: #1877F2; }
+    .platform-tab-tiktok.active { color: #000; }
+    .platform-tab-designer.active { color: #7C5CFC; }
+    .platform-panel { display: none; padding: 14px; border-top: 1px solid #E5E5E7; }
+    .platform-panel.active { display: block; }
+    .platform-content-full { font-size: 12px; color: #333; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow-y: auto; }
+
+    .vp-notes-section { padding: 0 14px 12px; }
+    .vp-notes-label { font-size: 11px; font-weight: 600; color: #7C5CFC; margin-bottom: 4px; }
+    .vp-notes-content { font-size: 12px; color: #555; line-height: 1.6; background: #F0EDFE; border-radius: 6px; padding: 8px 10px; }
+
+    .revision-section { border-top: 1px solid #F5F5F7; }
+    .revision-toggle { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; cursor: pointer; font-size: 11px; color: #999; font-weight: 500; }
+    .revision-toggle:hover { background: #F9F9F9; }
+    .revision-content { display: none; padding: 0 14px 10px; }
+    .revision-content.open { display: block; }
+    .revision-brief { font-size: 11px; color: #888; line-height: 1.5; background: #F5F5F7; border-radius: 6px; padding: 8px 10px; }
+
+    .card-actions { padding: 10px 14px; border-top: 1px solid #F5F5F7; display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+    .btn-approve { background: #D1FAE5; color: #065F46; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-approve:hover { background: #A7F3D0; }
+    .btn-revise { background: #F5F5F7; color: #555; border: 1px solid #E5E5E7; border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; }
+    .btn-revise:hover { background: #E5E5E7; }
+    .btn-hold { background: #FEF3C7; color: #92400E; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; }
+    .btn-visuals { background: #E0F2FE; color: #0C4A6E; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-schedule { background: #7C5CFC; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-posted { background: #E0F2FE; color: #0C4A6E; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-confirm { background: #D1FAE5; color: #065F46; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-delete { background: #FEE2E2; color: #991B1B; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; margin-left: auto; }
+    .btn-delete:hover { background: #FECACA; }
+    .revision-note-input { flex: 1; font-size: 11px; border: 1px solid #E5E5E7; border-radius: 6px; padding: 6px 8px; font-family: inherit; min-width: 60px; }
+    .revision-note-input:focus { outline: none; border-color: #7C5CFC; }
+    .schedule-date-input { font-size: 11px; border: 1px solid #E5E5E7; border-radius: 6px; padding: 6px 8px; font-family: inherit; flex: 1; }
+
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+    .filter-label { font-size: 12px; color: #999; }
+    .filter-btn { font-size: 11px; padding: 4px 12px; border-radius: 20px; border: 1px solid #E5E5E7; background: white; cursor: pointer; color: #555; }
+    .filter-btn.active { background: #7C5CFC; color: white; border-color: #7C5CFC; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+    .queue-empty { font-size: 12px; color: #bbb; text-align: center; padding: 20px 10px; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #E5E5E7; border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .agents-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Agency<span>AI</span></div>
+  <span class="system-status" id="systemStatus">● All agents ready</span>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active" onclick="showView('dashboard')">
+      <div class="nav-dot" style="background:#7C5CFC"></div> Dashboard
+    </div>
+    <div class="nav-item" onclick="showView('board')">
+      <div class="nav-dot" style="background:#F59E0B"></div> Content Board
+      <span class="badge" id="queueBadge">0</span>
+    </div>
+    <div class="nav-label">Agents</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#7C5CFC"></div> VP Marketing</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#10B981"></div> Writer</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#EF4444"></div> Designer</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#3B82F6"></div> Social Media</div>
+    <div class="nav-label">Settings</div>
+    <div class="nav-item" onclick="showView('settings')">
+      <div class="nav-dot" style="background:#999"></div> Brand Voice
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="view active" id="view-dashboard">
+      <div class="card">
+        <div class="card-title">New Campaign Brief</div>
+        <input class="campaign-input" id="campaignName" placeholder="Campaign name (e.g. Summer Repair Launch)">
+        <textarea class="brief-textarea" id="briefInput" placeholder="Describe what you need…"></textarea>
+        <div class="brief-footer">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:12px;color:#999">Pieces:</span>
+            <select id="numPieces" style="font-size:13px;border:1px solid #E5E5E7;border-radius:6px;padding:4px 8px;background:white">
+              <option value="3">3 pieces</option>
+              <option value="4">4 pieces</option>
+              <option value="5">5 pieces</option>
+            </select>
+          </div>
+          <button class="btn-run" id="runBtn" onclick="runAgents()">▶ Run Agents</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Agent Status</div>
+        <div class="agents-grid">
+          <div class="agent-card" id="agent-vp"><div class="agent-name">VP Marketing</div><div class="agent-role">Orchestrator</div><span class="agent-status-pill pill-idle" id="status-vp">Idle</span></div>
+          <div class="agent-card" id="agent-writer"><div class="agent-name">Writer</div><div class="agent-role">Content</div><span class="agent-status-pill pill-idle" id="status-writer">Idle</span></div>
+          <div class="agent-card" id="agent-designer"><div class="agent-name">Designer</div><div class="agent-role">Visuals</div><span class="agent-status-pill pill-idle" id="status-designer">Idle</span></div>
+          <div class="agent-card" id="agent-social"><div class="agent-name">Social Media</div><div class="agent-role">Publishing</div><span class="agent-status-pill pill-idle" id="status-social">Idle</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Activity Feed</div>
+        <div class="activity-feed" id="activityFeed">
+          <div class="activity-empty">No activity yet — run your first campaign above</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-board">
+      <div class="filter-bar">
+        <span class="filter-label">Campaign:</span>
+        <button class="filter-btn active" onclick="filterCampaign('all', this)">All</button>
+        <div id="campaignFilters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="kanban-wrapper">
+        <div class="kanban-board">
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">⏸ On Hold</span><span class="kanban-col-count" id="count-on-hold">0</span></div>
+            <div id="col-on-hold"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">📋 Needs Review</span><span class="kanban-col-count" id="count-needs-review">0</span></div>
+            <div id="col-needs-review"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">✏️ Needs Revision</span><span class="kanban-col-count" id="count-needs-revision">0</span></div>
+            <div id="col-needs-revision"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">🖼️ Needs Visuals</span><span class="kanban-col-count" id="count-needs-visuals">0</span></div>
+            <div id="col-needs-visuals"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">🔍 Final Review</span><span class="kanban-col-count" id="count-final-review">0</span></div>
+            <div id="col-final-review"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">✅ Approved</span><span class="kanban-col-count" id="count-approved">0</span></div>
+            <div id="col-approved"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">📅 Scheduled</span><span class="kanban-col-count" id="count-scheduled">0</span></div>
+            <div id="col-scheduled"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">📢 Posted</span><span class="kanban-col-count" id="count-posted">0</span></div>
+            <div id="col-posted"></div>
+          </div>
+
+          <div class="kanban-column">
+            <div class="kanban-col-header"><span class="kanban-col-title">🏁 Confirmed</span><span class="kanban-col-count" id="count-confirmed">0</span></div>
+            <div id="col-confirmed"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-settings">
+      <div class="card">
+        <div class="card-title">Brand Voice & Settings</div>
+        <p style="font-size:13px;color:#666;margin-bottom:16px">These instructions are injected into every agent so all content stays on-brand.</p>
+        <textarea class="brief-textarea" id="brandVoice" style="height:120px" placeholder="e.g. Our brand is warm, professional, and approachable..."></textarea>
+        <div style="margin-top:12px"><button class="btn-run" onclick="saveBrandVoice()">Save Brand Voice</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let brandVoice = localStorage.getItem('brandVoice') || '';
+  let allItems = [];
+  let activeCampaignFilter = 'all';
+  if (brandVoice) document.getElementById('brandVoice').value = brandVoice;
+
+  function saveBrandVoice() {
+    brandVoice = document.getElementById('brandVoice').value;
+    localStorage.setItem('brandVoice', brandVoice);
+    alert('Brand voice saved!');
+  }
+
+  function showView(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('view-' + view).classList.add('active');
+    if (view === 'board') loadBoard();
+  }
+
+  function setAgentStatus(agent, status, label) {
+    const card = document.getElementById('agent-' + agent);
+    const pill = document.getElementById('status-' + agent);
+    if (!card || !pill) return;
+    card.className = 'agent-card ' + status;
+    pill.className = 'agent-status-pill pill-' + status;
+    pill.textContent = label;
+  }
+
+  function addActivity(message) {
+    const feed = document.getElementById('activityFeed');
+    const empty = feed.querySelector('.activity-empty');
+    if (empty) empty.remove();
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+    item.innerHTML = `<span class="activity-time">${now}</span><span>${message}</span>`;
+    feed.insertBefore(item, feed.firstChild);
+  }
+
+  function getTypeClass(type) {
+    const map = { 'educational':'type-educational','inspirational':'type-inspirational','product':'type-product','social-proof':'type-social-proof','tips':'type-tips','behind-the-scenes':'type-behind-the-scenes' };
+    return map[type] || 'type-educational';
+  }
+
+  function parseContent(raw) {
+    const result = { instagram:'', facebook:'', tiktok:'', designer:'', writer:'' };
+    if (!raw) return result;
+    const sections = raw.split('---');
+    sections.forEach(s => {
+      const lo = s.toLowerCase();
+      if (lo.includes('designer brief') || lo.includes('design brief')) result.designer = s.replace(/DESIGNER BRIEF:|DESIGN BRIEF:/gi,'').trim();
+      else if (lo.includes('written content')) result.writer = s.replace(/WRITTEN CONTENT:/gi,'').trim();
+      else if (lo.includes('social media posts')) {
+        const ig = s.match(/INSTAGRAM[\s\S]*?(?=FACEBOOK|TIKTOK|$)/i);
+        if (ig) result.instagram = ig[0].replace(/INSTAGRAM:/gi,'').trim();
+        const fb = s.match(/FACEBOOK[\s\S]*?(?=INSTAGRAM|TIKTOK|$)/i);
+        if (fb) result.facebook = fb[0].replace(/FACEBOOK:/gi,'').trim();
+        const tt = s.match(/TIKTOK[\s\S]*?(?=INSTAGRAM|FACEBOOK|$)/i);
+        if (tt) result.tiktok = tt[0].replace(/TIKTOK:/gi,'').trim();
+      }
+    });
+    if (!result.instagram) result.instagram = result.writer || raw.substring(0,800);
+    return result;
+  }
+
+  function getActionButtons(item) {
+    const id = item.id;
+    const status = item.Status || 'Needs Review';
+    const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
+    const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes...">`;
+
+    if (status === 'Needs Review') return `${note}
+      <button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button>
+      <button class="btn-visuals" onclick="updateItem('${id}','Needs Visuals')">🖼 Needs Visuals</button>
+      <button class="btn-revise" onclick="updateItem('${id}','Needs Revision')">↩ Revise</button>
+      <button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>
+      ${del}`;
+
+    if (status === 'Needs Revision') return `${note}
+      <button class="btn-approve" onclick="updateItem('${id}','Needs Review')">↑ Back to Review</button>
+      <button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>
+      ${del}`;
+
+    if (status === 'On Hold') return `
+      <button class="btn-approve" onclick="updateItem('${id}','Needs Review')">↑ Back to Review</button>
+      ${del}`;
+
+    if (status === 'Needs Visuals') return `
+      <button class="btn-visuals" onclick="triggerVisualUpload('${id}')">📎 Upload Visual</button>
+      <input type="file" id="file-${id}" accept="image/*" style="display:none" onchange="handleVisualUpload('${id}',this)">
+      <button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>
+      ${del}`;
+
+    if (status === 'Final Review') return `
+      <button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button>
+      <button class="btn-revise" onclick="updateItem('${id}','Needs Revision')">↩ Revise</button>
+      ${del}`;
+
+    if (status === 'Approved') return `
+      <input type="datetime-local" class="schedule-date-input" id="scheddate-${id}">
+      <button class="btn-schedule" onclick="scheduleItem('${id}')">📅 Schedule</button>
+      ${del}`;
+
+    if (status === 'Scheduled') return `
+      <button class="btn-posted" onclick="updateItem('${id}','Posted')">📢 Mark Posted</button>
+      ${del}`;
+
+    if (status === 'Posted') return `
+      <button class="btn-confirm" onclick="updateItem('${id}','Confirmed')">✓ Confirm on Platform</button>
+      ${del}`;
+
+    if (status === 'Confirmed') return `
+      <span style="font-size:11px;color:#10B981;font-weight:600">🏁 Confirmed — auto-archives in 5 days</span>
+      ${del}`;
+
+    return del;
+  }
+
+  function buildCard(item) {
+    const parsed = parseContent(item.Content || '');
+    const contentType = (item.Notes||'').match(/Type: ([^\s|]+)/)?.[1] || 'content';
+    const typeClass = getTypeClass(contentType);
+    const score = (item.Notes||'').match(/VP Score: ([0-9.]+)/)?.[1] || '—';
+    const campaign = item.Campaign || 'Uncategorized';
+    const date = item.Created ? new Date(item.Created).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const title = (item.Name||'').replace(/^\[.*?\]\s*/,'');
+    const vpNotes = item['VP Notes'] || 'VP approved this content as on-brand and ready for review.';
+    const scheduledDate = item['Scheduled Date'] ? new Date(item['Scheduled Date']).toLocaleString() : '';
+
+    return `<div class="content-card" id="card-${item.id}" data-campaign="${campaign}">
+      <div class="content-card-header" onclick="toggleCard('${item.id}')">
+        <div class="content-card-campaign">${campaign}</div>
+        <div class="content-card-title">${title}</div>
+        <div class="content-card-meta">
+          <span class="type-badge ${typeClass}">${contentType}</span>
+          <span class="score-badge">⭐ ${score}/10</span>
+          ${scheduledDate ? `<span style="font-size:10px;color:#7C5CFC">📅 ${scheduledDate}</span>` : ''}
+          <span class="date-label">${date}</span>
+          <button class="expand-btn" id="expand-${item.id}">▼</button>
+        </div>
+      </div>
+      <div class="card-expanded" id="expanded-${item.id}">
+
+        <div class="visual-placeholder">
+          <div class="visual-placeholder-label">🎨 Visual Asset</div>
+          <div class="visual-placeholder-box" id="visual-box-${item.id}">
+            <div style="font-size:20px">🖼️</div>
+            <div style="font-size:11px;color:#888;margin-top:4px">Upload visual when ready</div>
+            ${parsed.designer ? `<div class="visual-placeholder-desc"><strong>Designer direction:</strong> ${parsed.designer.substring(0,200)}${parsed.designer.length>200?'...':''}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="platform-tabs">
+          <div class="platform-tab platform-tab-instagram active" onclick="switchTab('${item.id}','instagram')">📷 Instagram</div>
+          <div class="platform-tab platform-tab-facebook" onclick="switchTab('${item.id}','facebook')">👥 Facebook</div>
+          <div class="platform-tab platform-tab-tiktok" onclick="switchTab('${item.id}','tiktok')">🎵 TikTok</div>
+          <div class="platform-tab platform-tab-designer" onclick="switchTab('${item.id}','designer')">🎨 Design Brief</div>
+        </div>
+        <div class="platform-panel active" id="tab-instagram-${item.id}"><div class="platform-content-full">${parsed.instagram||'View full content in Airtable'}</div></div>
+        <div class="platform-panel" id="tab-facebook-${item.id}"><div class="platform-content-full">${parsed.facebook||'View full content in Airtable'}</div></div>
+        <div class="platform-panel" id="tab-tiktok-${item.id}"><div class="platform-content-full">${parsed.tiktok||'View full content in Airtable'}</div></div>
+        <div class="platform-panel" id="tab-designer-${item.id}"><div class="platform-content-full">${parsed.designer||'View full content in Airtable'}</div></div>
+
+        <div class="vp-notes-section" style="margin-top:10px">
+          <div class="vp-notes-label">💼 VP of Marketing Notes</div>
+          <div class="vp-notes-content">${vpNotes}</div>
+        </div>
+
+        <div class="revision-section">
+          <div class="revision-toggle" onclick="toggleRevision('${item.id}')">
+            <span>📋 Brief & History</span>
+            <span id="rev-arrow-${item.id}">▶</span>
+          </div>
+          <div class="revision-content" id="revision-${item.id}">
+            <div class="revision-brief"><strong>Original brief:</strong><br>${item.Brief?item.Brief.substring(0,400)+'...':'No brief recorded'}</div>
+          </div>
+        </div>
+
+        <div class="card-actions">${getActionButtons(item)}</div>
+      </div>
+    </div>`;
+  }
+
+  function toggleCard(id) {
+    const expanded = document.getElementById('expanded-'+id);
+    const arrow = document.getElementById('expand-'+id);
+    const card = document.getElementById('card-'+id);
+    const isOpen = expanded.classList.contains('open');
+    expanded.classList.toggle('open', !isOpen);
+    card.classList.toggle('card-open', !isOpen);
+    arrow.textContent = isOpen ? '▼' : '▲';
+  }
+
+  function switchTab(id, tab) {
+    ['instagram','facebook','tiktok','designer'].forEach(t => {
+      const panel = document.getElementById(`tab-${t}-${id}`);
+      const tabEl = document.querySelector(`#card-${id} .platform-tab-${t}`);
+      if (panel) panel.classList.toggle('active', t===tab);
+      if (tabEl) tabEl.classList.toggle('active', t===tab);
+    });
+  }
+
+  function toggleRevision(id) {
+    const content = document.getElementById('revision-'+id);
+    const arrow = document.getElementById('rev-arrow-'+id);
+    const isOpen = content.classList.contains('open');
+    content.classList.toggle('open', !isOpen);
+    arrow.textContent = isOpen ? '▶' : '▼';
+  }
+
+  function filterCampaign(campaign, btn) {
+    activeCampaignFilter = campaign;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBoard(allItems);
+  }
+
+  const COLUMNS = [
+    {key:'On Hold', id:'on-hold'},
+    {key:'Needs Review', id:'needs-review'},
+    {key:'Needs Revision', id:'needs-revision'},
+    {key:'Needs Visuals', id:'needs-visuals'},
+    {key:'Final Review', id:'final-review'},
+    {key:'Approved', id:'approved'},
+    {key:'Scheduled', id:'scheduled'},
+    {key:'Posted', id:'posted'},
+    {key:'Confirmed', id:'confirmed'}
+  ];
+
+  function renderBoard(items) {
+    const filtered = activeCampaignFilter==='all' ? items : items.filter(i=>(i.Campaign||'Uncategorized')===activeCampaignFilter);
+    COLUMNS.forEach(col => {
+      const colItems = filtered.filter(i=>i.Status===col.key);
+      const el = document.getElementById('col-'+col.id);
+      const countEl = document.getElementById('count-'+col.id);
+      if (el) el.innerHTML = colItems.length ? colItems.map(buildCard).join('') : '<div class="queue-empty">Empty</div>';
+      if (countEl) countEl.textContent = colItems.length;
+    });
+    const campaigns = [...new Set(items.map(i=>i.Campaign||'Uncategorized'))];
+    const fc = document.getElementById('campaignFilters');
+    if (fc) fc.innerHTML = campaigns.map(c=>`<button class="filter-btn" onclick="filterCampaign('${c}',this)">${c}</button>`).join('');
+    document.getElementById('queueBadge').textContent = filtered.filter(i=>i.Status==='Needs Review').length;
+  }
+
+  async function loadBoard() {
+    try {
+      const res = await fetch('/api/queue?all=true');
+      allItems = await res.json();
+      renderBoard(allItems);
+    } catch(e) { console.log('Board error:', e); }
+  }
+
+  async function loadQueueBadge() {
+    try {
+      const res = await fetch('/api/queue?all=true');
+      const items = await res.json();
+      document.getElementById('queueBadge').textContent = items.filter(i=>i.Status==='Needs Review').length;
+    } catch(e) {}
+  }
+
+  async function updateItem(id, status, extra={}) {
+    const notes = document.getElementById('note-'+id)?.value || '';
+    try {
+      await fetch('/api/queue/'+id, {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({status, notes, ...extra})
+      });
+      addActivity(`📋 Moved to ${status}`);
+      loadBoard();
+    } catch(e) { alert('Could not update item.'); }
+  }
+
+  async function deleteItem(id) {
+    if (!confirm('Delete this content? This cannot be undone.')) return;
+    try {
+      await fetch('/api/queue/'+id, {method:'DELETE'});
+      addActivity('🗑 Content deleted');
+      loadBoard();
+    } catch(e) { alert('Could not delete.'); }
+  }
+
+  async function scheduleItem(id) {
+    const dateInput = document.getElementById('scheddate-'+id);
+    if (!dateInput?.value) { alert('Please select a date and time.'); return; }
+    await updateItem(id, 'Scheduled', {scheduledDate: dateInput.value});
+    addActivity(`📅 Scheduled for ${new Date(dateInput.value).toLocaleString()}`);
+  }
+
+  function triggerVisualUpload(id) { document.getElementById('file-'+id)?.click(); }
+
+  async function handleVisualUpload(id, input) {
+    if (!input.files || !input.files[0]) return;
+    addActivity('🖼 Visual uploaded — moving to Final Review');
+    await updateItem(id, 'Final Review');
+  }
+
+  async function runAgents() {
+    const brief = document.getElementById('briefInput').value.trim();
+    const campaignName = document.getElementById('campaignName').value.trim() || 'Untitled Campaign';
+    if (!brief) { alert('Please enter a campaign brief first.'); return; }
+    const numPieces = parseInt(document.getElementById('numPieces')?.value || 3);
+    const runBtn = document.getElementById('runBtn');
+    runBtn.disabled = true;
+    runBtn.textContent = '⏳ Running...';
+    document.getElementById('systemStatus').textContent = '● Agents working...';
+    document.getElementById('systemStatus').style.background = '#FEF3CD';
+    document.getElementById('systemStatus').style.color = '#7A4F00';
+    ['vp','writer','designer','social'].forEach(a => setAgentStatus(a,'idle','Idle'));
+
+    try {
+      const startRes = await fetch('/api/run', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({brief: brandVoice ? `Brand Voice: ${brandVoice}\n\nBrief: ${brief}` : brief, numPieces, campaignName})
+      });
+      const {jobId} = await startRes.json();
+      let lastLogCount = 0;
+
+      const poll = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/job/${jobId}`);
+          const job = await statusRes.json();
+          const newLogs = job.logs.slice(lastLogCount);
+          newLogs.forEach(log => {
+            addActivity(log.msg);
+            if (log.msg.includes('VP creating')) setAgentStatus('vp','working','Working...');
+            if (log.msg.includes('Writer working')) setAgentStatus('writer','working','Working...');
+            if (log.msg.includes('Writer done')) setAgentStatus('writer','done','Done ✓');
+            if (log.msg.includes('Designer working')) setAgentStatus('designer','working','Working...');
+            if (log.msg.includes('Designer done')) setAgentStatus('designer','done','Done ✓');
+            if (log.msg.includes('Social Media working')) setAgentStatus('social','working','Working...');
+            if (log.msg.includes('Social done')) setAgentStatus('social','done','Done ✓');
+            if (log.msg.includes('VP reviewing')) setAgentStatus('vp','working','Reviewing...');
+            if (log.msg.includes('VP approved')) setAgentStatus('vp','done','Done ✓');
+            if (log.msg.includes('saved to Airtable')) loadQueueBadge();
+          });
+          lastLogCount = job.logs.length;
+          if (job.status==='complete' || job.status==='error') {
+            clearInterval(poll);
+            runBtn.disabled = false;
+            runBtn.textContent = '▶ Run Agents';
+            document.getElementById('systemStatus').textContent = '● All agents ready';
+            document.getElementById('systemStatus').style.background = '#E1F5EE';
+            document.getElementById('systemStatus').style.color = '#085041';
+            if (job.status==='complete') {
+              addActivity(`🎉 All ${job.numPieces} pieces complete! Go to Content Board to review.`);
+              if (job.calendarNote) addActivity(`📅 Tomorrow: ${job.calendarNote}`);
+            }
+            loadQueueBadge();
+          }
+        } catch(e) {}
+      }, 3000);
+    } catch(error) {
+      addActivity('❌ Error: '+error.message);
+      runBtn.disabled = false;
+      runBtn.textContent = '▶ Run Agents';
+    }
+  }
+
+  loadQueueBadge();
+</script>
+</body>
+</html>
