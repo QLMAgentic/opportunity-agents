@@ -8,28 +8,29 @@ app.use(express.static(path.join(__dirname)));
 
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
 
-// Expose Anthropic API key to frontend safely
+// Expose API key to frontend
 app.get('/api/config', (req, res) => {
   res.json({ apiKey: process.env.ANTHROPIC_API_KEY });
 });
 
-// Create opportunity record
+// ─── OPPORTUNITIES ────────────────────────────────────────────────────────────
 app.post('/api/opportunities', async (req, res) => {
   try {
-    const { name, signal } = req.body;
-    const record = await base('Opportunities').create({
+    const { name, signal, sourceTrend } = req.body;
+    const fields = {
       'Name': name,
       'Status': 'Signal Captured',
       'Signal': signal,
       'Created': new Date().toISOString().split('T')[0]
-    });
+    };
+    if (sourceTrend) fields['Source Trend'] = sourceTrend;
+    const record = await base('Opportunities').create(fields);
     res.json({ id: record.id, ...record.fields });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Update opportunity record
 app.patch('/api/opportunities/:id', async (req, res) => {
   try {
     const record = await base('Opportunities').update(req.params.id, req.body);
@@ -39,7 +40,6 @@ app.patch('/api/opportunities/:id', async (req, res) => {
   }
 });
 
-// Get all opportunities
 app.get('/api/opportunities', async (req, res) => {
   try {
     const records = await base('Opportunities').select({
@@ -51,7 +51,6 @@ app.get('/api/opportunities', async (req, res) => {
   }
 });
 
-// Get single opportunity
 app.get('/api/opportunities/:id', async (req, res) => {
   try {
     const record = await base('Opportunities').find(req.params.id);
@@ -61,7 +60,6 @@ app.get('/api/opportunities/:id', async (req, res) => {
   }
 });
 
-// Delete opportunity
 app.delete('/api/opportunities/:id', async (req, res) => {
   try {
     await base('Opportunities').destroy(req.params.id);
@@ -71,7 +69,46 @@ app.delete('/api/opportunities/:id', async (req, res) => {
   }
 });
 
-// Legacy queue endpoint for compatibility
+// ─── TRENDS ───────────────────────────────────────────────────────────────────
+app.post('/api/trends', async (req, res) => {
+  try {
+    const record = await base('Trends').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/trends/:id', async (req, res) => {
+  try {
+    const record = await base('Trends').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/trends', async (req, res) => {
+  try {
+    const records = await base('Trends').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/trends/:id', async (req, res) => {
+  try {
+    await base('Trends').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── LEGACY ENDPOINTS ─────────────────────────────────────────────────────────
 app.get('/api/queue', async (req, res) => {
   try {
     const records = await base('Opportunities').select({
@@ -105,4 +142,4 @@ app.delete('/api/queue/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`OpportunityAI server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`OpportunityAI running on port ${PORT}`));

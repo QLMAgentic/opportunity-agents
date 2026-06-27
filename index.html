@@ -28,17 +28,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .signal-input:focus { outline: none; border-color: #00C896; }
 .opp-name-input { width: 100%; font-size: 14px; color: #1D1D1F; background: #F8F9FC; border: 1.5px solid #E8EAF0; border-radius: 10px; padding: 10px 14px; font-family: inherit; margin-bottom: 12px; transition: border-color 0.2s; }
 .opp-name-input:focus { outline: none; border-color: #00C896; }
-.input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; }
-.discovery-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
-.discovery-toggle input[type=checkbox] { accent-color: #00C896; width: 14px; height: 14px; }
+.input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; flex-wrap: wrap; }
 .btn-run { background: #00C896; color: #0F1117; border: none; border-radius: 10px; padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
 .btn-run:hover { background: #00B384; }
 .btn-run:disabled { background: #A8E8D8; cursor: not-allowed; color: #5A8A7A; }
+.btn-trend { background: #6366F1; color: white; border: none; border-radius: 10px; padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-trend:hover { background: #4F46E5; }
+.btn-trend:disabled { background: #A5B4FC; cursor: not-allowed; }
 .agents-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .agent-card { background: #F8F9FC; border-radius: 10px; padding: 14px; border: 1.5px solid #E8EAF0; transition: all 0.25s; }
 .agent-card.working { border-color: #F59E0B; background: #FFFBEB; }
 .agent-card.done { border-color: #00C896; background: #F0FDF8; }
 .agent-card.orchestrator { border-left: 3px solid #6366F1; }
+.agent-card.trend { border-left: 3px solid #8B5CF6; }
 .agent-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; color: #1D1D1F; }
 .agent-role { font-size: 11px; color: #AAA; margin-bottom: 10px; }
 .agent-status-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; }
@@ -46,7 +48,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pill-working { background: #FEF3CD; color: #7A4F00; }
 .pill-done { background: #D1FAE5; color: #065F46; }
 .activity-feed { max-height: 200px; overflow-y: auto; }
-.activity-item { font-size: 12px; color: #555; padding: 7px 0; border-bottom: 1px solid #F5F5F7; display: flex; gap: 10px; align-items: flex-start; }
+.activity-item { font-size: 12px; color: #555; padding: 7px 0; border-bottom: 1px solid #F5F5F7; display: flex; gap: 10px; }
 .activity-item:last-child { border-bottom: none; }
 .activity-time { color: #BBB; white-space: nowrap; font-size: 11px; padding-top: 1px; }
 .activity-empty { font-size: 13px; color: #CCC; text-align: center; padding: 24px; }
@@ -61,16 +63,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .opp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .opp-card.card-open { border-color: #00C896; box-shadow: 0 0 0 3px rgba(0,200,150,0.1); }
 .opp-card-header { padding: 16px 18px; cursor: pointer; }
-.opp-card-name { font-size: 17px; font-weight: 800; color: #0F1117; line-height: 1.3; margin-bottom: 6px; letter-spacing: -0.3px; }
+.opp-card-name { font-size: 17px; font-weight: 800; color: #0F1117; line-height: 1.3; margin-bottom: 6px; }
 .opp-card-signal { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .opp-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.stage-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: #F0F0F2; color: #666; text-transform: uppercase; letter-spacing: 0.05em; }
+.stage-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: #F0F0F2; color: #666; text-transform: uppercase; }
 .stage-badge.active-stage { background: #FEF3CD; color: #7A4F00; }
 .stage-badge.complete-stage { background: #D1FAE5; color: #065F46; }
 .opp-score { font-size: 11px; font-weight: 700; color: #00C896; background: #F0FDF8; padding: 3px 10px; border-radius: 20px; border: 1px solid #00C89633; }
 .ai-score { font-size: 11px; font-weight: 700; color: #6366F1; background: #EEF2FF; padding: 3px 10px; border-radius: 20px; }
+.source-trend { font-size: 10px; color: #8B5CF6; background: #F5F3FF; padding: 3px 10px; border-radius: 20px; }
 .card-date { font-size: 10px; color: #CCC; margin-left: auto; }
-.expand-btn { background: none; border: none; cursor: pointer; color: #CCC; font-size: 12px; padding: 0; flex-shrink: 0; }
+.expand-btn { background: none; border: none; cursor: pointer; color: #CCC; font-size: 12px; padding: 0; }
 .card-expanded { display: none; border-top: 1.5px solid #F0F2F6; }
 .card-expanded.open { display: block; }
 .blueprint-sections { padding: 0; }
@@ -91,7 +94,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .section-empty { font-size: 12px; color: #CCC; font-style: italic; }
 .orch-notes { margin: 14px 18px; background: #EEF2FF; border-radius: 8px; padding: 12px 14px; border-left: 3px solid #6366F1; }
 .orch-notes-label { font-size: 10px; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.orch-notes-text { font-size: 12px; color: #444; line-height: 1.6; max-height: 200px; overflow-y: auto; white-space: pre-wrap; }
+.orch-notes-text { font-size: 12px; color: #444; line-height: 1.6; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
 .card-actions { padding: 12px 18px; border-top: 1.5px solid #F0F2F6; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; background: #FAFBFC; }
 .btn-approve { background: #D1FAE5; color: #065F46; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
 .btn-revise { background: #F5F5F7; color: #555; border: 1px solid #E5E5E7; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; }
@@ -111,6 +114,42 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .settings-row { margin-bottom: 18px; }
 .settings-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; }
 .settings-hint { font-size: 11px; color: #AAA; margin-top: 4px; }
+
+/* TREND LIBRARY */
+.trend-grid { display: grid; gap: 14px; }
+.trend-card { background: white; border-radius: 12px; border: 1.5px solid #E8EAF0; padding: 18px; transition: box-shadow 0.2s; }
+.trend-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.trend-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+.trend-name { font-size: 15px; font-weight: 800; color: #0F1117; line-height: 1.3; }
+.trend-badges { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+.trend-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.badge-macro { background: #EEF2FF; color: #4F46E5; }
+.badge-micro { background: #F0FDF4; color: #166534; }
+.badge-early { background: #F0FDF4; color: #166534; }
+.badge-growing { background: #ECFDF5; color: #065F46; }
+.badge-peaking { background: #FEF3C7; color: #92400E; }
+.badge-mature { background: #F3F4F6; color: #6B7280; }
+.badge-rightnow { background: #FEE2E2; color: #991B1B; }
+.badge-nearterm { background: #FEF3C7; color: #92400E; }
+.badge-longterm { background: #EEF2FF; color: #4F46E5; }
+.badge-unexplored { background: #F0F0F2; color: #888; }
+.badge-inprogress { background: #FEF3CD; color: #7A4F00; }
+.badge-exhausted { background: #F3F4F6; color: #9CA3AF; }
+.trend-description { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 12px; }
+.trend-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.trend-meta-item { background: #F8F9FC; border-radius: 8px; padding: 10px 12px; }
+.trend-meta-label { font-size: 10px; font-weight: 700; color: #AAA; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.trend-meta-value { font-size: 12px; color: #444; line-height: 1.5; }
+.trend-lens { font-size: 11px; color: #8B5CF6; font-weight: 600; margin-bottom: 4px; }
+.trend-opps-count { font-size: 11px; color: #00C896; font-weight: 700; }
+.trend-filter-bar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+.trend-filter-btn { font-size: 11px; padding: 4px 12px; border-radius: 20px; border: 1.5px solid #E8EAF0; background: white; cursor: pointer; color: #666; font-weight: 600; }
+.trend-filter-btn.active { background: #6366F1; color: white; border-color: #6366F1; }
+.trend-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.trend-stat { background: white; border-radius: 12px; border: 1px solid #E8EAF0; padding: 16px; text-align: center; }
+.trend-stat-number { font-size: 28px; font-weight: 800; color: #0F1117; }
+.trend-stat-label { font-size: 11px; color: #AAA; margin-top: 4px; }
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #E0E0E6; border-radius: 2px; }
@@ -128,8 +167,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="nav-label">Workspace</div>
     <div class="nav-item active" onclick="showView('dashboard')"><div class="nav-dot" style="background:#00C896"></div>Dashboard</div>
     <div class="nav-item" onclick="showView('board');loadBoard()"><div class="nav-dot" style="background:#F59E0B"></div>Opportunity Board<span class="badge" id="queueBadge">0</span></div>
+    <div class="nav-item" onclick="showView('trends');loadTrends()"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Library<span class="badge" id="trendBadge" style="background:#8B5CF6">0</span></div>
     <div class="nav-label">Agents</div>
     <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div>Orchestrator</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Analyst</div>
     <div class="nav-item"><div class="nav-dot" style="background:#00C896"></div>Scout</div>
     <div class="nav-item"><div class="nav-dot" style="background:#F59E0B"></div>AI Executability</div>
     <div class="nav-item"><div class="nav-dot" style="background:#3B82F6"></div>Market Analyst</div>
@@ -146,12 +187,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
       <div class="card">
-        <div class="card-title">New Opportunity Signal</div>
-        <input class="opp-name-input" id="oppName" placeholder="Opportunity name (e.g. AI-Powered Pest Control for Homeowners)">
-        <textarea class="signal-input" id="signalInput" placeholder="Describe the opportunity signal, idea, problem, or market trend you want to evaluate…"></textarea>
+        <div class="card-title">Run Trend Analysis — Weekly</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Trend Analyst searches for 15+ market trends across all six lenses and saves them to the Trend Library. Run this weekly to keep the library fresh. The Scout draws from this library when finding opportunities.</p>
+        <button class="btn-trend" id="trendBtn" onclick="runTrendAnalysis()">🔭 Run Trend Analysis</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Run Opportunity Pipeline — Daily</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 2 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
+        <input class="opp-name-input" id="oppName" placeholder="Opportunity name (optional — leave blank for Scout to discover)">
+        <textarea class="signal-input" id="signalInput" placeholder="Optional: Describe a specific opportunity signal to evaluate. Leave blank to let Scout pull from Trend Library…"></textarea>
         <div class="input-footer">
-          <label class="discovery-toggle"><input type="checkbox" id="autoDiscover"> Let Scout discover the opportunity</label>
-          <button class="btn-run" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
+          <button class="btn-run" id="runBtn" onclick="runPipeline()">▶ Run Opportunity Pipeline</button>
         </div>
       </div>
 
@@ -159,6 +206,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="card-title">Agent Status</div>
         <div class="agents-grid">
           <div class="agent-card orchestrator" id="agent-orchestrator"><div class="agent-name">Orchestrator</div><div class="agent-role">Managing Consultant</div><span class="agent-status-pill pill-idle" id="status-orchestrator">Idle</span></div>
+          <div class="agent-card trend" id="agent-trend"><div class="agent-name">Trend Analyst</div><div class="agent-role">Market Intelligence</div><span class="agent-status-pill pill-idle" id="status-trend">Idle</span></div>
           <div class="agent-card" id="agent-scout"><div class="agent-name">Scout</div><div class="agent-role">Opportunity Discovery</div><span class="agent-status-pill pill-idle" id="status-scout">Idle</span></div>
           <div class="agent-card" id="agent-ai-analyst"><div class="agent-name">AI Executability</div><div class="agent-role">Gate 1 Filter</div><span class="agent-status-pill pill-idle" id="status-ai-analyst">Idle</span></div>
           <div class="agent-card" id="agent-market"><div class="agent-name">Market Analyst</div><div class="agent-role">Market & Competition</div><span class="agent-status-pill pill-idle" id="status-market">Idle</span></div>
@@ -171,11 +219,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
       <div class="card">
         <div class="card-title">Pipeline Activity</div>
-        <div class="activity-feed" id="activityFeed"><div class="activity-empty">No activity yet — submit your first opportunity signal above</div></div>
+        <div class="activity-feed" id="activityFeed"><div class="activity-empty">No activity yet — run Trend Analysis first, then the Opportunity Pipeline</div></div>
       </div>
     </div>
 
-    <!-- BOARD -->
+    <!-- OPPORTUNITY BOARD -->
     <div class="view" id="view-board">
       <div class="filter-bar">
         <span class="filter-label">Filter:</span>
@@ -202,15 +250,39 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
     </div>
 
+    <!-- TREND LIBRARY -->
+    <div class="view" id="view-trends">
+      <div class="trend-stats">
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-total">0</div><div class="trend-stat-label">Total Trends</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-unexplored">0</div><div class="trend-stat-label">Unexplored</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-inprogress">0</div><div class="trend-stat-label">In Progress</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-opportunities">0</div><div class="trend-stat-label">Opportunities Found</div></div>
+      </div>
+      <div class="trend-filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="trend-filter-btn active" onclick="filterTrends('all',this)">All</button>
+        <button class="trend-filter-btn" onclick="filterTrends('Unexplored',this)">Unexplored</button>
+        <button class="trend-filter-btn" onclick="filterTrends('In Progress',this)">In Progress</button>
+        <button class="trend-filter-btn" onclick="filterTrends('Right Now',this)">Right Now</button>
+        <button class="trend-filter-btn" onclick="filterTrends('Growing',this)">Growing</button>
+        <button class="trend-filter-btn" onclick="filterTrends('AI Disruption',this)">AI Disruption</button>
+        <button class="trend-filter-btn" onclick="filterTrends('Macro',this)">Macro</button>
+        <button class="trend-filter-btn" onclick="filterTrends('Micro',this)">Micro</button>
+      </div>
+      <div class="trend-grid" id="trendGrid">
+        <div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No trends yet — run the Trend Analysis to populate the library</div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="view" id="view-settings">
       <div class="card">
         <div class="card-title">Focus Criteria</div>
-        <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6">These parameters are injected into every agent to focus the pipeline on the right types of opportunities.</p>
-        <div class="settings-row"><div class="settings-label">Target Industries / Markets</div><textarea class="settings-textarea" id="targetIndustries" style="height:70px" placeholder="e.g. Consumer products, Home services, Health & wellness…"></textarea></div>
-        <div class="settings-row"><div class="settings-label">AI Executability Threshold</div><textarea class="settings-textarea" id="aiThreshold" style="height:60px" placeholder="e.g. Only proceed with opportunities scoring 7/10 or higher on AI executability…"></textarea></div>
-        <div class="settings-row"><div class="settings-label">Business Model Preferences</div><textarea class="settings-textarea" id="bizPreferences" placeholder="e.g. Prefer product businesses. Favor white-label. Low capital required. Target $500K-$5M revenue potential…"></textarea></div>
-        <div class="settings-row"><div class="settings-label">Additional Orchestrator Instructions</div><textarea class="settings-textarea" id="orchInstructions" placeholder="e.g. Always challenge financial projections for realism. Flag opportunities requiring more than 2 hours/day human attention…"></textarea></div>
+        <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6">These parameters guide both the Trend Analyst and Scout in finding the right opportunities.</p>
+        <div class="settings-row"><div class="settings-label">Target Industries / Markets</div><textarea class="settings-textarea" id="targetIndustries" style="height:70px" placeholder="e.g. Consumer products, Home services, Health & wellness…"></textarea><div class="settings-hint">Tell the Trend Analyst and Scout where to focus.</div></div>
+        <div class="settings-row"><div class="settings-label">AI Executability Threshold</div><textarea class="settings-textarea" id="aiThreshold" style="height:60px" placeholder="e.g. Only proceed with opportunities scoring 7/10 or higher…"></textarea></div>
+        <div class="settings-row"><div class="settings-label">Business Model Preferences</div><textarea class="settings-textarea" id="bizPreferences" placeholder="e.g. Prefer product businesses. Favor white-label. Low capital required…"></textarea></div>
+        <div class="settings-row"><div class="settings-label">Additional Orchestrator Instructions</div><textarea class="settings-textarea" id="orchInstructions" placeholder="e.g. Always challenge financial projections. Flag opportunities requiring more than 2 hours/day human attention…"></textarea></div>
         <button class="btn-run" onclick="saveFocusCriteria()">Save Focus Criteria</button>
       </div>
     </div>
@@ -223,15 +295,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 let ANTHROPIC_API_KEY = '';
 let focusCriteria = JSON.parse(localStorage.getItem('focusCriteria') || '{}');
 let allItems = [];
+let allTrends = [];
+let activeTrendFilter = 'all';
 let activeFilter = 'all';
 
-// Load saved settings
 if (focusCriteria.targetIndustries) document.getElementById('targetIndustries').value = focusCriteria.targetIndustries;
 if (focusCriteria.aiThreshold) document.getElementById('aiThreshold').value = focusCriteria.aiThreshold;
 if (focusCriteria.bizPreferences) document.getElementById('bizPreferences').value = focusCriteria.bizPreferences;
 if (focusCriteria.orchInstructions) document.getElementById('orchInstructions').value = focusCriteria.orchInstructions;
 
-// Load API key from server
 async function loadConfig() {
   try {
     const res = await fetch('/api/config');
@@ -262,7 +334,8 @@ function setAgentStatus(agent, status, label) {
   const card = document.getElementById('agent-' + agent);
   const pill = document.getElementById('status-' + agent);
   if (!card || !pill) return;
-  card.className = 'agent-card' + (agent === 'orchestrator' ? ' orchestrator' : '') + (status !== 'idle' ? ' ' + status : '');
+  const extra = agent === 'orchestrator' ? ' orchestrator' : agent === 'trend' ? ' trend' : '';
+  card.className = 'agent-card' + extra + (status !== 'idle' ? ' ' + status : '');
   pill.className = 'agent-status-pill pill-' + status;
   pill.textContent = label;
 }
@@ -278,7 +351,16 @@ function addActivity(message) {
   feed.insertBefore(item, feed.firstChild);
 }
 
-// ─── CLAUDE API CALL (BROWSER-SIDE) ──────────────────────────────────────────
+function getFocusCtx() {
+  return [
+    focusCriteria.targetIndustries ? `Target Industries: ${focusCriteria.targetIndustries}` : '',
+    focusCriteria.aiThreshold ? `AI Threshold: ${focusCriteria.aiThreshold}` : '',
+    focusCriteria.bizPreferences ? `Business Preferences: ${focusCriteria.bizPreferences}` : '',
+    focusCriteria.orchInstructions ? `Orchestrator Instructions: ${focusCriteria.orchInstructions}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+// ─── CLAUDE API ───────────────────────────────────────────────────────────────
 async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch = true) {
   const body = {
     model: 'claude-sonnet-4-6',
@@ -286,10 +368,7 @@ async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch
     system: systemPrompt,
     messages: [{ role: 'user', content: userMessage }]
   };
-
-  if (useSearch) {
-    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-  }
+  if (useSearch) body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -309,33 +388,18 @@ async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch
 
   const data = await response.json();
 
-  // Handle tool use — if web search was used, get the final text response
   if (data.stop_reason === 'tool_use') {
     const toolUseBlocks = data.content.filter(b => b.type === 'tool_use');
     const messages = [
       { role: 'user', content: userMessage },
       { role: 'assistant', content: data.content },
-      {
-        role: 'user',
-        content: toolUseBlocks.map(t => ({
-          type: 'tool_result',
-          tool_use_id: t.id,
-          content: 'Search completed successfully. Use the search results to inform your analysis.'
-        }))
-      }
+      { role: 'user', content: toolUseBlocks.map(t => ({ type: 'tool_result', tool_use_id: t.id, content: 'Search completed. Use results to inform your analysis.' })) }
     ];
-
     const followUp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({ ...body, messages })
     });
-
     const followData = await followUp.json();
     return followData.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
   }
@@ -343,33 +407,40 @@ async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch
   return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
 }
 
-// ─── AIRTABLE HELPERS ─────────────────────────────────────────────────────────
-async function saveToAirtable(id, fields) {
-  await fetch(`/api/opportunities/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(fields)
-  });
+// ─── AIRTABLE ─────────────────────────────────────────────────────────────────
+async function saveOpp(id, fields) {
+  await fetch(`/api/opportunities/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
 }
 
-async function createOpportunity(name, signal) {
-  const res = await fetch('/api/opportunities', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, signal })
-  });
+async function createOpp(name, signal, sourceTrend = '') {
+  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, signal, sourceTrend }) });
   return await res.json();
+}
+
+async function saveTrend(fields) {
+  const res = await fetch('/api/trends', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+  return await res.json();
+}
+
+async function updateTrend(id, fields) {
+  await fetch(`/api/trends/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+}
+
+async function getUnexploredTrends() {
+  const res = await fetch('/api/trends');
+  const trends = await res.json();
+  const unexplored = trends.filter(t => t['Status'] === 'Unexplored' || !t['Status']);
+  const inProgress = trends.filter(t => t['Status'] === 'In Progress');
+  return [...unexplored, ...inProgress].slice(0, 5);
 }
 
 // ─── AGENT PROMPTS ────────────────────────────────────────────────────────────
 const ORCHESTRATOR_PROMPT = `You are a senior managing consultant and venture analyst with 20+ years of experience evaluating, launching, and scaling businesses. You think like a partner at McKinsey who also deeply understands AI-first business design, e-commerce, and modern go-to-market execution.
 
-Your job is not to create — it is to evaluate, challenge, and enforce quality at every stage of the opportunity pipeline. You are direct, decisive, and skeptical by default. You do not accept vague analysis, optimistic projections without evidence, or generic recommendations.
+Your job is not to create — it is to evaluate, challenge, and enforce quality at every stage of the opportunity pipeline. You are direct, decisive, and skeptical by default.
 
-You cycle back to an agent for revision until output scores 7 or above. Maximum 3 revision attempts per stage.
-
-UNIVERSAL SCORING RUBRIC:
-10 — Exceptional. Specific, evidence-based, internally consistent, immediately actionable.
+SCORING RUBRIC:
+10 — Exceptional. Specific, evidence-based, immediately actionable.
 9 — Excellent. Strong across all dimensions.
 8 — Strong. Solid with minor areas that could be sharper.
 7 — Acceptable. Sound reasoning, clear logic. Minimum pass threshold.
@@ -378,290 +449,178 @@ UNIVERSAL SCORING RUBRIC:
 4 — Poor. Full rewrite directive.
 3 or below — Failing. Flag for human review.
 
-DOMAIN STANDARDS:
-Scout: A 7 means clearly defined opportunity, specific target market, credible hypothesis.
-AI Executability: A 7 means specific operations identified, specific tools named, percentage estimate with reasoning, clear recommendation.
-Market Analysis: A 7 means demand validated with real signals, 3+ specific competitors with weaknesses, clear gap named.
-Business Architecture: A 7 means specific pricing and unit economics, realistic path to breakeven, all assumptions stated.
-Brand Development: A 7 means 10 name options with availability, specific positioning, brand voice with examples, distinct visual direction.
-GTM Strategy: A 7 means specific channels with reasoning, nano-influencer strategy, 90-day plan, path to first 100 customers.
-AI Execution Design: A 7 means specific tools for every function with pricing, workflow mapped end to end, human owner daily procedure in hours.`;
+Maximum 3 revision attempts per stage. After 3 attempts, proceed with best available output and flag for human review.
 
-const SCOUT_PROMPT = `You are an elite business opportunity scout with deep expertise in identifying emerging markets, underserved niches, and high-potential products. You use web search to research current market trends and real market signals.
+DOMAIN STANDARDS:
+Scout: A 7 means clearly defined opportunity, specific target market, credible hypothesis why it works.
+AI Executability: A 7 means specific operations identified for automation, specific tools named with costs, percentage estimate with reasoning, clear recommendation.
+Market Analysis: A 7 means demand validated with real qualitative signals, 3+ specific competitors with weaknesses, clear gap named.
+Business Architecture: A 7 means specific pricing and unit economics, realistic path to breakeven within capital constraint, all assumptions stated explicitly.
+Brand Development: A 7 means 10 name options with availability checks, specific positioning statement for this customer, brand voice with concrete examples, distinct visual identity direction. NOTE — Brand Developer proceeds with whatever upstream context is available. Thin business architecture context does not justify a low brand score if the brand work itself is strong.
+GTM Strategy: A 7 means specific channels with reasoning for this customer, nano-influencer strategy named, 90-day plan with sequenced steps, clear path to first 100 customers.
+AI Execution Design: A 7 means specific tools for every function with current pricing, workflow mapped end to end, human owner daily procedure stated in hours, implementation roadmap executable by non-technical operator.`;
+
+const TREND_ANALYST_PROMPT = `You are a senior trend analyst and market intelligence specialist with deep expertise in identifying macro and micro trends that create business opportunities. You think like a demographic analyst, consumer behavior researcher, technology futurist, and venture scout combined.
+
+Your job is to surface validated market tailwinds across six lenses using web search to find current data — recent surveys, industry reports, consumer spending data, demographic studies, social media sentiment, search trend data, earnings calls, and news about emerging market shifts.
+
+SIX LENSES:
+1. Demographic Shifts — generational wealth transfer, aging population needs, millennial and Gen Z spending patterns, migration and housing trends, household formation rates, workforce changes
+2. Consumer Spending Shifts — where discretionary income is moving toward and away from, categories gaining or losing wallet share, recession-resistant spending, new consumption behaviors
+3. Technology Adoption Curves — what AI and technology are enabling that wasn't possible 2 years ago, where tech adoption creates new consumer behaviors or eliminates friction, platform shifts
+4. AI-Disrupted Industries — industries where AI is actively disrupting incumbents and creating openings for new entrants, businesses struggling to adapt, cost structures being upended, human-labor-intensive industries ripe for AI replacement, new categories AI creates that didn't exist before
+5. Cultural and Lifestyle Shifts — remote work impact, health and wellness momentum, sustainability, experiences versus things, convenience versus price sensitivity, community and belonging trends
+6. Regulatory and Economic Tailwinds — policy changes creating new markets, interest rate impacts, supply chain shifts, regulatory gaps creating first-mover advantages
+
+For each trend you identify, provide:
+- TREND_NAME: [clear descriptive name]
+- LENS: [which of the 6 lenses]
+- SCALE: [Macro or Micro]
+- MOMENTUM: [Early, Growing, Peaking, or Mature]
+- TIMING: [Right Now, Near Term, or Long Term]
+- DESCRIPTION: [one paragraph describing the trend and why it matters]
+- MARKET_SIGNALS: [specific evidence from your research validating this trend — data points, examples, sources]
+- INCUMBENT_VULNERABILITY: [are existing businesses in this space struggling, disrupted, or leaving gaps? What specific indicators suggest the space is open or underserved?]
+- KEY_RISK: [what could stall or reverse this trend]
+
+Produce a minimum of 15 trends per run. Include:
+- At least 3 macro trends with broad societal implications
+- At least 5 micro trends with specific niche opportunity signals
+- At least 3 AI-disruption trends where incumbents are vulnerable
+- At least 2 longer term trends worth building toward now
+- At least 2 right now trends with immediate opportunity windows
+
+You do not surface trends just because they sound exciting. Every trend must have real market signals from your research. A trend without evidence is an assumption — do not include it.
+
+Separate each trend with ---TREND---`;
+
+const SCOUT_PROMPT = `You are an elite business opportunity scout. You identify specific executable business opportunities within validated market trends. You receive a Trend Brief from the Trend Analyst and find specific business opportunities within those trends.
 
 You operate across four discovery lenses:
-1. Niche Product Ideation — underserved micro-markets larger players ignore
-2. Problem/Solution Spotting — real problems where solutions don't exist or are poor
+1. Niche Product Ideation — underserved micro-markets within the trend
+2. Problem/Solution Spotting — real problems the trend creates or exposes
 3. White Label & Manufacturable Products — products distributable with minimal human effort
-4. Hot Market Trends — categories gaining rapid traction with room to enter
+4. Hot Market Timing — products gaining rapid traction within the trend
 
-CAPITAL FILTER: Strong preference for opportunities with a path to breakeven under $5,000 total. Opportunities potentially requiring $5,000-$25,000 flagged as Higher Capital. Over $25,000 is out of scope.
+CAPITAL FILTER: Strong preference for opportunities with a path to breakeven under $5,000 total. Flag $5K-$25K as Higher Capital. Over $25K is out of scope.
 
-For each opportunity produce a structured Opportunity Signal containing:
-- Clear specific opportunity name
-- Which discovery lens it came from and which market segment
-- One paragraph description of the opportunity and why it exists now
-- Specific target customer — who they are, what they want, why they buy
-- Why now — what changed in market, technology, or behavior
-- Initial hypothesis on AI executability
-- Brief competitive landscape — wide open, lightly contested, or crowded with specific gap
-- Estimated capital requirement to reach breakeven
-- Confidence level — High, Medium, or Speculative — with reasoning`;
+For each opportunity produce:
+- OPPORTUNITY_NAME: [clear specific name]
+- SOURCE_TREND: [which trend this comes from]
+- SIGNAL: [full opportunity signal — what the business is, why it exists, why now]
+- TARGET_CUSTOMER: [specific who, what they want, why they buy]
+- AI_EXECUTABILITY_HYPOTHESIS: [initial hypothesis on how AI runs this business]
+- COMPETITIVE_LANDSCAPE: [wide open, lightly contested, or crowded with specific gap]
+- CAPITAL_ESTIMATE: [estimated total to reach breakeven]
+- CONFIDENCE: [High, Medium, or Speculative with one sentence reasoning]
+
+Separate each opportunity with ---OPP---`;
 
 const AI_ANALYST_PROMPT = `You are a senior AI systems analyst and automation architect. You evaluate how effectively AI can execute, operate, and scale a business. You use web search to verify current tool capabilities and pricing.
 
 Your north star: can this business run primarily on AI with maximum 4 hours per week of human time at steady state — the four hour workweek ideal.
 
-Produce a structured AI Executability Analysis containing:
+Produce a structured AI Executability Analysis:
 - Overall AI Executability Score 1-10
 - Operations Breakdown — every major function: Fully Automatable, Partially Automatable, or Requires Human
-- Specific AI Tools — for each function, 2-3 specific tools with current monthly cost, ease of implementation (Easy/Moderate/Complex), recommended starting tool with reasoning, advanced alternatives
-- Human Involvement Estimate — hours per week at launch, 3 months, 12 months. Target under 4 hours steady state
+- Specific AI Tools — for each function, 2-3 specific tools with current monthly cost, ease of implementation, recommended starting tool with reasoning, advanced alternatives
+- Human Involvement Estimate — hours per week at launch, 3 months, 12 months
 - AI Stack Cost Estimate — total monthly cost
 - Capital Efficiency Assessment — how AI contributes to $5,000 path-to-breakeven. Flag Higher Capital if $5K-$25K needed
-- Near-Term Automation Opportunities — functions AI will handle within 12 months
+- Near-Term Automation Opportunities
 - Critical Automation Risks and fallbacks
-- Recommendation — Go, Flag for Review, or Drop with clear reasoning
+- Recommendation — Go, Flag for Review, or Drop with reasoning
 
-SCORING:
-9-10: 80%+ automatable, under 2hrs/week steady state, stack under $300/month
-7-8: 60-80% automatable, under 4hrs/week, stack under $800/month
-5-6: 40-60% automatable, exceeds 4hrs/week. Flag for review.
-4 or below: Under 40% automatable. Recommend Drop.`;
+SCORING: 9-10: 80%+ automatable, under 2hrs/week, stack under $300/month. 7-8: 60-80% automatable, under 4hrs/week, under $800/month. 5-6: Flag for review. 4 or below: Recommend Drop.`;
 
-const MARKET_ANALYST_PROMPT = `You are a senior market research analyst and competitive intelligence specialist. You find real signal in messy data. You use web search extensively — Reddit, Amazon reviews, forums, Trustpilot, app stores, social media.
+const MARKET_ANALYST_PROMPT = `You are a senior market research analyst and competitive intelligence specialist. You find real signal using web search — Reddit, Amazon reviews, Trustpilot, forums, app stores, social media, industry reports.
 
 PHILOSOPHY: Qualitative validation is more important than TAM numbers. A $150M market where you can capture 10% is worth more than a $10B market where you are invisible.
 
-Produce a structured Market Analysis containing:
+Produce a structured Market Analysis:
+- Market Validation — real demonstrable demand with specific evidence, is it reachable on lean budget, realistic revenue potential at 10% penetration or 1,000 customers
+- Market Timing — early, growing, mature, or declining with specific signals
+- Competitive Landscape — all direct competitors with positioning, pricing, primary weakness, scale. Few competitors is a positive signal.
+- Market Gap Analysis — specific unmet need, must be precise not generic
+- Target Customer Profile — demographics, psychographics, where they spend time, what they use now, what makes them switch, price sensitivity
+- Customer Validation Signals — real evidence from research
+- Market Entry Barriers and how this opportunity navigates them
+- Capital Reachability — can this market be reached within $5,000?
+- Market Viability Score 1-10 with reasoning
 
-Market Validation — qualitative first:
-- Real demonstrable demand with specific evidence from research
-- Is the market reachable on a lean budget?
-- Realistic revenue potential at 10% market penetration or 1,000 customers
-- Market size figure if credible
+SCORING: 9-10: Demand clearly validated, competitive landscape well understood, precise gap named, target customer described in enough detail to write an ad. 7-8: Strong validation, minor gaps. 5-6: Exists but validation thin. 4 or below: Unvalidated or overcrowded.`;
 
-Market Timing — early, growing, mature, or declining with specific signals.
+const BUSINESS_ARCHITECT_PROMPT = `You are a senior business architect and financial modeler. You build realistic models with conservative assumptions. You are brutally honest about whether numbers work. You use web search to verify current costs and benchmarks. You adapt the model to the business type.
 
-Competitive Landscape — all direct competitors:
-- Few competitors is a positive signal
-- For each: positioning, pricing, primary weakness, approximate scale
-- Specific gap that makes entry viable
+Produce a structured Business Architecture:
+- Business Model — revenue model, specific pricing with reasoning, revenue streams, gross margin, unit economics
+- Path to Breakeven — startup costs itemized, monthly operating costs itemized, revenue needed to cover costs, units or customers needed per month, realistic timeline, total capital required
+- Revenue Projections — Conservative, Base, Upside scenarios. Month by month 6 months, quarterly to 24 months. All assumptions stated explicitly. If seasonal, show full cycles.
+- Capital Allocation Plan
+- Scaling Economics at $10K, $50K, $100K monthly revenue
+- Key Financial Risks — top 3 with early warning signals
+- Financial Viability Score 1-10 with reasoning
 
-Market Gap Analysis — specific unmet need, must be precise not generic.
+SCORING: 9-10: Path to breakeven clearly achievable, strong unit economics, all assumptions grounded in real data. 7-8: Solid model, realistic assumptions. 5-6: Directionally correct but assumptions unverified. 4 or below: Numbers don't work within capital constraint.`;
 
-Target Customer Profile:
-- Demographics, psychographics, where they spend time online/offline
-- What they currently use to solve this problem
-- What would make them switch, price sensitivity
+const BRAND_DEVELOPER_PROMPT = `You are a senior brand strategist and creative director. You build brands that connect, convert, and endure. You never produce generic brands.
 
-Customer Validation Signals — real evidence from research.
+CRITICAL INSTRUCTION: You receive context from agents who ran before you. Your job is brand development only. You are NOT responsible for validating the business model or financial projections. If the business architecture context is thin or incomplete, you PROCEED ANYWAY using the Scout signal, market analysis, and target customer profile as your primary inputs. You always produce the best brand work possible with whatever information is available. The Orchestrator decides whether the overall opportunity moves forward — that is not your concern. Never let upstream context quality stop you from producing excellent brand work.
 
-Market Entry Barriers and how this opportunity navigates them.
+You use web search to check name availability, domain availability, social handle availability, and existing brand landscape.
 
-Capital Reachability — can this market be reached within $5,000?
+Produce a structured Brand Development Brief:
+- Brand Name Development — 10 name options with rationale. Each evaluated on memorability, distinctiveness, relevance, brand feel. Availability check: .com (preferred), .co and .io, Instagram, TikTok, Facebook, YouTube, trademark conflicts. Primary and secondary recommendation.
+- Brand Positioning — positioning statement specific enough that removing the brand name makes it unrecognizable as generic. Category definition. 3 key differentiators. Brand promise.
+- Brand Voice & Personality — 4-5 traits with what each means in practice and explicitly is not. Tone in different contexts. Language guidelines. 3 sample headlines. 1 sample product description.
+- Visual Identity Direction — aesthetic specific enough a designer could execute. Color direction with psychological reasoning. Typography recommendations. Imagery style. What brand should NOT look like. 3 reference brands with what to borrow and not copy.
+- Brand Architecture — how brand scales
+- Brand Viability Score 1-10 with reasoning
 
-Market Viability Score 1-10 with reasoning.
+SCORING: 9-10: Name distinctive and available, positioning razor sharp, voice fully developed, visual direction specific enough to execute immediately. 7-8: Strong foundation, all elements present. 5-6: Lack distinctiveness. 4 or below: Generic, full revision required.`;
 
-SCORING:
-9-10: Demand clearly validated, competitive landscape well understood, precise gap named, target customer described in enough detail to write an ad
-7-8: Strong validation, competitive landscape clear, gap specific and credible
-5-6: Market exists but validation thin or customer too broadly defined
-4 or below: Unvalidated, overcrowded without clear gap, or customer too vague`;
+const GTM_STRATEGIST_PROMPT = `You are a senior go-to-market strategist. You launch products from zero to first revenue with minimal capital. You use web search to verify channel costs, influencer rates, and current best practices. Every tactic should be automatable with AI.
 
-const BUSINESS_ARCHITECT_PROMPT = `You are a senior business architect and financial modeler. You build realistic models with conservative assumptions. You are brutally honest about whether numbers work. You use web search to verify current costs and benchmarks.
+Produce a structured GTM Plan:
+- GTM Strategy Overview — single core insight in one paragraph
+- Customer Acquisition — primary channel with full reasoning, secondary channel, how first 100 customers get acquired step by step, CAC estimate, conversion strategy
+- Influencer Strategy — LEAD WITH NANO-INFLUENCERS (under 10K followers, product-only compensation). Goal: 10-20 nano-influencers in first 30 days. Specific type, where to find them, outreach approach. Micro-influencers come after first revenue. Relevant communities.
+- Paid Advertising — NOT at launch within $5K constraint. Small test budget $200-$500 only after organic traction proven.
+- Content & Messaging — core message, message hierarchy, 3 sample headlines for this customer
+- Launch Sequence — 90 day plan: Pre-launch, Launch week, Days 8-30, Days 31-60, Days 61-90. Key milestones and metrics.
+- Retention — email or SMS based on target customer with reasoning, both AI-automated from day one, loyalty or referral mechanism
+- GTM Budget Allocation
+- GTM Risk Assessment — what could fail, early warning signals, pivot plan
+- GTM Viability Score 1-10 with reasoning
 
-You adapt the financial model to fit the business type — product, subscription, service, or marketplace.
+SCORING: 9-10: Primary channel specific and proven, first 100 customers plan tactical, 90-day plan detailed, nano-influencer strategy specific. 7-8: Strong GTM, clear channels, solid plan. 5-6: Logical but vague tactics. 4 or below: Generic, no clear path to first customer.`;
 
-Produce a structured Business Architecture containing:
-
-Business Model Design:
-- Revenue model — product sales, subscription, service, marketplace, licensing, or hybrid
-- Specific pricing with reasoning
-- Revenue streams primary and secondary
-- Gross margin target and why achievable
-- Unit economics adapted to business type
-
-Path to Breakeven — most important section:
-- Total startup costs itemized
-- Monthly operating costs itemized
-- Monthly revenue needed to cover costs
-- Units or customers needed per month to break even
-- Realistic timeline to breakeven
-- Total capital required — within $5,000 or flagged as Higher Capital
-
-Revenue Projections — three scenarios with all assumptions stated:
-- Conservative, Base, and Upside
-- Month by month first 6 months, quarterly to 24 months
-- If seasonal, extend to cover two full cycles and show cash flow gaps
-
-Capital Allocation Plan.
-
-Scaling Economics at $10K, $50K, $100K monthly revenue.
-
-Key Financial Risks — top 3 with early warning signals.
-
-Financial Viability Score 1-10 with reasoning.
-
-SCORING:
-9-10: Path to breakeven clearly achievable, unit economics strong, all assumptions grounded in real data
-7-8: Solid model, realistic assumptions, path to breakeven clear
-5-6: Directionally correct but assumptions unverified or unit economics thin
-4 or below: Numbers don't work within capital constraint`;
-
-const BRAND_DEVELOPER_PROMPT = `You are a senior brand strategist and creative director. You build brands that connect, convert, and endure. You never produce generic brands. You use web search to check name availability, domain availability, social handle availability, and existing brand landscape.
-
-Produce a structured Brand Development Brief containing:
-
-Brand Name Development:
-- 10 name options with rationale for each
-- Each evaluated on: memorability, distinctiveness, relevance to customer, brand feel
-- Availability check: .com (preferred), .co and .io alternatives, Instagram, TikTok, Facebook, YouTube handles, trademark conflicts
-- Primary recommendation with full reasoning
-- Secondary recommendation as backup
-- Naming approach for each
-
-Brand Positioning:
-- Positioning statement — specific enough that removing the brand name makes it unrecognizable as generic
-- Category definition
-- 3 key differentiators
-- Brand promise
-
-Brand Voice & Personality:
-- 4-5 personality traits with what each means in practice and explicitly is not
-- Tone of voice in different contexts
-- Language guidelines — words used and never used
-- 3 sample headlines or taglines in brand voice
-- 1 sample product description in brand voice
-
-Visual Identity Direction:
-- Brand aesthetic specific enough a designer could execute without a briefing call
-- Color direction with psychological reasoning
-- Typography direction with specific font recommendations
-- Imagery style
-- What the brand should NOT look like
-- 3 well-known reference brands with what specifically to borrow and not copy
-
-Brand Architecture — how brand scales with product line expansion.
-
-Brand Viability Score 1-10 with reasoning.
-
-SCORING:
-9-10: Name distinctive and available across all channels, positioning razor sharp, voice fully developed, visual direction specific enough to execute immediately
-7-8: Strong foundation, all key elements present, minor refinements possible
-5-6: Elements present but lack distinctiveness or names have availability issues
-4 or below: Generic, interchangeable. Full revision required.`;
-
-const GTM_STRATEGIST_PROMPT = `You are a senior go-to-market strategist who launches products from zero to first revenue with minimal capital. You use web search to verify channel costs, influencer rates, and current best practices. Every tactic you recommend should be automatable with AI tools.
-
-Produce a structured GTM Plan containing:
-
-GTM Strategy Overview — single core insight in one paragraph.
-
-Customer Acquisition Strategy:
-- Primary acquisition channel with full reasoning
-- Secondary channel for backup
-- How first 100 customers get acquired — specific and tactical
-- Customer acquisition cost estimate per channel
-- Conversion strategy
-
-Influencer Strategy — LEAD WITH NANO-INFLUENCERS:
-- Nano-influencers under 10,000 followers are the primary launch vehicle — work for product only, no cash
-- Goal first 30 days: 10-20 nano-influencers in exact niche
-- Specific type, where to find them, outreach approach, product-only compensation
-- Micro-influencers come after first revenue
-- Relevant communities — subreddits, Facebook groups, forums, Discord
-
-Paid Advertising: NOT recommended at launch within $5,000 constraint. Small test budget $200-$500 only after organic traction proven.
-
-Content & Messaging:
-- Core message
-- Message hierarchy
-- 3 sample headlines or social captions for this customer
-
-Launch Sequence — 90 day plan:
-- Pre-launch, Launch week, Days 8-30, Days 31-60, Days 61-90
-- Key milestones and metrics at each phase
-
-Retention Strategy:
-- Email or SMS based on target customer with reasoning. Both AI-automated from day one.
-- Loyalty or referral mechanism
-
-GTM Budget Allocation across channels and phases.
-
-GTM Risk Assessment — what could fail, early warning signals, pivot plan.
-
-GTM Viability Score 1-10 with reasoning.
-
-SCORING:
-9-10: Primary channel specific and proven for this customer, first 100 customers plan tactical, 90-day plan detailed, nano-influencer strategy specific
-7-8: Strong GTM, clear channels, solid 90-day plan, minor tactical gaps
-5-6: Logical but tactics vague, acquisition plan lacks specificity
-4 or below: Generic, could apply to any product, no clear path to first customer`;
-
-const AI_EXEC_DESIGNER_PROMPT = `You are a senior AI systems architect and operational designer. You build businesses that run primarily on AI. You use web search to verify current tool capabilities, pricing, and integration options. You always present two implementation paths.
+const AI_EXEC_DESIGNER_PROMPT = `You are a senior AI systems architect and operational designer. You build businesses that run primarily on AI. You use web search to verify current tool capabilities and pricing. You always present two implementation paths.
 
 Your north star: the human owner spends no more than 4 hours per week at steady state.
 
-Produce a structured AI Execution Design containing:
+Produce a structured AI Execution Design:
+- System Architecture Overview — plain English customer journey showing where AI handles each step
+- Core AI Stack — for each tool: name, current pricing, specific function, integrations, ease of implementation, alternatives. Total monthly cost, setup costs, complexity rating.
+- Operational Workflow Design covering: Customer Acquisition & Marketing Automation, Sales & Conversion, Fulfillment & Operations, Customer Service & Retention, Financial Operations, Business Intelligence
+- Implementation Approach — TWO paths: Path 1 No-Code/Low-Code, Path 2 Coded/Advanced
+- Outsourcing Strategy — for steps requiring technical skill: task description, platform (Fiverr/Upwork), cost, time, what to look for
+- Human Owner Daily Operating Procedure — specific daily tasks and time, weekly and monthly responsibilities, total hours at launch, 3 months, 12 months. Flag if 4-hour target not achievable.
+- Implementation Roadmap — Phase 1 Week 1-2, Phase 2 Week 3-4, Phase 3 Month 2, Phase 4 Month 3+
+- Integration Map — Format 1: Written narrative. Format 2: Visual workflow START → [Trigger] → [Tool A: Action] → [Output]
+- Scaling Design at 10x volume
+- Total System Cost at launch, 6 months, 12 months
+- Near-Term Automation Opportunities
+- AI Execution Design Score 1-10 with reasoning
 
-System Architecture Overview — plain English customer journey from discovery to purchase to fulfillment to retention showing where AI handles each step.
-
-Core AI Stack:
-- For each tool: name, current pricing, specific function, integration with other tools, ease of implementation, alternatives
-- Total monthly stack cost, one-time setup costs, complexity rating
-
-Operational Workflow Design:
-- Customer Acquisition & Marketing Automation — content creation, social scheduling, influencer outreach, email/SMS automation
-- Sales & Conversion — customer journey automation, product pages, abandoned cart
-- Fulfillment & Operations — order processing, supplier integration, inventory, shipping
-- Customer Service & Retention — AI customer service tool with pricing, post-purchase sequences, review collection
-- Financial Operations — revenue tracking, expense monitoring, accounting tools
-- Business Intelligence — what gets tracked, performance monitoring, human alert triggers
-
-Implementation Approach — TWO paths:
-Path 1 — No-Code/Low-Code: Fastest path for non-technical operator
-Path 2 — Coded/Advanced: More powerful, may require technical resource
-
-Outsourcing Strategy for steps requiring technical skill:
-- Specific task description, platform (Fiverr/Upwork), estimated cost and time, what to look for
-
-Human Owner Daily Operating Procedure:
-- Specific daily tasks and time
-- Weekly and monthly responsibilities
-- Total hours at launch, 3 months, 12 months
-- Flag clearly if 4-hour target not achievable
-
-Implementation Roadmap:
-- Phase 1 Week 1-2: Core infrastructure
-- Phase 2 Week 3-4: Automation layer
-- Phase 3 Month 2: Full operational mode
-- Phase 4 Month 3+: Optimization and scaling
-
-Integration Map — TWO formats:
-Format 1 — Written narrative for non-technical operator
-Format 2 — Visual workflow: START → [Trigger] → [Tool A: Action] → [Tool B: Action] → [Output]
-
-Scaling Design at 10x current volume.
-
-Total System Cost at launch, 6 months, 12 months.
-
-Near-Term Automation Opportunities.
-
-AI Execution Design Score 1-10 with reasoning.
-
-SCORING:
-9-10: Complete system with specific tools for every function, under 4hrs/week, stack within budget, roadmap executable by non-technical operator
-7-8: Strong design, all major functions covered, human time target achievable
-5-6: Incomplete system or human time exceeds target
-4 or below: Cannot achieve 4-hour target or stack makes business unviable`;
+SCORING: 9-10: Complete system, specific tools for every function, under 4hrs/week, within budget, roadmap executable by non-technical operator. 7-8: Strong design, all major functions covered. 5-6: Incomplete or human time exceeds target. 4 or below: Cannot achieve 4-hour target.`;
 
 // ─── ORCHESTRATOR REVIEW ──────────────────────────────────────────────────────
-async function orchestratorReview(stage, agentOutput, opportunityContext) {
+async function orchestratorReview(stage, agentOutput, context) {
   const prompt = `Review this ${stage} output.
 
-OPPORTUNITY CONTEXT (summary):
-${opportunityContext.substring(0, 1500)}
+OPPORTUNITY CONTEXT:
+${context.substring(0, 1500)}
 
 ${stage.toUpperCase()} OUTPUT:
 ${agentOutput.substring(0, 2500)}
@@ -673,7 +632,6 @@ REASONING: [2-3 sentences]
 REVISION_INSTRUCTIONS: [If REVISE or DROP — specific instructions. If PASS — leave blank]`;
 
   const review = await callClaude(ORCHESTRATOR_PROMPT, prompt, 600, false);
-
   const scoreMatch = review.match(/SCORE:\s*(\d+(?:\.\d+)?)/);
   const verdictMatch = review.match(/VERDICT:\s*(PASS|REVISE|DROP)/);
   const reasoningMatch = review.match(/REASONING:\s*([\s\S]*?)(?=REVISION_INSTRUCTIONS:|$)/);
@@ -696,236 +654,365 @@ async function runAgent(stageName, agentPrompt, userMessage, context, maxAttempt
   while (attempts < maxAttempts) {
     attempts++;
     addActivity(`⚙️ ${stageName} working… (attempt ${attempts})`);
-
-    const message = attempts === 1 ? userMessage
-      : `${userMessage}\n\nPREVIOUS ATTEMPT REJECTED.\nREVISION INSTRUCTIONS: ${review.revisionInstructions}\n\nPlease revise accordingly.`;
-
+    const message = attempts === 1 ? userMessage : `${userMessage}\n\nPREVIOUS ATTEMPT REJECTED.\nREVISION INSTRUCTIONS: ${review.revisionInstructions}\n\nPlease revise accordingly.`;
     output = await callClaude(agentPrompt, message, 4000, true);
-
     addActivity(`🔍 Orchestrator reviewing ${stageName}…`);
     setAgentStatus('orchestrator', 'working', 'Reviewing…');
     review = await orchestratorReview(stageName, output, context);
-
     addActivity(`📊 ${stageName}: ${review.score}/10 — ${review.verdict}`);
-
     if (review.verdict === 'PASS') return { output, score: review.score, passed: true };
     if (review.verdict === 'DROP') return { output, score: review.score, passed: false, dropped: true };
-    if (attempts >= maxAttempts) return { output, score: review.score, passed: false, flagged: true };
+    if (attempts >= maxAttempts) {
+      addActivity(`⚠️ ${stageName} flagged after ${maxAttempts} attempts — proceeding with best output`);
+      return { output, score: review.score, passed: true, flagged: true };
+    }
   }
-  return { output, score: 0, passed: false, flagged: true };
+  return { output, score: 0, passed: true, flagged: true };
 }
 
-// ─── FULL PIPELINE ────────────────────────────────────────────────────────────
-async function runFullPipeline(recordId, oppName, signal, focusCtx) {
+// ─── TREND ANALYSIS RUN ───────────────────────────────────────────────────────
+async function runTrendAnalysis() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded. Please wait and try again.'); return; }
+
+  const trendBtn = document.getElementById('trendBtn');
+  trendBtn.disabled = true;
+  trendBtn.textContent = '⏳ Running Trend Analysis…';
+  document.getElementById('systemStatus').textContent = '● Trend Analysis running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  setAgentStatus('trend', 'working', 'Researching…');
+  addActivity('🔭 Trend Analyst searching for market trends…');
+
+  const focusCtx = getFocusCtx();
+
+  try {
+    const trendMsg = `Perform a comprehensive trend analysis run. Use web search to research current market trends across all six lenses. Identify a minimum of 15 distinct trends with real market signals.
+
+${focusCtx ? `Focus areas to prioritize:\n${focusCtx}\n\n` : ''}
+
+Remember to include macro and micro trends, right now and near term opportunities, and especially AI-disruption trends where incumbents are vulnerable.`;
+
+    const trendsOutput = await callClaude(TREND_ANALYST_PROMPT, trendMsg, 6000, true);
+    setAgentStatus('trend', 'done', 'Done ✓');
+
+    // Parse trends
+    const trendBlocks = trendsOutput.split('---TREND---').filter(t => t.trim().length > 50);
+    addActivity(`📊 ${trendBlocks.length} trends identified — saving to library…`);
+
+    const runDate = new Date().toISOString().split('T')[0];
+    let saved = 0;
+
+    for (const block of trendBlocks) {
+      const nameMatch = block.match(/TREND_NAME:\s*(.+)/);
+      const lensMatch = block.match(/LENS:\s*(.+)/);
+      const scaleMatch = block.match(/SCALE:\s*(.+)/);
+      const momentumMatch = block.match(/MOMENTUM:\s*(.+)/);
+      const timingMatch = block.match(/TIMING:\s*(.+)/);
+      const descMatch = block.match(/DESCRIPTION:\s*([\s\S]*?)(?=MARKET_SIGNALS:|$)/);
+      const signalsMatch = block.match(/MARKET_SIGNALS:\s*([\s\S]*?)(?=INCUMBENT_VULNERABILITY:|$)/);
+      const incumbentMatch = block.match(/INCUMBENT_VULNERABILITY:\s*([\s\S]*?)(?=KEY_RISK:|$)/);
+      const riskMatch = block.match(/KEY_RISK:\s*([\s\S]*?)$/);
+
+      if (!nameMatch) continue;
+
+      try {
+        await saveTrend({
+          Name: nameMatch[1].trim(),
+          Lens: lensMatch ? lensMatch[1].trim() : '',
+          Scale: scaleMatch ? scaleMatch[1].trim() : '',
+          Momentum: momentumMatch ? momentumMatch[1].trim() : '',
+          Timing: timingMatch ? timingMatch[1].trim() : '',
+          Description: descMatch ? descMatch[1].trim() : '',
+          'Market Signals': signalsMatch ? signalsMatch[1].trim() : '',
+          'Incumbent Vulnerability': incumbentMatch ? incumbentMatch[1].trim() : '',
+          'Key Risk': riskMatch ? riskMatch[1].trim() : '',
+          Status: 'Unexplored',
+          'Opportunities Found': 0,
+          'Date Identified': runDate,
+          'Source Run': `Trend Run ${runDate}`
+        });
+        saved++;
+      } catch(e) {
+        console.error('Failed to save trend:', e);
+      }
+    }
+
+    addActivity(`✅ Trend Analysis complete — ${saved} trends saved to library`);
+    loadTrendBadge();
+
+  } catch(err) {
+    addActivity(`❌ Trend Analysis error: ${err.message}`);
+    console.error(err);
+  }
+
+  trendBtn.disabled = false;
+  trendBtn.textContent = '🔭 Run Trend Analysis';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+  setAgentStatus('trend', 'idle', 'Idle');
+}
+
+// ─── FULL OPPORTUNITY PIPELINE ────────────────────────────────────────────────
+async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
+  // Build initial context
   let context = `Opportunity: ${oppName}\nSignal: ${signal}`;
+  if (sourceTrend) context += `\nSource Trend: ${sourceTrend}`;
+
+  const focusCtx = getFocusCtx();
   if (focusCtx) context = `Focus Criteria:\n${focusCtx}\n\n${context}`;
+
+  const scores = {};
 
   // SCOUT
   setAgentStatus('scout', 'working', 'Discovering…');
   addActivity(`🔭 Scout enriching opportunity signal…`);
-  await saveToAirtable(recordId, { 'Status': 'Signal Captured' });
+  await saveOpp(recordId, { 'Status': 'Signal Captured' });
 
   const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${context}`, context);
   setAgentStatus('scout', 'done', 'Done ✓');
+  scores.scout = scout.score;
 
   if (scout.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Orchestrator Summary': `Dropped at Scout. Score: ${scout.score}/10.` });
-    addActivity(`❌ "${oppName}" dropped at Scout stage.`);
+    await saveOpp(recordId, { 'Status': 'Dropped', 'Orchestrator Summary': `Dropped at Scout. Score: ${scout.score}/10.` });
+    addActivity(`❌ "${oppName}" dropped at Scout.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'Signal': scout.output, 'Status': 'AI Executability' });
+  await saveOpp(recordId, { 'Signal': scout.output, 'Status': 'AI Executability' });
   context += `\n\nSCOUT OUTPUT:\n${scout.output}`;
 
   // AI EXECUTABILITY
   setAgentStatus('ai-analyst', 'working', 'Analyzing…');
   const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context);
   setAgentStatus('ai-analyst', 'done', 'Done ✓');
+  scores.aiExec = aiAnalyst.score;
 
   if (aiAnalyst.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at AI Executability.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
-  context += `\n\nAI EXECUTABILITY:\n${aiAnalyst.output}`;
+  await saveOpp(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
+  context += `\n\nAI EXECUTABILITY ANALYSIS:\n${aiAnalyst.output}`;
 
   // MARKET ANALYSIS
   setAgentStatus('market', 'working', 'Researching…');
   const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context);
   setAgentStatus('market', 'done', 'Done ✓');
+  scores.market = market.score;
 
   if (market.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output, 'Orchestrator Summary': `Dropped at Market Analysis. Score: ${market.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output, 'Orchestrator Summary': `Dropped at Market Analysis. Score: ${market.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at Market Analysis.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'Market Analysis': market.output, 'Competitive Landscape': market.output, 'Target Customer': market.output, 'Status': 'Business Design' });
+  await saveOpp(recordId, { 'Market Analysis': market.output, 'Competitive Landscape': market.output, 'Target Customer': market.output, 'Status': 'Business Design' });
   context += `\n\nMARKET ANALYSIS:\n${market.output}`;
 
   // BUSINESS ARCHITECT
   setAgentStatus('architect', 'working', 'Designing…');
   const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context);
   setAgentStatus('architect', 'done', 'Done ✓');
+  scores.biz = biz.score;
 
   if (biz.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Business Model': biz.output, 'Orchestrator Summary': `Dropped at Business Design. Score: ${biz.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'Business Model': biz.output, 'Orchestrator Summary': `Dropped at Business Design. Score: ${biz.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at Business Design.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'Business Model': biz.output, 'Revenue Projections': biz.output, 'Financial Analysis': biz.output, 'Status': 'Brand Development' });
-  context += `\n\nBUSINESS MODEL:\n${biz.output}`;
+  await saveOpp(recordId, { 'Business Model': biz.output, 'Revenue Projections': biz.output, 'Financial Analysis': biz.output, 'Status': 'Brand Development' });
+  context += `\n\nBUSINESS ARCHITECTURE:\n${biz.output}`;
 
   // BRAND DEVELOPER
   setAgentStatus('brand', 'working', 'Creating…');
-  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation.\n\n${context}`, context);
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with the best available context regardless of upstream completeness.\n\n${context}`, context);
   setAgentStatus('brand', 'done', 'Done ✓');
+  scores.brand = brand.score;
 
   if (brand.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'Brand Name & Positioning': brand.output, 'Orchestrator Summary': `Dropped at Brand Development. Score: ${brand.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'Brand Name & Positioning': brand.output, 'Orchestrator Summary': `Dropped at Brand Development. Score: ${brand.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at Brand Development.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'Brand Name & Positioning': brand.output, 'Brand Identity Direction': brand.output, 'Status': 'GTM Strategy' });
-  context += `\n\nBRAND:\n${brand.output}`;
+  await saveOpp(recordId, { 'Brand Name & Positioning': brand.output, 'Brand Identity Direction': brand.output, 'Status': 'GTM Strategy' });
+  context += `\n\nBRAND DEVELOPMENT:\n${brand.output}`;
 
   // GTM STRATEGIST
   setAgentStatus('gtm', 'working', 'Planning…');
   const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context);
   setAgentStatus('gtm', 'done', 'Done ✓');
+  scores.gtm = gtm.score;
 
   if (gtm.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output, 'Orchestrator Summary': `Dropped at GTM Strategy. Score: ${gtm.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output, 'Orchestrator Summary': `Dropped at GTM Strategy. Score: ${gtm.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at GTM Strategy.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
+  await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
   context += `\n\nGTM STRATEGY:\n${gtm.output}`;
 
   // AI EXECUTION DESIGNER
   setAgentStatus('exec', 'working', 'Designing…');
   const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context);
   setAgentStatus('exec', 'done', 'Done ✓');
+  scores.exec = exec.score;
 
   if (exec.dropped) {
-    await saveToAirtable(recordId, { 'Status': 'Dropped', 'AI Stack Plan': exec.output, 'Orchestrator Summary': `Dropped at AI Execution Design. Score: ${exec.score}/10.` });
+    await saveOpp(recordId, { 'Status': 'Dropped', 'AI Stack Plan': exec.output, 'Orchestrator Summary': `Dropped at AI Execution Design. Score: ${exec.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at AI Execution Design.`);
     return false;
   }
-  await saveToAirtable(recordId, { 'AI Stack Plan': exec.output, 'Execution Roadmap': exec.output, 'Status': 'Blueprint Draft' });
+  await saveOpp(recordId, { 'AI Stack Plan': exec.output, 'Execution Roadmap': exec.output, 'Status': 'Blueprint Draft' });
   context += `\n\nAI EXECUTION DESIGN:\n${exec.output}`;
 
   // ORCHESTRATOR FINAL BLUEPRINT
   setAgentStatus('orchestrator', 'working', 'Compiling Blueprint…');
   addActivity(`📋 Orchestrator compiling final Blueprint…`);
 
+  const stageScoresSummary = Object.entries(scores).map(([k,v]) => `${k}: ${v}/10`).join(', ');
+
   const blueprintMsg = `Compile the complete Opportunity Launch Blueprint.
 
-${context.substring(0, 8000)}
+STAGE SCORES: ${stageScoresSummary}
+
+FULL CONTEXT:
+${context.substring(0, 7000)}
 
 Produce the final Blueprint:
-1. EXECUTIVE SUMMARY — 3-5 paragraphs for a decision maker
-2. STAGE SCORES SUMMARY — all stage scores with brief reasoning
-3. KEY STRENGTHS — 3-5 things making this opportunity compelling
-4. KEY RISKS — 3-5 things that could make this fail
-5. CAPITAL SUMMARY — path to breakeven, monthly operating cost, timeline to first revenue
-6. OVERALL OPPORTUNITY SCORE — weighted average. AI Executability and Financial Viability weighted most heavily, Market Analysis and GTM second, Brand Development third. Show weighting and calculation.
-7. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with reasoning
-8. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right`;
+1. EXECUTIVE SUMMARY — 3-5 paragraphs for a decision maker who needs to understand the opportunity in under 2 minutes
+2. STAGE SCORES SUMMARY — table of all stage scores with brief reasoning for each
+3. KEY STRENGTHS — 3-5 things making this opportunity genuinely compelling
+4. KEY RISKS — 3-5 things that could make this fail and what to watch for
+5. CAPITAL SUMMARY — total path to breakeven, monthly operating cost at steady state, timeline to first revenue
+6. OVERALL OPPORTUNITY SCORE: [X]/10 — weighted average. AI Executability and Financial Viability weighted most heavily (35% combined), Market Analysis and GTM Strategy second (35% combined), Brand Development third (15%), Scout signal (15%). Show your calculation.
+7. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with clear reasoning
+8. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right
+
+Format the overall score exactly as: OVERALL OPPORTUNITY SCORE: [number]/10`;
 
   const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
   setAgentStatus('orchestrator', 'done', 'Done ✓');
 
-  const scoreMatch = blueprint.match(/OVERALL OPPORTUNITY SCORE[:\s]+(\d+(?:\.\d+)?)/i);
-  const overallScore = scoreMatch ? parseFloat(scoreMatch[1]) : null;
+  // Extract score with multiple patterns
+  const scorePatterns = [
+    /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i,
+    /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)/i,
+    /overall score[:\s]+(\d+(?:\.\d+)?)\/10/i,
+    /opportunity score[:\s]+(\d+(?:\.\d+)?)/i,
+  ];
+  let overallScore = null;
+  for (const pattern of scorePatterns) {
+    const match = blueprint.match(pattern);
+    if (match) { overallScore = parseFloat(match[1]); break; }
+  }
+  if (!overallScore) {
+    // Calculate weighted average from stage scores
+    const w = { scout: 0.15, aiExec: 0.20, market: 0.175, biz: 0.175, brand: 0.15, gtm: 0.175, exec: 0.175 };
+    overallScore = Object.entries(scores).reduce((sum, [k,v]) => sum + (v * (w[k] || 0.14)), 0);
+    overallScore = Math.round(overallScore * 10) / 10;
+  }
 
-  await saveToAirtable(recordId, {
+  await saveOpp(recordId, {
     'Orchestrator Summary': blueprint,
     'Opportunity Score': overallScore,
     'Risks & Challenges': blueprint,
     'Status': 'Review'
   });
 
-  addActivity(`🎉 Blueprint complete! "${oppName}" is ready for review. Score: ${overallScore}/10`);
+  addActivity(`🎉 Blueprint complete! "${oppName}" ready for review. Score: ${overallScore}/10`);
   loadBoard();
   loadQueueBadge();
   return true;
 }
 
-// ─── MAIN RUN FUNCTION ────────────────────────────────────────────────────────
+// ─── MAIN PIPELINE RUN ────────────────────────────────────────────────────────
 async function runPipeline() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded. Please wait and try again.'); return; }
+
   const signal = document.getElementById('signalInput').value.trim();
-  const oppName = document.getElementById('oppName').value.trim() || 'Untitled Opportunity';
-  const autoDiscover = document.getElementById('autoDiscover').checked;
-
-  if (!signal && !autoDiscover) {
-    alert('Please enter an opportunity signal or check "Let Scout discover the opportunity".');
-    return;
-  }
-
-  if (!ANTHROPIC_API_KEY) {
-    alert('API key not loaded yet. Please wait a moment and try again.');
-    return;
-  }
+  const oppName = document.getElementById('oppName').value.trim();
 
   const runBtn = document.getElementById('runBtn');
   runBtn.disabled = true;
-  runBtn.textContent = '⏳ Pipeline running…';
+  runBtn.textContent = '⏳ Running…';
   document.getElementById('systemStatus').textContent = '● Pipeline running…';
   document.getElementById('systemStatus').className = 'system-status working';
   ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 
-  const focusCtx = [
-    focusCriteria.targetIndustries ? `Target Industries: ${focusCriteria.targetIndustries}` : '',
-    focusCriteria.aiThreshold ? `AI Threshold: ${focusCriteria.aiThreshold}` : '',
-    focusCriteria.bizPreferences ? `Business Preferences: ${focusCriteria.bizPreferences}` : '',
-    focusCriteria.orchInstructions ? `Orchestrator Instructions: ${focusCriteria.orchInstructions}` : '',
-  ].filter(Boolean).join('\n');
-
   try {
-    if (autoDiscover) {
-      addActivity(`🔭 Scout discovering 2 opportunities…`);
-      setAgentStatus('scout', 'working', 'Discovering…');
+    if (signal) {
+      // Manual signal provided
+      const name = oppName || 'Manual Opportunity';
+      const record = await createOpp(name, signal);
+      addActivity(`📡 Opportunity "${name}" created`);
+      addActivity(`🔍 Starting pipeline for: ${name}`);
+      await runFullPipeline(record.id, name, signal);
+    } else {
+      // Pull from Trend Library
+      addActivity(`📚 Pulling unexplored trends from library…`);
+      const trends = await getUnexploredTrends();
 
-      const discoveryMsg = `Perform an autonomous opportunity discovery run. Using your four discovery lenses and web search, identify 2 distinct business opportunities meeting the capital constraint.
-
-${focusCtx ? `Focus Criteria:\n${focusCtx}\n\n` : ''}
-
-For each opportunity provide:
-OPPORTUNITY_NAME: [name]
-OPPORTUNITY_SIGNAL: [full signal description]
-
-Separate with ---NEXT---`;
-
-      const discoveries = await callClaude(SCOUT_PROMPT, discoveryMsg, 3000, true);
-      setAgentStatus('scout', 'idle', 'Idle');
-
-      const opps = discoveries.split('---NEXT---').map(o => {
-        const nameMatch = o.match(/OPPORTUNITY_NAME:\s*(.+)/);
-        const sigMatch = o.match(/OPPORTUNITY_SIGNAL:\s*([\s\S]+?)(?=OPPORTUNITY_NAME:|$)/);
-        return { name: nameMatch ? nameMatch[1].trim() : 'New Opportunity', signal: sigMatch ? sigMatch[1].trim() : o.trim() };
-      }).filter(o => o.signal.length > 50).slice(0, 2);
-
-      addActivity(`📡 ${opps.length} opportunities discovered. Running pipelines…`);
-
-      for (const opp of opps) {
-        const record = await createOpportunity(opp.name, opp.signal);
-        await runFullPipeline(record.id, opp.name, opp.signal, focusCtx);
+      if (trends.length === 0) {
+        addActivity(`⚠️ No unexplored trends in library. Run Trend Analysis first.`);
+        runBtn.disabled = false;
+        runBtn.textContent = '▶ Run Opportunity Pipeline';
+        document.getElementById('systemStatus').textContent = '● All agents ready';
+        document.getElementById('systemStatus').className = 'system-status';
+        return;
       }
 
-    } else {
-      const record = await createOpportunity(oppName, signal);
-      addActivity(`📡 Opportunity "${oppName}" created`);
-      addActivity(`🔍 Starting pipeline for: ${oppName}`);
-      await runFullPipeline(record.id, oppName, signal, focusCtx);
-    }
+      // Scout finds opportunities from trends
+      setAgentStatus('scout', 'working', 'Discovering…');
+      addActivity(`🔭 Scout finding opportunities within ${trends.length} trends…`);
 
+      const trendBrief = trends.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
+
+      const scoutMsg = `You have been given a Trend Brief with ${trends.length} validated market trends. Find 2 specific business opportunities within these trends. Choose the trends with the strongest signals and clearest business opportunity potential.
+
+TREND BRIEF:
+${trendBrief}
+
+${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}
+
+For each opportunity use the format specified in your instructions. Separate with ---OPP---`;
+
+      const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 4000, true);
+      setAgentStatus('scout', 'done', 'Done ✓');
+
+      // Parse opportunities
+      const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
+      addActivity(`📡 Scout found ${oppBlocks.length} opportunities — running pipelines…`);
+
+      for (const block of oppBlocks.slice(0, 2)) {
+        const nameMatch = block.match(/OPPORTUNITY_NAME:\s*(.+)/);
+        const trendMatch = block.match(/SOURCE_TREND:\s*(.+)/);
+        const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=TARGET_CUSTOMER:|$)/);
+
+        const oppName = nameMatch ? nameMatch[1].trim() : 'New Opportunity';
+        const sourceTrend = trendMatch ? trendMatch[1].trim() : '';
+        const oppSignal = signalMatch ? signalMatch[1].trim() : block.trim();
+
+        const record = await createOpp(oppName, oppSignal, sourceTrend);
+        addActivity(`🔍 Starting pipeline for: ${oppName}`);
+
+        // Mark source trend as In Progress
+        const sourceTrendRecord = trends.find(t => t['Name'] && t['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
+        if (sourceTrendRecord) {
+          await updateTrend(sourceTrendRecord.id, {
+            'Status': 'In Progress',
+            'Opportunities Found': (sourceTrendRecord['Opportunities Found'] || 0) + 1,
+            'Last Visited': new Date().toISOString().split('T')[0]
+          });
+        }
+
+        await runFullPipeline(record.id, oppName, oppSignal, sourceTrend);
+      }
+    }
   } catch(err) {
     addActivity(`❌ Error: ${err.message}`);
     console.error(err);
   }
 
   runBtn.disabled = false;
-  runBtn.textContent = '▶ Run Pipeline';
+  runBtn.textContent = '▶ Run Opportunity Pipeline';
   document.getElementById('systemStatus').textContent = '● All agents ready';
   document.getElementById('systemStatus').className = 'system-status';
 }
@@ -973,13 +1060,26 @@ function toggleSection(itemId, secKey) {
   if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
 }
 
+function buildCardActions(item) {
+  const id = item.id;
+  const status = item.Status || '';
+  const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
+  const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes…">`;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${del}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${del}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${del}`;
+  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${del}`;
+  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${del}`;
+}
+
 function buildCard(item) {
-  const name = item.Name || 'Unnamed Opportunity';
+  const name = item.Name || 'Unnamed';
   const signal = item.Signal || '';
   const status = item.Status || 'Signal Captured';
   const oppScore = item['Opportunity Score'];
   const aiScore = item['AI Executability Score'];
   const orchNotes = item['Orchestrator Summary'] || '';
+  const sourceTrend = item['Source Trend'] || '';
   const date = item.Created ? new Date(item.Created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
   const isActive = !['Review','Approved','On Hold','Dropped'].includes(status);
   const isComplete = status === 'Approved';
@@ -987,34 +1087,22 @@ function buildCard(item) {
   return `<div class="opp-card" id="card-${item.id}">
     <div class="opp-card-header" onclick="toggleCard('${item.id}')">
       <div class="opp-card-name">${name}</div>
-      ${signal ? `<div class="opp-card-signal">${signal.substring(0, 200)}</div>` : ''}
+      ${signal ? `<div class="opp-card-signal">${signal.substring(0,200)}</div>` : ''}
       <div class="opp-card-meta">
         <span class="stage-badge ${isComplete ? 'complete-stage' : isActive ? 'active-stage' : ''}">${status}</span>
         ${oppScore ? `<span class="opp-score">🎯 ${oppScore}/10</span>` : ''}
         ${aiScore ? `<span class="ai-score">🤖 AI ${aiScore}/10</span>` : ''}
+        ${sourceTrend ? `<span class="source-trend">📈 ${sourceTrend.substring(0,30)}</span>` : ''}
         <span class="card-date">${date}</span>
         <button class="expand-btn" id="expand-${item.id}">▼</button>
       </div>
     </div>
     <div class="card-expanded" id="expanded-${item.id}">
-      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes.substring(0, 1000)}${orchNotes.length > 1000 ? '…' : ''}</div></div>` : ''}
+      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes.substring(0,1500)}${orchNotes.length > 1500 ? '…' : ''}</div></div>` : ''}
       <div class="blueprint-sections">${buildSections(item)}</div>
       <div class="card-actions">${buildCardActions(item)}</div>
     </div>
   </div>`;
-}
-
-function buildCardActions(item) {
-  const id = item.id;
-  const status = item.Status || '';
-  const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
-  const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes…">`;
-
-  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${del}`;
-  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${del}`;
-  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${del}`;
-  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${del}`;
-  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${del}`;
 }
 
 function toggleCard(id) {
@@ -1090,11 +1178,7 @@ async function loadQueueBadge() {
 
 async function updateItem(id, status) {
   const notes = document.getElementById('note-' + id)?.value || '';
-  await fetch(`/api/queue/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status, notes })
-  });
+  await fetch(`/api/queue/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status, notes }) });
   addActivity(`📋 Opportunity moved to ${status}`);
   loadBoard();
 }
@@ -1106,7 +1190,121 @@ async function deleteItem(id) {
   loadBoard();
 }
 
+// ─── TREND LIBRARY ────────────────────────────────────────────────────────────
+function getTrendBadgeClass(value, type) {
+  if (type === 'scale') return value === 'Macro' ? 'badge-macro' : 'badge-micro';
+  if (type === 'momentum') {
+    const map = { 'Early': 'badge-early', 'Growing': 'badge-growing', 'Peaking': 'badge-peaking', 'Mature': 'badge-mature' };
+    return map[value] || 'badge-early';
+  }
+  if (type === 'timing') {
+    const map = { 'Right Now': 'badge-rightnow', 'Near Term': 'badge-nearterm', 'Long Term': 'badge-longterm' };
+    return map[value] || 'badge-nearterm';
+  }
+  if (type === 'status') {
+    const map = { 'Unexplored': 'badge-unexplored', 'In Progress': 'badge-inprogress', 'Exhausted': 'badge-exhausted' };
+    return map[value] || 'badge-unexplored';
+  }
+  return '';
+}
+
+function buildTrendCard(trend) {
+  const name = trend['Name'] || 'Unnamed Trend';
+  const desc = trend['Description'] || '';
+  const lens = trend['Lens'] || '';
+  const scale = trend['Scale'] || '';
+  const momentum = trend['Momentum'] || '';
+  const timing = trend['Timing'] || '';
+  const status = trend['Status'] || 'Unexplored';
+  const signals = trend['Market Signals'] || '';
+  const vulnerability = trend['Incumbent Vulnerability'] || '';
+  const risk = trend['Key Risk'] || '';
+  const oppsFound = trend['Opportunities Found'] || 0;
+  const dateId = trend['Date Identified'] || '';
+
+  return `<div class="trend-card">
+    <div class="trend-card-header">
+      <div>
+        <div class="trend-lens">${lens}</div>
+        <div class="trend-name">${name}</div>
+      </div>
+      <div class="trend-badges">
+        ${scale ? `<span class="trend-badge ${getTrendBadgeClass(scale,'scale')}">${scale}</span>` : ''}
+        ${momentum ? `<span class="trend-badge ${getTrendBadgeClass(momentum,'momentum')}">${momentum}</span>` : ''}
+        ${timing ? `<span class="trend-badge ${getTrendBadgeClass(timing,'timing')}">${timing}</span>` : ''}
+        <span class="trend-badge ${getTrendBadgeClass(status,'status')}">${status}</span>
+      </div>
+    </div>
+    <div class="trend-description">${desc}</div>
+    <div class="trend-meta">
+      ${signals ? `<div class="trend-meta-item"><div class="trend-meta-label">Market Signals</div><div class="trend-meta-value">${signals.substring(0,200)}${signals.length > 200 ? '…' : ''}</div></div>` : ''}
+      ${vulnerability ? `<div class="trend-meta-item"><div class="trend-meta-label">Incumbent Vulnerability</div><div class="trend-meta-value">${vulnerability.substring(0,200)}${vulnerability.length > 200 ? '…' : ''}</div></div>` : ''}
+      ${risk ? `<div class="trend-meta-item"><div class="trend-meta-label">Key Risk</div><div class="trend-meta-value">${risk.substring(0,150)}${risk.length > 150 ? '…' : ''}</div></div>` : ''}
+      <div class="trend-meta-item"><div class="trend-meta-label">Opportunities Found</div><div class="trend-meta-value trend-opps-count">${oppsFound} opportunities explored</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span style="font-size:11px;color:#CCC">Identified: ${dateId}</span>
+      <button onclick="markTrendExhausted('${trend.id}')" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #E5E5E7;background:white;cursor:pointer;color:#666">Mark Exhausted</button>
+    </div>
+  </div>`;
+}
+
+async function markTrendExhausted(id) {
+  await updateTrend(id, { 'Status': 'Exhausted' });
+  loadTrends();
+}
+
+function filterTrends(filter, btn) {
+  activeTrendFilter = filter;
+  document.querySelectorAll('.trend-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrends(allTrends);
+}
+
+function renderTrends(trends) {
+  const filtered = activeTrendFilter === 'all' ? trends : trends.filter(t => {
+    if (activeTrendFilter === 'Unexplored') return t['Status'] === 'Unexplored' || !t['Status'];
+    if (activeTrendFilter === 'In Progress') return t['Status'] === 'In Progress';
+    if (activeTrendFilter === 'Right Now') return t['Timing'] === 'Right Now';
+    if (activeTrendFilter === 'Growing') return t['Momentum'] === 'Growing';
+    if (activeTrendFilter === 'AI Disruption') return t['Lens'] && t['Lens'].includes('AI');
+    if (activeTrendFilter === 'Macro') return t['Scale'] === 'Macro';
+    if (activeTrendFilter === 'Micro') return t['Scale'] === 'Micro';
+    return true;
+  });
+
+  const grid = document.getElementById('trendGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No trends match this filter</div>';
+  } else {
+    grid.innerHTML = filtered.map(buildTrendCard).join('');
+  }
+
+  // Update stats
+  document.getElementById('stat-total').textContent = trends.length;
+  document.getElementById('stat-unexplored').textContent = trends.filter(t => t['Status'] === 'Unexplored' || !t['Status']).length;
+  document.getElementById('stat-inprogress').textContent = trends.filter(t => t['Status'] === 'In Progress').length;
+  document.getElementById('stat-opportunities').textContent = trends.reduce((sum, t) => sum + (t['Opportunities Found'] || 0), 0);
+}
+
+async function loadTrends() {
+  try {
+    const res = await fetch('/api/trends');
+    allTrends = await res.json();
+    renderTrends(allTrends);
+  } catch(e) { console.error('Trends error:', e); }
+}
+
+async function loadTrendBadge() {
+  try {
+    const res = await fetch('/api/trends');
+    const trends = await res.json();
+    document.getElementById('trendBadge').textContent = trends.length;
+  } catch(e) {}
+}
+
 loadQueueBadge();
+loadTrendBadge();
 </script>
 </body>
 </html>
