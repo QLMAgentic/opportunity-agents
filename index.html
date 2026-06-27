@@ -413,7 +413,7 @@ async function saveOpp(id, fields) {
 }
 
 async function createOpp(name, signal, sourceTrend = '') {
-  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, signal, sourceTrend }) });
+  const res = await fetch('/api/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.replace(/\*\*/g, '').trim(), signal, sourceTrend }) });
   return await res.json();
 }
 
