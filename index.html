@@ -420,7 +420,6 @@ async function createOpp(name, signal, sourceTrend = '') {
   if (!data.id) console.error('createOpp missing id:', data);
   return data;
 }
-}
 
 async function saveTrend(fields) {
   const res = await fetch('/api/trends', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
