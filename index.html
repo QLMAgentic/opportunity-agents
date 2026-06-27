@@ -702,6 +702,8 @@ Remember to include macro and micro trends, right now and near term opportunitie
     let saved = 0;
 
     for (const block of trendBlocks) {
+      const clean = s => s ? s.replace(/\*\*/g, '').replace(/^\s+|\s+$/g, '') : '';
+
       const nameMatch = block.match(/TREND_NAME:\s*(.+)/);
       const lensMatch = block.match(/LENS:\s*(.+)/);
       const scaleMatch = block.match(/SCALE:\s*(.+)/);
@@ -716,15 +718,15 @@ Remember to include macro and micro trends, right now and near term opportunitie
 
       try {
         await saveTrend({
-          Name: nameMatch[1].trim(),
-          Lens: lensMatch ? lensMatch[1].trim() : '',
-          Scale: scaleMatch ? scaleMatch[1].trim() : '',
-          Momentum: momentumMatch ? momentumMatch[1].trim() : '',
-          Timing: timingMatch ? timingMatch[1].trim() : '',
-          Description: descMatch ? descMatch[1].trim() : '',
-          'Market Signals': signalsMatch ? signalsMatch[1].trim() : '',
-          'Incumbent Vulnerability': incumbentMatch ? incumbentMatch[1].trim() : '',
-          'Key Risk': riskMatch ? riskMatch[1].trim() : '',
+          Name: clean(nameMatch[1]),
+          Lens: clean(lensMatch ? lensMatch[1] : ''),
+          Scale: clean(scaleMatch ? scaleMatch[1] : ''),
+          Momentum: clean(momentumMatch ? momentumMatch[1] : ''),
+          Timing: clean(timingMatch ? timingMatch[1] : ''),
+          Description: clean(descMatch ? descMatch[1] : ''),
+          'Market Signals': clean(signalsMatch ? signalsMatch[1] : ''),
+          'Incumbent Vulnerability': clean(incumbentMatch ? incumbentMatch[1] : ''),
+          'Key Risk': clean(riskMatch ? riskMatch[1] : ''),
           Status: 'Unexplored',
           'Opportunities Found': 0,
           'Date Identified': runDate,
