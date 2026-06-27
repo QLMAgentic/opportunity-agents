@@ -70,12 +70,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 /* KANBAN */
 .kanban-wrapper { overflow-x: auto; padding-bottom: 20px; }
-.kanban-board { display: grid; grid-template-columns: repeat(12, 720px); gap: 14px; align-items: start; min-width: max-content; }
-.kanban-column { background: #EDEEF2; border-radius: 14px; padding: 14px; }
-.kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.kanban-board { display: flex; gap: 14px; align-items: start; min-width: max-content; }
+.kanban-column { background: #EDEEF2; border-radius: 14px; padding: 14px; width: 720px; transition: width 0.3s ease; flex-shrink: 0; }
+.kanban-column.col-empty { width: 160px; }
+.kanban-column.col-empty .kanban-col-title { font-size: 10px; writing-mode: horizontal-tb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 6px; }
 .kanban-col-title { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.06em; }
-.kanban-col-count { font-size: 11px; background: white; border: 1px solid #E0E0E6; padding: 2px 9px; border-radius: 10px; color: #AAA; font-weight: 600; }
-.queue-empty { font-size: 12px; color: #C0C0C8; text-align: center; padding: 24px 10px; }
+.kanban-col-count { font-size: 11px; background: white; border: 1px solid #E0E0E6; padding: 2px 9px; border-radius: 10px; color: #AAA; font-weight: 600; flex-shrink: 0; }
+.queue-empty { display: none; }
+.kanban-column.col-empty .col-empty-dot { display: flex; justify-content: center; padding: 10px 0; }
+.col-empty-dot { display: none; }
 
 /* OPPORTUNITY CARD */
 .opp-card { background: white; border-radius: 12px; border: 1.5px solid #E8EAF0; margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.2s; }
@@ -284,51 +288,51 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
       <div class="kanban-wrapper">
         <div class="kanban-board">
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-signal">
             <div class="kanban-col-header"><span class="kanban-col-title">📡 Signal Captured</span><span class="kanban-col-count" id="count-signal">0</span></div>
             <div id="col-signal"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-ai-exec">
             <div class="kanban-col-header"><span class="kanban-col-title">🤖 AI Executability</span><span class="kanban-col-count" id="count-ai-exec">0</span></div>
             <div id="col-ai-exec"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-market">
             <div class="kanban-col-header"><span class="kanban-col-title">📊 Market Analysis</span><span class="kanban-col-count" id="count-market">0</span></div>
             <div id="col-market"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-business">
             <div class="kanban-col-header"><span class="kanban-col-title">🏗️ Business Design</span><span class="kanban-col-count" id="count-business">0</span></div>
             <div id="col-business"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-brand">
             <div class="kanban-col-header"><span class="kanban-col-title">🎨 Brand Development</span><span class="kanban-col-count" id="count-brand">0</span></div>
             <div id="col-brand"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-gtm">
             <div class="kanban-col-header"><span class="kanban-col-title">🚀 GTM Strategy</span><span class="kanban-col-count" id="count-gtm">0</span></div>
             <div id="col-gtm"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-exec">
             <div class="kanban-col-header"><span class="kanban-col-title">⚙️ AI Execution Design</span><span class="kanban-col-count" id="count-exec">0</span></div>
             <div id="col-exec"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-blueprint">
             <div class="kanban-col-header"><span class="kanban-col-title">📋 Blueprint Draft</span><span class="kanban-col-count" id="count-blueprint">0</span></div>
             <div id="col-blueprint"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-review">
             <div class="kanban-col-header"><span class="kanban-col-title">🔍 Review</span><span class="kanban-col-count" id="count-review">0</span></div>
             <div id="col-review"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-approved">
             <div class="kanban-col-header"><span class="kanban-col-title">✅ Approved</span><span class="kanban-col-count" id="count-approved">0</span></div>
             <div id="col-approved"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-hold">
             <div class="kanban-col-header"><span class="kanban-col-title">⏸ On Hold</span><span class="kanban-col-count" id="count-hold">0</span></div>
             <div id="col-hold"></div>
           </div>
-          <div class="kanban-column">
+          <div class="kanban-column col-empty" id="colwrap-dropped">
             <div class="kanban-col-header"><span class="kanban-col-title">🚫 Dropped</span><span class="kanban-col-count" id="count-dropped">0</span></div>
             <div id="col-dropped"></div>
           </div>
@@ -591,8 +595,16 @@ function renderBoard(items) {
     const colItems = filtered.filter(i => i.Status === col.key);
     const el = document.getElementById('col-' + col.id);
     const countEl = document.getElementById('count-' + col.id);
-    if (el) el.innerHTML = colItems.length ? colItems.map(buildCard).join('') : '<div class="queue-empty">Empty</div>';
+    const colWrapper = document.getElementById('colwrap-' + col.id);
+    if (el) el.innerHTML = colItems.length ? colItems.map(buildCard).join('') : '';
     if (countEl) countEl.textContent = colItems.length;
+    if (colWrapper) {
+      if (colItems.length === 0) {
+        colWrapper.classList.add('col-empty');
+      } else {
+        colWrapper.classList.remove('col-empty');
+      }
+    }
   });
   document.getElementById('queueBadge').textContent = items.filter(i => i.Status === 'Review').length;
 }
