@@ -169,11 +169,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="nav-label">Workspace</div>
     <div class="nav-item active" onclick="showView('dashboard')"><div class="nav-dot" style="background:#00C896"></div>Dashboard</div>
     <div class="nav-item" onclick="showView('board');loadBoard()"><div class="nav-dot" style="background:#F59E0B"></div>Opportunity Board<span class="badge" id="queueBadge">0</span></div>
+    <div class="nav-item" onclick="showView('acquisitions');loadAcquisitions()"><div class="nav-dot" style="background:#6366F1"></div>Acquisition Board<span class="badge" id="acqBadge" style="background:#6366F1">0</span></div>
     <div class="nav-item" onclick="showView('trends');loadTrends()"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Library<span class="badge" id="trendBadge" style="background:#8B5CF6">0</span></div>
     <div class="nav-label">Agents</div>
     <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div>Orchestrator</div>
     <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Analyst</div>
-    <div class="nav-item"><div class="nav-dot" style="background:#00C896"></div>Scout</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#00C896"></div>Scout 1 — Opportunity</div>
+    <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div>Scout 2 — Acquisition</div>
     <div class="nav-item"><div class="nav-dot" style="background:#F59E0B"></div>AI Executability</div>
     <div class="nav-item"><div class="nav-dot" style="background:#3B82F6"></div>Market Analyst</div>
     <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div>Business Architect</div>
@@ -214,14 +216,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
 
       <div class="card">
+        <div class="card-title">Run Acquisition Pipeline — Scout 2</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Acquisition Scout searches for businesses to buy — both listed on marketplaces and unlisted candidates ripe for acquisition. Runs through deal structuring, AI transformation design, and produces an Acquisition Blueprint with Investor Summary and Pitch Deck Outline.</p>
+        <input class="opp-name-input" id="acqFocus" placeholder="Optional: Focus area (e.g. 'Home services businesses in the Southeast' or leave blank for broad search)">
+        <div style="margin-top:12px">
+          <button class="btn-run" id="acqBtn" onclick="runAcquisitionPipeline()" style="background:#6366F1">🏢 Run Acquisition Pipeline</button>
+        </div>
+      </div>
+      <div class="card">
         <div class="card-title">Agent Status</div>
         <div class="agents-grid">
           <div class="agent-card orchestrator" id="agent-orchestrator"><div class="agent-name">Orchestrator</div><div class="agent-role">Managing Consultant</div><span class="agent-status-pill pill-idle" id="status-orchestrator">Idle</span></div>
           <div class="agent-card trend" id="agent-trend"><div class="agent-name">Trend Analyst</div><div class="agent-role">Market Intelligence</div><span class="agent-status-pill pill-idle" id="status-trend">Idle</span></div>
-          <div class="agent-card" id="agent-scout"><div class="agent-name">Scout</div><div class="agent-role">Opportunity Discovery</div><span class="agent-status-pill pill-idle" id="status-scout">Idle</span></div>
+          <div class="agent-card" id="agent-scout"><div class="agent-name">Scout 1</div><div class="agent-role">Opportunity Discovery</div><span class="agent-status-pill pill-idle" id="status-scout">Idle</span></div>
+          <div class="agent-card" style="border-left:3px solid #6366F1" id="agent-acq-scout"><div class="agent-name">Scout 2</div><div class="agent-role">Acquisition Discovery</div><span class="agent-status-pill pill-idle" id="status-acq-scout">Idle</span></div>
           <div class="agent-card" id="agent-ai-analyst"><div class="agent-name">AI Executability</div><div class="agent-role">Gate 1 Filter</div><span class="agent-status-pill pill-idle" id="status-ai-analyst">Idle</span></div>
           <div class="agent-card" id="agent-market"><div class="agent-name">Market Analyst</div><div class="agent-role">Market & Competition</div><span class="agent-status-pill pill-idle" id="status-market">Idle</span></div>
           <div class="agent-card" id="agent-architect"><div class="agent-name">Business Architect</div><div class="agent-role">Model & Financials</div><span class="agent-status-pill pill-idle" id="status-architect">Idle</span></div>
+          <div class="agent-card" style="border-left:3px solid #6366F1" id="agent-acq-strategist"><div class="agent-name">Acquisition Strategist</div><div class="agent-role">Deal Structure & Finance</div><span class="agent-status-pill pill-idle" id="status-acq-strategist">Idle</span></div>
           <div class="agent-card" id="agent-brand"><div class="agent-name">Brand Developer</div><div class="agent-role">Brand & Identity</div><span class="agent-status-pill pill-idle" id="status-brand">Idle</span></div>
           <div class="agent-card" id="agent-gtm"><div class="agent-name">GTM Strategist</div><div class="agent-role">Go-To-Market</div><span class="agent-status-pill pill-idle" id="status-gtm">Idle</span></div>
           <div class="agent-card" id="agent-exec"><div class="agent-name">AI Exec Designer</div><div class="agent-role">AI Stack & Operations</div><span class="agent-status-pill pill-idle" id="status-exec">Idle</span></div>
@@ -310,7 +322,57 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
     </div>
 
-    <!-- TREND LIBRARY -->
+    <!-- ACQUISITION BOARD -->
+    <div class="view" id="view-acquisitions">
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterAcq('all',this)">All</button>
+        <button class="filter-btn" onclick="filterAcq('review',this)">Needs Review</button>
+        <button class="filter-btn" onclick="filterAcq('approved',this)">Approved</button>
+        <button class="filter-btn" onclick="filterAcq('self',this)">Self-Fundable</button>
+        <button class="filter-btn" onclick="filterAcq('investor',this)">Investor Package</button>
+        <button class="filter-btn" onclick="filterAcq('pipeline',this)">In Pipeline</button>
+      </div>
+      <div class="kanban-wrapper">
+        <div class="kanban-board">
+          <div class="kanban-column col-empty" id="acqwrap-pipeline">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-pipeline">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">⚙️ In Pipeline</div><div class="kanban-col-sub">Currently being evaluated by agents</div></div>
+            <div id="acqcol-pipeline"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-review">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-review">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🔍 Review</div><div class="kanban-col-sub">Blueprint complete — awaiting your review</div></div>
+            <div id="acqcol-review"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-self">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-self">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">💰 Self-Fundable</div><div class="kanban-col-sub">Under $5M — SBA or seller financing viable</div></div>
+            <div id="acqcol-self"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-investor">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-investor">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🤝 Investor Package</div><div class="kanban-col-sub">$5M–$20M — requires capital partners</div></div>
+            <div id="acqcol-investor"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-approved">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-approved">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">✅ Approved</div><div class="kanban-col-sub">Approved for pursuit</div></div>
+            <div id="acqcol-approved"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-hold">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-hold">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">⏸ On Hold</div><div class="kanban-col-sub">Paused for now</div></div>
+            <div id="acqcol-hold"></div>
+          </div>
+          <div class="kanban-column col-empty" id="acqwrap-dropped">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="acqcount-dropped">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🚫 Dropped</div><div class="kanban-col-sub">Did not pass evaluation</div></div>
+            <div id="acqcol-dropped"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="view" id="view-trends">
       <div class="trend-stats">
         <div class="trend-stat"><div class="trend-stat-number" id="stat-total">0</div><div class="trend-stat-label">Total Trends</div></div>
@@ -1529,7 +1591,7 @@ async function printBlueprint(id) {
   </div>
   ${sectionsHtml}
   <div class="footer">QLMAgentic · OpportunityAI · Confidential · ${item.Created || ''}</div>
-  <script>window.onload = () => window.print();<\/script>
+  <script>window.onload = () => window.print();</script>
 </body>
 </html>`;
 
@@ -1807,6 +1869,508 @@ async function loadTrendBadge() {
 
 loadQueueBadge();
 loadTrendBadge();
-</script>
+
+// ─── SCOUT 2 & ACQUISITION STRATEGIST PROMPTS ────────────────────────────────
+const ACQ_SCOUT_PROMPT = `You are a senior business acquisition scout with deep expertise in identifying small to mid-market businesses that are ripe for acquisition and AI transformation. You think like a combination of a seasoned M&A advisor who has closed hundreds of Main Street and lower middle market deals, a private equity analyst who can spot value where others see a tired business, and an AI transformation specialist who sees exactly what a business could become with the right technology applied.
+
+You operate across two tracks:
+
+Track A — Listed Business Discovery: You actively search business-for-sale marketplaces — BizBuySell, BusinessBroker.net, Acquire.com, Flippa, and similar platforms — for listings that meet acquisition criteria. You use web search to find current listings, analyze what is available, and identify which ones have the strongest combination of acquisition feasibility and AI transformation potential.
+
+Track B — Unlisted Opportunity Identification: You proactively identify categories and types of businesses that are currently ripe for acquisition even if not yet listed. You look for industries with aging owner profiles, businesses showing signs of owner fatigue or operational stagnation, industries being disrupted by AI where incumbents are struggling to adapt, and business categories where a motivated seller is statistically likely.
+
+You are realistic about what you can and cannot know. You work with publicly available information — listing details, business type indicators, industry data, online presence signals, and market research. You never fabricate specific financial data. When information is unavailable you say so and estimate with clear methodology and reasoning.
+
+Your primary filter is AI transformation potential. A mediocre business that becomes exceptional with AI is more interesting than a great business that is already optimized. You are looking for the gap between what a business is today and what it could be with the right operator and AI stack.
+
+TARGET ACQUISITION SIZE AND FUNDING TIERS:
+Under $5M — Self-Fundable: Achievable through SBA 7(a) financing, owner financing, or a combination. Flag as SELF-FUNDABLE.
+$5M to $20M — Investor Package Required: Requires assembling a funding package. The Acquisition Blueprint becomes the foundation of the investor pitch. Flag as INVESTOR-PACKAGE.
+Above $20M — Out of scope. Do not surface.
+
+For each business produce:
+- BUSINESS_NAME: [name or description if unlisted]
+- TRACK: [Listed or Unlisted]
+- SOURCE: [platform name if listed, or identification method if unlisted]
+- FUNDING_TIER: [Self-Fundable or Investor Package]
+- BUSINESS_PROFILE: [what the business does, business model, industry, approximate size]
+- ACQUIRABILITY_SIGNALS: [why this business may be acquirable]
+- ESTIMATED_VALUATION: [listing price or estimated range with methodology]
+- AI_TRANSFORMATION_OPPORTUNITY: [what specifically changes post-acquisition with AI]
+- CONFIDENCE: [High, Medium, or Speculative with confidence qualifier]
+- RECOMMENDED_APPROACH: [Pursue Listed Purchase, Initiate Direct Outreach, or Monitor]
+
+Separate each with ---ACQ---`;
+
+const ACQ_STRATEGIST_PROMPT = `You are a senior acquisition strategist and deal architect with deep expertise in structuring, negotiating, and closing small to mid-market business acquisitions. You think like a combination of a seasoned M&A attorney, an SBA lending specialist, and a search fund operator.
+
+INFORMATION REALITY CHECK — CRITICAL: You frequently operate with incomplete information. Flag every assumption with ASSUMED or ESTIMATED. State the basis for every estimate. Never present estimated figures as confirmed facts. Always append your score with HIGH CONFIDENCE, MEDIUM CONFIDENCE, or LOW CONFIDENCE.
+
+You use web search to verify current SBA lending terms, seller financing norms, and M&A multiples.
+
+Produce a structured Acquisition Strategy containing:
+
+Deal Structure Analysis:
+- Recommended deal structure with reasoning
+- Proposed purchase price range with reasoning
+- Earnout potential if appropriate
+- Working capital requirements beyond purchase price
+- Total capital required
+
+Financing Strategy:
+- Primary financing vehicle
+- For Self-Fundable under $5M: SBA 7(a) structure, seller financing opportunity, combined structure recommendation, total out of pocket
+- For Investor Package $5M-$20M: Equity structure, investor return profile, investor pitch summary — 3 key points, recommended investor profile, total out of pocket
+
+Seller Approach Strategy:
+- For listed: recommended offer approach, contingencies, due diligence priorities
+- For unlisted: outreach strategy, how to frame the conversation
+- Seller motivation assessment
+- Key negotiation points
+
+Due Diligence Priorities:
+- Top 5 things to verify before committing
+- Red flags to watch for
+- Information requests to make early
+
+Transition Plan:
+- How long seller stays on post-close and in what capacity
+- Key person risk assessment
+- First 90 days post-close
+- When AI transformation begins
+
+Deal Viability Score 1-10 with confidence qualifier.`;
+
+const AI_TRANSFORMATION_PROMPT = `You are a senior AI systems architect operating in TRANSFORMATION MODE. You are not designing a new business from scratch — you are designing how to transform an existing operating business using AI while protecting existing customers and revenue.
+
+Design the AI transformation in three phases:
+
+Phase 1 — Stabilize (Days 1-30 post-acquisition):
+- What must be maintained exactly as-is to protect existing customers and revenue
+- Quick AI wins implementable immediately with zero disruption risk
+- Legacy systems to understand before touching
+- Human time requirement during stabilization
+
+Phase 2 — Transform (Months 2-6):
+- Which operations get replaced with AI first and in what sequence
+- How existing processes are documented before being automated
+- Staff transition plan
+- Customer communication strategy during transformation
+- Specific AI tools replacing existing systems with current pricing
+
+Phase 3 — Optimize (Months 6-12):
+- Full AI stack at steady state
+- Human time at target — 4 hours per week or less
+- Performance benchmarks versus pre-acquisition baseline
+- What the business looks like at 12 months post-acquisition
+
+Cost Reduction Analysis:
+- Current estimated operating costs — flag as ESTIMATED if not confirmed
+- Projected post-AI operating costs
+- Estimated cost reduction — dollar amount and percentage
+
+Revenue Upside Analysis:
+- What revenue improvements does AI enable
+- Conservative, base, and upside projections post-transformation
+
+Complete AI Stack with current pricing, integration map in two formats, outsourcing recommendations for technical setup, human owner daily procedure at steady state.
+
+AI Transformation Design Score 1-10.`;
+
+// ─── ACQUISITION PIPELINE ─────────────────────────────────────────────────────
+async function saveAcq(id, fields) {
+  await fetch(`/api/acquisitions/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+}
+
+async function createAcq(name, source) {
+  const res = await fetch('/api/acquisitions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.replace(/\*\*/g, '').trim(), source }) });
+  const data = await res.json();
+  console.log('createAcq response:', JSON.stringify(data).substring(0, 200));
+  return data;
+}
+
+async function runFullAcquisitionPipeline(recordId, businessName, businessProfile, fundingTier, source) {
+  let context = `Business: ${businessName}\nFunding Tier: ${fundingTier}\nSource: ${source}\nBusiness Profile:\n${businessProfile}`;
+  const scores = {};
+
+  setAgentStatus('ai-analyst', 'working', 'Analyzing…');
+  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform an AI Executability Analysis for this EXISTING business being considered for acquisition. Focus on AI transformation potential.\n\n${context}`, context);
+  setAgentStatus('ai-analyst', 'done', 'Done ✓');
+  scores.aiExec = aiAnalyst.score;
+  if (aiAnalyst.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` }); addActivity(`❌ "${businessName}" dropped.`); return false; }
+  await saveAcq(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
+  context += `\n\nAI EXECUTABILITY:\n${aiAnalyst.output}`;
+
+  setAgentStatus('market', 'working', 'Researching…');
+  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a Market Analysis for the industry this acquisition target operates in.\n\n${context}`, context);
+  setAgentStatus('market', 'done', 'Done ✓');
+  scores.market = market.score;
+  if (market.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output }); return false; }
+  await saveAcq(recordId, { 'Market Analysis': market.output, 'Status': 'Business Design' });
+  context += `\n\nMARKET ANALYSIS:\n${market.output}`;
+
+  setAgentStatus('architect', 'working', 'Modeling…');
+  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the post-acquisition financial model. Focus on acquisition ROI and post-transformation P&L.\n\n${context}`, context);
+  setAgentStatus('architect', 'done', 'Done ✓');
+  scores.biz = biz.score;
+  if (biz.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Business Architecture': biz.output }); return false; }
+  await saveAcq(recordId, { 'Business Architecture': biz.output, 'Status': 'Acquisition Strategy' });
+  context += `\n\nBUSINESS ARCHITECTURE:\n${biz.output}`;
+
+  setAgentStatus('acq-strategist', 'working', 'Structuring deal…');
+  const acqStrategy = await runAgent('Acquisition Strategy', ACQ_STRATEGIST_PROMPT, `Design the complete acquisition strategy.\n\n${context}`, context);
+  setAgentStatus('acq-strategist', 'done', 'Done ✓');
+  scores.acqStrategy = acqStrategy.score;
+  if (acqStrategy.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Acquisition Strategy': acqStrategy.output }); return false; }
+  await saveAcq(recordId, { 'Acquisition Strategy': acqStrategy.output, 'Status': 'Brand Development' });
+  context += `\n\nACQUISITION STRATEGY:\n${acqStrategy.output}`;
+
+  setAgentStatus('brand', 'working', 'Assessing brand…');
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Assess the existing brand. Evaluate: preserve, refresh, or rebuild? What does post-acquisition brand strategy look like?\n\n${context}`, context);
+  setAgentStatus('brand', 'done', 'Done ✓');
+  scores.brand = brand.score;
+  await saveAcq(recordId, { 'Brand Assessment': brand.output, 'Status': 'GTM Strategy' });
+  context += `\n\nBRAND ASSESSMENT:\n${brand.output}`;
+
+  setAgentStatus('gtm', 'working', 'Planning relaunch…');
+  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the post-acquisition go-to-market relaunch strategy. Focus on retaining existing customers while acquiring new ones.\n\n${context}`, context);
+  setAgentStatus('gtm', 'done', 'Done ✓');
+  scores.gtm = gtm.score;
+  await saveAcq(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Transformation Design' });
+  context += `\n\nGTM STRATEGY:\n${gtm.output}`;
+
+  setAgentStatus('exec', 'working', 'Designing transformation…');
+  const aiTransform = await runAgent('AI Transformation Design', AI_TRANSFORMATION_PROMPT, `Design the complete AI transformation plan. TRANSFORMATION MODE.\n\n${context}`, context);
+  setAgentStatus('exec', 'done', 'Done ✓');
+  scores.aiTransform = aiTransform.score;
+  await saveAcq(recordId, { 'AI Transformation Plan': aiTransform.output, 'Status': 'Blueprint Draft' });
+  context += `\n\nAI TRANSFORMATION:\n${aiTransform.output}`;
+
+  setAgentStatus('orchestrator', 'working', 'Compiling Blueprint…');
+  addActivity(`📋 Orchestrator compiling Acquisition Blueprint…`);
+
+  const stageScoresSummary = Object.entries(scores).map(([k,v]) => `${k}: ${v}/10`).join(', ');
+
+  const blueprintMsg = `Compile the complete Acquisition Blueprint.
+
+STAGE SCORES: ${stageScoresSummary}
+FUNDING TIER: ${fundingTier}
+
+FULL CONTEXT:
+${context.substring(0, 7000)}
+
+Produce:
+
+1. EXECUTIVE SUMMARY including AGENT FINDINGS SUMMARY (~100-150 words per agent): Scout Finding, AI Executability Finding, Market Analysis Finding, Business Architecture Finding, Acquisition Strategist Finding, Brand Assessment Finding, GTM Strategy Finding, AI Transformation Finding.
+
+2. STAGE SCORES SUMMARY
+
+3. KEY STRENGTHS — 3-5 compelling points
+
+4. KEY RISKS — 3-5 risk factors
+
+5. DEAL SUMMARY — purchase price range, funding structure, total capital, projected ROI timeline
+
+6. INVESTOR SUMMARY — The business and why undervalued. The AI transformation thesis. Deal structure and capital required. Projected returns with timeline. The ask. Why now.
+
+7. PITCH DECK OUTLINE — 13-15 slides. For each slide: title, 3-5 bullet points max (10-15 words each), and talking point (what presenter says NOT on slide). Arc: Cover → Problem → Opportunity → The Business → AI Transformation → Market Position → Business Model → Financial Projections → The Deal → ROI for Investors → The Team → Why Now → The Ask → Appendix
+
+8. OVERALL OPPORTUNITY SCORE: [X]/10
+
+9. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS
+
+10. MOST IMPORTANT NEXT STEP
+
+Format exactly as: OVERALL OPPORTUNITY SCORE: [number]/10`;
+
+  const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 6000, false);
+  setAgentStatus('orchestrator', 'done', 'Done ✓');
+
+  let overallScore = null;
+  const scoreMatch = blueprint.match(/OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i);
+  if (scoreMatch) overallScore = parseFloat(scoreMatch[1]);
+  if (!overallScore) {
+    const w = { aiExec: 0.25, market: 0.15, biz: 0.25, acqStrategy: 0.15, brand: 0.05, gtm: 0.10, aiTransform: 0.05 };
+    overallScore = Math.round(Object.entries(scores).reduce((sum, [k,v]) => sum + (v * (w[k] || 0.10)), 0) * 10) / 10;
+  }
+
+  const investorMatch = blueprint.match(/INVESTOR SUMMARY[:\s]+([\s\S]*?)(?=PITCH DECK|7\.|$)/i);
+  const pitchMatch = blueprint.match(/PITCH DECK OUTLINE[:\s]+([\s\S]*?)(?=OVERALL OPPORTUNITY|8\.|$)/i);
+
+  await saveAcq(recordId, {
+    'Orchestrator Summary': blueprint,
+    'Opportunity Score': overallScore,
+    'Funding Tier': fundingTier,
+    'Investor Summary': investorMatch ? investorMatch[1].trim() : '',
+    'Pitch Deck Outline': pitchMatch ? pitchMatch[1].trim() : '',
+    'Status': 'Review'
+  });
+
+  addActivity(`🎉 Acquisition Blueprint complete! "${businessName}" → ${fundingTier} | Score: ${overallScore}/10`);
+  loadAcquisitions();
+  loadAcqBadge();
+  return true;
+}
+
+async function runAcquisitionPipeline() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+  const focusArea = document.getElementById('acqFocus').value.trim();
+  const acqBtn = document.getElementById('acqBtn');
+  acqBtn.disabled = true;
+  acqBtn.textContent = '⏳ Running…';
+  document.getElementById('systemStatus').textContent = '● Acquisition Pipeline running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  ['orchestrator','acq-scout','ai-analyst','market','architect','acq-strategist','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+
+  try {
+    setAgentStatus('acq-scout', 'working', 'Searching…');
+    addActivity(`🏢 Acquisition Scout searching for businesses…`);
+
+    const scoutMsg = `Search for 2 businesses that are strong acquisition candidates with high AI transformation potential.
+${focusArea ? `FOCUS AREA: ${focusArea}\n\n` : ''}${getFocusCtx() ? `Additional Criteria:\n${getFocusCtx()}\n\n` : ''}
+Search both Track A (listed on BizBuySell, BusinessBroker.net, Acquire.com, Flippa) and Track B (unlisted but ripe). Use web search to find real current listings and market intelligence. Target $50K to $20M. Primary filter: AI transformation potential.
+
+Separate with ---ACQ---`;
+
+    const scoutOutput = await callClaude(ACQ_SCOUT_PROMPT, scoutMsg, 4000, true);
+    setAgentStatus('acq-scout', 'done', 'Done ✓');
+
+    const acqBlocks = scoutOutput.split('---ACQ---').filter(b => b.trim().length > 50);
+    addActivity(`📡 Scout found ${acqBlocks.length} acquisition candidates — running pipelines…`);
+
+    for (const block of acqBlocks.slice(0, 2)) {
+      const nameMatch = block.match(/BUSINESS_NAME:\s*(.+)/);
+      const sourceMatch = block.match(/SOURCE:\s*(.+)/);
+      const tierMatch = block.match(/FUNDING_TIER:\s*(.+)/);
+      const profileMatch = block.match(/BUSINESS_PROFILE:\s*([\s\S]*?)(?=ACQUIRABILITY_SIGNALS:|$)/);
+
+      const bizName = nameMatch ? nameMatch[1].replace(/\*\*/g, '').trim() : 'Acquisition Target';
+      const source = sourceMatch ? sourceMatch[1].trim() : '';
+      const fundingTier = tierMatch ? tierMatch[1].replace(/\*\*/g, '').trim() : 'Self-Fundable';
+      const profile = profileMatch ? profileMatch[1].trim() : block.trim();
+
+      const record = await createAcq(bizName, source);
+      if (!record || !record.id) { addActivity(`❌ Failed to create record for: ${bizName}`); continue; }
+
+      await saveAcq(record.id, { 'Business Profile': block.trim(), 'Funding Tier': fundingTier, 'Status': 'AI Executability' });
+      addActivity(`🔍 Starting acquisition pipeline for: ${bizName}`);
+      await runFullAcquisitionPipeline(record.id, bizName, profile, fundingTier, source);
+    }
+  } catch(err) {
+    addActivity(`❌ Acquisition Pipeline error: ${err.message}`);
+    console.error(err);
+  }
+
+  acqBtn.disabled = false;
+  acqBtn.textContent = '🏢 Run Acquisition Pipeline';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+// ─── ACQUISITION BOARD ────────────────────────────────────────────────────────
+let allAcquisitions = [];
+let activeAcqFilter = 'all';
+const ACQ_PIPELINE_STATUSES = ['Signal Captured','AI Executability','Market Analysis','Business Design','Acquisition Strategy','Brand Development','GTM Strategy','AI Transformation Design','Blueprint Draft'];
+
+function buildAcqCard(item) {
+  const name = item.Name || 'Unnamed Acquisition';
+  const status = item.Status || 'Signal Captured';
+  const score = item['Opportunity Score'];
+  const aiScore = item['AI Executability Score'];
+  const fundingTier = item['Funding Tier'] || '';
+  const orchNotes = item['Orchestrator Summary'] || '';
+  const source = item['Source'] || '';
+  const date = item.Created ? new Date(item.Created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  const isActive = ACQ_PIPELINE_STATUSES.includes(status);
+
+  const ACQ_SECTIONS = [
+    { key: 'profile', icon: '🏢', label: 'Business Profile', field: 'Business Profile' },
+    { key: 'aiExec', icon: '🤖', label: 'AI Executability', field: 'AI Executability Notes', scoreField: 'AI Executability Score' },
+    { key: 'market', icon: '📊', label: 'Market Analysis', field: 'Market Analysis' },
+    { key: 'bizarch', icon: '💰', label: 'Business Architecture', field: 'Business Architecture' },
+    { key: 'acqstrat', icon: '🤝', label: 'Acquisition Strategy', field: 'Acquisition Strategy' },
+    { key: 'brand', icon: '🎨', label: 'Brand Assessment', field: 'Brand Assessment' },
+    { key: 'gtm', icon: '🚀', label: 'GTM Plan', field: 'GTM Plan' },
+    { key: 'aitransform', icon: '⚙️', label: 'AI Transformation Plan', field: 'AI Transformation Plan' },
+    { key: 'investor', icon: '💼', label: 'Investor Summary', field: 'Investor Summary' },
+    { key: 'pitchdeck', icon: '📊', label: 'Pitch Deck Outline', field: 'Pitch Deck Outline' },
+  ];
+
+  const sectionsHtml = ACQ_SECTIONS.map(sec => {
+    const content = item[sec.field] || '';
+    const sStatus = content ? 'complete' : 'pending';
+    const scoreTag = sec.scoreField && item[sec.scoreField] ? ` <span style="font-size:11px;color:#6366F1;font-weight:700;margin-left:6px">AI Score: ${item[sec.scoreField]}/10</span>` : '';
+    return `<div class="section-item">
+      <div class="section-header" onclick="toggleSection('acq-${item.id}','${sec.key}')">
+        <div class="section-header-left"><span class="section-icon">${sec.icon}</span><span class="section-label">${sec.label}</span>${scoreTag}</div>
+        <div style="display:flex;align-items:center;gap:8px"><span class="section-status ${sStatus}">${sStatus === 'complete' ? 'Complete' : 'Pending'}</span><span class="section-arrow" id="sec-arrow-acq-${item.id}-${sec.key}">▶</span></div>
+      </div>
+      <div class="section-content" id="sec-acq-${item.id}-${sec.key}">
+        ${content ? `<div class="section-text">${content}</div>` : '<div class="section-empty">Not yet completed.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="opp-card" id="acq-card-${item.id}">
+    <div class="opp-card-header" onclick="toggleCard('acq-${item.id}')">
+      <div class="opp-card-name">${name}</div>
+      ${source ? `<div class="opp-card-signal">Source: ${source}</div>` : ''}
+      <div class="opp-card-meta">
+        <span class="stage-badge ${isActive ? 'active-stage' : ''}">${status}</span>
+        ${fundingTier ? `<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${fundingTier === 'Self-Fundable' ? '#D1FAE5' : '#EEF2FF'};color:${fundingTier === 'Self-Fundable' ? '#065F46' : '#4F46E5'}">${fundingTier}</span>` : ''}
+        ${score ? `<span class="opp-score">🎯 ${score}/10</span>` : ''}
+        ${aiScore ? `<span class="ai-score">🤖 AI ${aiScore}/10</span>` : ''}
+        <span class="card-date">${date}</span>
+        <button class="expand-btn" id="expand-acq-${item.id}">▼</button>
+      </div>
+    </div>
+    <div class="card-expanded" id="expanded-acq-${item.id}">
+      ${orchNotes ? `<div class="orch-notes"><div class="orch-notes-label">🧠 Orchestrator Summary</div><div class="orch-notes-text">${orchNotes}</div></div>` : ''}
+      <div class="blueprint-sections">${sectionsHtml}</div>
+      <div class="card-actions">${buildAcqCardActions(item)}</div>
+    </div>
+  </div>`;
+}
+
+function buildAcqCardActions(item) {
+  const id = item.id;
+  const status = item.Status || '';
+  const del = `<button class="btn-delete" onclick="deleteAcq('${id}')">🗑 Delete</button>`;
+  const exportBtns = `<button class="btn-revise" onclick="printAcqBlueprint('${id}')">🖨️ Print PDF</button><button class="btn-revise" onclick="window.open('/api/acquisitions/${id}/export','_blank')">📄 Word Doc</button>`;
+  const note = `<input class="revision-note-input" id="acq-note-${id}" placeholder="Notes…">`;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateAcq('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateAcq('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateAcq('${id}','On Hold')">⏸ Hold</button>${exportBtns}${del}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${exportBtns}${del}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateAcq('${id}','Review')">↑ Back to Review</button>${exportBtns}${del}`;
+  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateAcq('${id}','Signal Captured')">↺ Reopen</button>${del}`;
+  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateAcq('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateAcq('${id}','Dropped')">🚫 Drop</button>${del}`;
+}
+
+function filterAcqItems(items) {
+  if (activeAcqFilter === 'all') return items;
+  if (activeAcqFilter === 'review') return items.filter(i => i.Status === 'Review');
+  if (activeAcqFilter === 'approved') return items.filter(i => i.Status === 'Approved');
+  if (activeAcqFilter === 'self') return items.filter(i => i['Funding Tier'] === 'Self-Fundable' && !ACQ_PIPELINE_STATUSES.includes(i.Status));
+  if (activeAcqFilter === 'investor') return items.filter(i => i['Funding Tier'] === 'Investor Package' && !ACQ_PIPELINE_STATUSES.includes(i.Status));
+  if (activeAcqFilter === 'pipeline') return items.filter(i => ACQ_PIPELINE_STATUSES.includes(i.Status));
+  return items;
+}
+
+function renderAcquisitions(items) {
+  const filtered = filterAcqItems(items);
+  const cols = [
+    { items: filtered.filter(i => ACQ_PIPELINE_STATUSES.includes(i.Status)), elId: 'acqcol-pipeline', countId: 'acqcount-pipeline', wrapId: 'acqwrap-pipeline' },
+    { items: filtered.filter(i => i.Status === 'Review'), elId: 'acqcol-review', countId: 'acqcount-review', wrapId: 'acqwrap-review' },
+    { items: filtered.filter(i => i['Funding Tier'] === 'Self-Fundable' && ['Review','Approved','On Hold'].includes(i.Status)), elId: 'acqcol-self', countId: 'acqcount-self', wrapId: 'acqwrap-self' },
+    { items: filtered.filter(i => i['Funding Tier'] === 'Investor Package' && ['Review','Approved','On Hold'].includes(i.Status)), elId: 'acqcol-investor', countId: 'acqcount-investor', wrapId: 'acqwrap-investor' },
+    { items: filtered.filter(i => i.Status === 'Approved'), elId: 'acqcol-approved', countId: 'acqcount-approved', wrapId: 'acqwrap-approved' },
+    { items: filtered.filter(i => i.Status === 'On Hold'), elId: 'acqcol-hold', countId: 'acqcount-hold', wrapId: 'acqwrap-hold' },
+    { items: filtered.filter(i => i.Status === 'Dropped'), elId: 'acqcol-dropped', countId: 'acqcount-dropped', wrapId: 'acqwrap-dropped' },
+  ];
+  cols.forEach(col => {
+    const el = document.getElementById(col.elId);
+    const countEl = document.getElementById(col.countId);
+    const wrapper = document.getElementById(col.wrapId);
+    if (el) el.innerHTML = col.items.length ? col.items.map(buildAcqCard).join('') : '';
+    if (countEl) countEl.textContent = col.items.length;
+    if (wrapper) wrapper.classList.toggle('col-empty', col.items.length === 0);
+  });
+  document.getElementById('acqBadge').textContent = items.filter(i => i.Status === 'Review').length;
+}
+
+function filterAcq(filter, btn) {
+  activeAcqFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAcquisitions(allAcquisitions);
+}
+
+async function loadAcquisitions() {
+  try {
+    const res = await fetch('/api/acquisitions');
+    allAcquisitions = await res.json();
+    renderAcquisitions(allAcquisitions);
+  } catch(e) { console.error('Acquisitions error:', e); }
+}
+
+async function loadAcqBadge() {
+  try {
+    const res = await fetch('/api/acquisitions');
+    const items = await res.json();
+    document.getElementById('acqBadge').textContent = items.filter(i => i.Status === 'Review').length;
+  } catch(e) {}
+}
+
+async function updateAcq(id, status) {
+  await fetch(`/api/acquisitions/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Status: status }) });
+  addActivity(`📋 Acquisition moved to ${status}`);
+  loadAcquisitions();
+}
+
+async function deleteAcq(id) {
+  if (!confirm('Delete this acquisition? This cannot be undone.')) return;
+  await fetch(`/api/acquisitions/${id}`, { method: 'DELETE' });
+  addActivity('🗑 Acquisition deleted');
+  loadAcquisitions();
+}
+
+async function printAcqBlueprint(id) {
+  try {
+    const res = await fetch(`/api/acquisitions/${id}`);
+    const item = await res.json();
+    const ACQ_PRINT_SECTIONS = [
+      { label: 'Orchestrator Summary & Blueprint', field: 'Orchestrator Summary' },
+      { label: 'Business Profile', field: 'Business Profile' },
+      { label: 'AI Executability Analysis', field: 'AI Executability Notes' },
+      { label: 'Market Analysis', field: 'Market Analysis' },
+      { label: 'Business Architecture', field: 'Business Architecture' },
+      { label: 'Acquisition Strategy', field: 'Acquisition Strategy' },
+      { label: 'Brand Assessment', field: 'Brand Assessment' },
+      { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'AI Transformation Plan', field: 'AI Transformation Plan' },
+      { label: 'Investor Summary', field: 'Investor Summary' },
+      { label: 'Pitch Deck Outline', field: 'Pitch Deck Outline' },
+    ];
+    const sectionsHtml = ACQ_PRINT_SECTIONS.map(sec => {
+      const content = item[sec.field];
+      if (!content || !content.trim()) return '';
+      return `<div class="section"><div class="section-divider"></div><h2>${sec.label}</h2><div class="section-body">${markdownToHtml(content)}</div></div>`;
+    }).filter(Boolean).join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${item.Name} — Acquisition Blueprint</title>
+<style>* { box-sizing:border-box;margin:0;padding:0; } body { font-family:Arial,sans-serif;color:#1D1D1F;line-height:1.7;font-size:13px; }
+.cover { text-align:center;padding:80px 60px 60px;border-bottom:4px solid #6366F1;margin-bottom:40px; }
+.cover .label { font-size:11px;font-weight:700;color:#6366F1;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:16px; }
+.cover h1 { font-size:32px;font-weight:800;color:#0F1117;margin-bottom:16px; }
+.cover .scores { display:flex;justify-content:center;gap:24px;margin:20px 0; }
+.cover .score-pill { background:#EEF2FF;border:1.5px solid #6366F1;border-radius:20px;padding:6px 18px;font-size:13px;font-weight:700;color:#4F46E5; }
+.cover .meta { font-size:12px;color:#999;margin-top:16px; }
+.section { padding:0 60px 40px;page-break-before:always; }
+.section-divider { height:3px;background:linear-gradient(to right,#6366F1,#00C896);border-radius:2px;margin-bottom:20px; }
+h2 { font-size:20px;font-weight:800;color:#0F1117;margin-bottom:16px; }
+.section-body { color:#333; } .section-body p { margin-bottom:12px; } .section-body ul { margin:8px 0 12px 24px; } .section-body li { margin-bottom:6px; }
+.footer { text-align:center;padding:40px 60px;border-top:2px solid #F0F0F2;font-size:11px;color:#CCC; }
+@media print { .section { page-break-before:always; } .cover { page-break-after:always; } @page { margin:0.75in; } }
+</style></head><body>
+<div class="cover">
+  <div class="label">OpportunityAI by QLMAgentic — Acquisition Blueprint</div>
+  <h1>${item.Name || 'Acquisition Target'}</h1>
+  <div class="scores">
+    ${item['Opportunity Score'] ? `<span class="score-pill">🎯 Overall: ${item['Opportunity Score']}/10</span>` : ''}
+    ${item['Funding Tier'] ? `<span class="score-pill">${item['Funding Tier']}</span>` : ''}
+  </div>
+  <div class="meta">Generated ${item.Created || ''} · Confidential · QLMAgentic OpportunityAI</div>
+</div>
+${sectionsHtml}
+<div class="footer">QLMAgentic · OpportunityAI · Confidential</div>
+<script>window.onload = () => window.print();<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  } catch(err) { alert('Export error: ' + err.message); }
+}
+
+loadAcqBadge();
 </body>
 </html>

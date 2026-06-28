@@ -230,7 +230,140 @@ app.get('/api/opportunities/:id/export', async (req, res) => {
   }
 });
 
-// ─── TRENDS ───────────────────────────────────────────────────────────────────
+// ─── ACQUISITIONS ─────────────────────────────────────────────────────────────
+app.post('/api/acquisitions', async (req, res) => {
+  try {
+    const { name, source } = req.body;
+    const fields = {
+      'Name': name,
+      'Status': 'Signal Captured',
+      'Source': source || '',
+      'Created': new Date().toISOString().split('T')[0]
+    };
+    const record = await base('Acquisitions').create(fields);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/acquisitions/:id', async (req, res) => {
+  try {
+    const record = await base('Acquisitions').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/acquisitions', async (req, res) => {
+  try {
+    const records = await base('Acquisitions').select({
+      sort: [{ field: 'Created', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/acquisitions/:id', async (req, res) => {
+  try {
+    const record = await base('Acquisitions').find(req.params.id);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/acquisitions/:id', async (req, res) => {
+  try {
+    await base('Acquisitions').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Acquisition Word Doc Export
+app.get('/api/acquisitions/:id/export', async (req, res) => {
+  try {
+    const record = await base('Acquisitions').find(req.params.id);
+    const item = { id: record.id, ...record.fields };
+    const name = item['Name'] || 'Acquisition Blueprint';
+    const score = item['Opportunity Score'];
+    const fundingTier = item['Funding Tier'] || '';
+    const created = item['Created'] || '';
+
+    const divider = new Paragraph({
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '6366F1', space: 1 } },
+      spacing: { before: 300, after: 300 },
+      children: []
+    });
+
+    function h2(text) {
+      return new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        children: [new TextRun({ text, bold: true, size: 26, font: 'Arial', color: '6366F1' })],
+        spacing: { before: 300, after: 150 }
+      });
+    }
+
+    function body(text) {
+      if (!text) return [];
+      return text.split('\n').filter(l => l.trim()).map(line => {
+        const isBold = line.startsWith('**') || line.startsWith('#');
+        const clean = line.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+        if (!clean) return null;
+        return new Paragraph({ children: [new TextRun({ text: clean, size: 22, font: 'Arial', bold: isBold, color: '1D1D1F' })], spacing: { after: 120 } });
+      }).filter(Boolean);
+    }
+
+    const SECTIONS = [
+      { label: 'Orchestrator Summary & Acquisition Blueprint', field: 'Orchestrator Summary' },
+      { label: 'Business Profile', field: 'Business Profile' },
+      { label: 'Acquirability Signals', field: 'Acquirability Signals' },
+      { label: 'AI Executability Analysis', field: 'AI Executability Notes' },
+      { label: 'Market Analysis', field: 'Market Analysis' },
+      { label: 'Business Architecture', field: 'Business Architecture' },
+      { label: 'Acquisition Strategy', field: 'Acquisition Strategy' },
+      { label: 'Brand Assessment', field: 'Brand Assessment' },
+      { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'AI Transformation Plan', field: 'AI Transformation Plan' },
+      { label: 'Investor Summary', field: 'Investor Summary' },
+      { label: 'Pitch Deck Outline', field: 'Pitch Deck Outline' },
+    ];
+
+    const children = [
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 800, after: 200 }, children: [new TextRun({ text: 'ACQUISITION BLUEPRINT', bold: true, size: 48, font: 'Arial', color: '0F1117' })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: name, bold: true, size: 36, font: 'Arial', color: '6366F1' })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: `Overall Score: ${score ? score + '/10' : 'Pending'} | ${fundingTier}`, size: 24, font: 'Arial', color: '666666' })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 600 }, children: [new TextRun({ text: `Generated: ${created} | QLMAgentic OpportunityAI`, size: 20, font: 'Arial', color: '999999' })] }),
+      divider,
+    ];
+
+    for (const sec of SECTIONS) {
+      const content = item[sec.field];
+      if (!content || content.trim() === '') continue;
+      children.push(new Paragraph({ children: [new PageBreak()] }), h2(sec.label), divider, ...body(content));
+    }
+
+    children.push(divider, new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400 }, children: [new TextRun({ text: `QLMAgentic · OpportunityAI · ${created} · Confidential`, size: 18, font: 'Arial', color: '999999' })] }));
+
+    const doc = new Document({
+      styles: { default: { document: { run: { font: 'Arial', size: 22 } } } },
+      sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const filename = name.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}_Acquisition_Blueprint.docx"`);
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.post('/api/trends', async (req, res) => {
   try {
     const record = await base('Trends').create(req.body);
