@@ -515,7 +515,17 @@ async function callClaude(systemPrompt, userMessage, maxTokens = 4000, useSearch
     const messages = [
       { role: 'user', content: userMessage },
       { role: 'assistant', content: data.content },
-      { role: 'user', content: toolUseBlocks.map(t => ({ type: 'tool_result', tool_use_id: t.id, content: 'Search completed. Use results to inform your analysis.' })) }
+      { role: 'user', content: data.content
+          .filter(b => b.type === 'tool_use')
+          .map(t => ({
+            type: 'tool_result',
+            tool_use_id: t.id,
+            content: data.content
+              .filter(b => b.type === 'tool_result' && b.tool_use_id === t.id)
+              .map(b => typeof b.content === 'string' ? b.content : JSON.stringify(b.content))
+              .join('\n') || 'Search completed — no results returned.'
+          }))
+      }
     ];
     const followUp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
