@@ -1591,7 +1591,7 @@ async function printBlueprint(id) {
   </div>
   ${sectionsHtml}
   <div class="footer">QLMAgentic · OpportunityAI · Confidential · ${item.Created || ''}</div>
-  <script>window.onload = () => window.print();<\/script>
+  <p style="text-align:center;padding:20px;color:#666;font-size:13px">Press <strong>Cmd+P</strong> (Mac) or <strong>Ctrl+P</strong> (Windows) to print or save as PDF</p>
 </body>
 </html>`;
 
@@ -2362,7 +2362,7 @@ h2 { font-size:20px;font-weight:800;color:#0F1117;margin-bottom:16px; }
 </div>
 ${sectionsHtml}
 <div class="footer">QLMAgentic · OpportunityAI · Confidential</div>
-<script>window.onload = () => window.print();<\/script>
+<p style="text-align:center;padding:20px;color:#666;font-size:13px">Press <strong>Cmd+P</strong> (Mac) or <strong>Ctrl+P</strong> (Windows) to print or save as PDF</p>
 </body></html>`;
 
     const win = window.open('', '_blank');
