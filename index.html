@@ -56,8 +56,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .kanban-board { display: flex; gap: 14px; align-items: start; min-width: max-content; }
 .kanban-column { background: #EDEEF2; border-radius: 14px; padding: 14px; width: 720px; transition: width 0.3s ease; flex-shrink: 0; }
 .kanban-column.col-empty { width: 160px; }
-.kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 6px; }
-.kanban-col-title { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kanban-col-header { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 6px; gap: 6px; }
+.kanban-col-title-block { margin-bottom: 14px; }
+.kanban-col-main { font-size: 12px; font-weight: 800; color: #444; letter-spacing: -0.2px; margin-bottom: 4px; }
+.kanban-col-sub { font-size: 10px; color: #999; line-height: 1.5; }
 .kanban-col-count { font-size: 11px; background: white; border: 1px solid #E0E0E6; padding: 2px 9px; border-radius: 10px; color: #AAA; font-weight: 600; flex-shrink: 0; }
 .opp-card { background: white; border-radius: 12px; border: 1.5px solid #E8EAF0; margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.2s; }
 .opp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
@@ -189,12 +191,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="card">
         <div class="card-title">Run Trend Analysis — Weekly</div>
         <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Trend Analyst searches for 15+ market trends across all six lenses and saves them to the Trend Library. Run this weekly to keep the library fresh. The Scout draws from this library when finding opportunities.</p>
-        <button class="btn-trend" id="trendBtn" onclick="runTrendAnalysis()">🔭 Run Trend Analysis</button>
+        <button class="btn-trend" id="trendBtn" onclick="runTrendAnalysis(false)">🔭 Run Weekly Trend Analysis</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Run Targeted Trend Search — On Demand</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Enter a specific focus area for the Trend Analyst to search. Results are added to the Trend Library alongside the weekly batch.</p>
+        <textarea class="signal-input" id="targetedTrendPrompt" style="height:70px" placeholder="e.g. Find trends specifically in the aging-in-place home modification market… or Focus on AI disruption in the legal services industry…"></textarea>
+        <div style="margin-top:12px">
+          <button class="btn-trend" id="targetedTrendBtn" onclick="runTrendAnalysis(true)">🎯 Run Targeted Trend Search</button>
+        </div>
       </div>
 
       <div class="card">
         <div class="card-title">Run Opportunity Pipeline — Daily</div>
-        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 2 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 3 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
         <input class="opp-name-input" id="oppName" placeholder="Opportunity name (optional — leave blank for Scout to discover)">
         <textarea class="signal-input" id="signalInput" placeholder="Optional: Describe a specific opportunity signal to evaluate. Leave blank to let Scout pull from Trend Library…"></textarea>
         <div class="input-footer">
@@ -228,24 +239,73 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="filter-bar">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" onclick="filterStatus('all',this)">All</button>
-        <button class="filter-btn" onclick="filterStatus('active',this)">In Pipeline</button>
         <button class="filter-btn" onclick="filterStatus('review',this)">Needs Review</button>
         <button class="filter-btn" onclick="filterStatus('approved',this)">Approved</button>
+        <button class="filter-btn" onclick="filterStatus('pipeline',this)">In Pipeline</button>
+        <button class="filter-btn" onclick="filterStatus('dropped',this)">Dropped</button>
       </div>
       <div class="kanban-wrapper">
         <div class="kanban-board">
-          <div class="kanban-column col-empty" id="colwrap-signal"><div class="kanban-col-header"><span class="kanban-col-title">📡 Signal Captured</span><span class="kanban-col-count" id="count-signal">0</span></div><div id="col-signal"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-ai-exec"><div class="kanban-col-header"><span class="kanban-col-title">🤖 AI Executability</span><span class="kanban-col-count" id="count-ai-exec">0</span></div><div id="col-ai-exec"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-market"><div class="kanban-col-header"><span class="kanban-col-title">📊 Market Analysis</span><span class="kanban-col-count" id="count-market">0</span></div><div id="col-market"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-business"><div class="kanban-col-header"><span class="kanban-col-title">🏗️ Business Design</span><span class="kanban-col-count" id="count-business">0</span></div><div id="col-business"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-brand"><div class="kanban-col-header"><span class="kanban-col-title">🎨 Brand Development</span><span class="kanban-col-count" id="count-brand">0</span></div><div id="col-brand"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-gtm"><div class="kanban-col-header"><span class="kanban-col-title">🚀 GTM Strategy</span><span class="kanban-col-count" id="count-gtm">0</span></div><div id="col-gtm"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-exec"><div class="kanban-col-header"><span class="kanban-col-title">⚙️ AI Execution Design</span><span class="kanban-col-count" id="count-exec">0</span></div><div id="col-exec"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-blueprint"><div class="kanban-col-header"><span class="kanban-col-title">📋 Blueprint Draft</span><span class="kanban-col-count" id="count-blueprint">0</span></div><div id="col-blueprint"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-review"><div class="kanban-col-header"><span class="kanban-col-title">🔍 Review</span><span class="kanban-col-count" id="count-review">0</span></div><div id="col-review"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-approved"><div class="kanban-col-header"><span class="kanban-col-title">✅ Approved</span><span class="kanban-col-count" id="count-approved">0</span></div><div id="col-approved"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-hold"><div class="kanban-col-header"><span class="kanban-col-title">⏸ On Hold</span><span class="kanban-col-count" id="count-hold">0</span></div><div id="col-hold"></div></div>
-          <div class="kanban-column col-empty" id="colwrap-dropped"><div class="kanban-col-header"><span class="kanban-col-title">🚫 Dropped</span><span class="kanban-col-count" id="count-dropped">0</span></div><div id="col-dropped"></div></div>
+          <div class="kanban-column col-empty" id="colwrap-health">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-health">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🏥 Health & Wellness</div><div class="kanban-col-sub">Supplements, fitness, mental health, medical devices, wellness products</div></div>
+            <div id="col-health"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-home">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-home">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🏠 Home & Living</div><div class="kanban-col-sub">Home improvement, decor, garden, pet, outdoor, cleaning</div></div>
+            <div id="col-home"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-consumer">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-consumer">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">👗 Consumer Goods</div><div class="kanban-col-sub">Apparel, beauty, personal care, food & beverage, baby</div></div>
+            <div id="col-consumer"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-b2b">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-b2b">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">💼 B2B & Professional</div><div class="kanban-col-sub">Business services, productivity, professional tools, HR, legal, finance</div></div>
+            <div id="col-b2b"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-tech">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-tech">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">💻 Technology & SaaS</div><div class="kanban-col-sub">Software, AI tools, apps, platforms, tech accessories</div></div>
+            <div id="col-tech"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-marketplace">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-marketplace">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🔗 Marketplace & Middleman</div><div class="kanban-col-sub">Connectors, aggregators, brokers, lead gen, arbitrage, sourcing</div></div>
+            <div id="col-marketplace"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-education">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-education">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">📚 Education & Media</div><div class="kanban-col-sub">Courses, coaching, content, newsletters, communities</div></div>
+            <div id="col-education"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-finance">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-finance">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">💰 Finance & Wealth</div><div class="kanban-col-sub">Fintech, investing tools, real estate adjacent, insurance</div></div>
+            <div id="col-finance"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-sustainability">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-sustainability">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🌿 Sustainability & Lifestyle</div><div class="kanban-col-sub">Eco products, conscious consumption, travel, experiences</div></div>
+            <div id="col-sustainability"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-other">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-other">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">📦 Other</div><div class="kanban-col-sub">Opportunities that span multiple categories or don't fit neatly above</div></div>
+            <div id="col-other"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-pipeline">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-pipeline">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">⚙️ In Pipeline</div><div class="kanban-col-sub">Currently running through the agent pipeline</div></div>
+            <div id="col-pipeline"></div>
+          </div>
+          <div class="kanban-column col-empty" id="colwrap-dropped">
+            <div class="kanban-col-header"><span class="kanban-col-count" id="count-dropped">0</span></div>
+            <div class="kanban-col-title-block"><div class="kanban-col-main">🚫 Dropped</div><div class="kanban-col-sub">Did not pass Orchestrator evaluation</div></div>
+            <div id="col-dropped"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -451,7 +511,9 @@ UNIVERSAL SCORING RUBRIC:
 4 — Poor. Misses the brief, contains contradictions, or too shallow to be useful. Full rewrite directive.
 3 or below — Failing. Flag for human review immediately. Do not continue pipeline.
 
-Maximum 3 revision attempts per stage. After 3 attempts, proceed with best available output and flag for human review.
+SCOUT-SPECIFIC ABANDONMENT RULE: For the Scout stage only, a score below 5 means the opportunity concept itself is fundamentally flawed, too generic, or not viable. Do not revise — abandon completely and instruct the Scout to find an entirely new and different opportunity. Do not attempt to rescue a bad idea through revision. A score of 5-6 means the opportunity is directionally correct but the Scout's presentation needs improvement — revise with specific instructions. A score of 7+ means pass.
+
+PIPELINE ABANDONMENT RULE: At any stage in the pipeline, if the Orchestrator determines after careful evaluation that the core opportunity concept is fundamentally unviable — regardless of how well the agent executed its specific task — the Orchestrator may recommend abandoning the entire opportunity rather than continuing to invest resources. This is distinct from a low score on execution quality. If the market doesn't exist, the financials can never work, or the AI executability is structurally impossible, flag for abandonment with a clear explanation rather than continuing the pipeline.
 
 DOMAIN-SPECIFIC STANDARDS:
 Scout: A 7 means the opportunity is clearly defined, the target market is specific, and there is a credible hypothesis for why this could work as a business. Vague trends or overcrowded markets without a clear angle score no higher than 5.
@@ -919,25 +981,39 @@ async function runAgent(stageName, agentPrompt, userMessage, context, maxAttempt
 }
 
 // ─── TREND ANALYSIS RUN ───────────────────────────────────────────────────────
-async function runTrendAnalysis() {
+async function runTrendAnalysis(targeted = false) {
   if (!ANTHROPIC_API_KEY) { alert('API key not loaded. Please wait and try again.'); return; }
 
-  const trendBtn = document.getElementById('trendBtn');
+  const targetedPrompt = targeted ? document.getElementById('targetedTrendPrompt').value.trim() : '';
+  if (targeted && !targetedPrompt) { alert('Please enter a focus area for the targeted trend search.'); return; }
+
+  const trendBtn = targeted ? document.getElementById('targetedTrendBtn') : document.getElementById('trendBtn');
   trendBtn.disabled = true;
-  trendBtn.textContent = '⏳ Running Trend Analysis…';
-  document.getElementById('systemStatus').textContent = '● Trend Analysis running…';
+  trendBtn.textContent = '⏳ Running…';
+  document.getElementById('systemStatus').textContent = targeted ? '● Targeted Trend Search running…' : '● Trend Analysis running…';
   document.getElementById('systemStatus').className = 'system-status working';
   setAgentStatus('trend', 'working', 'Researching…');
-  addActivity('🔭 Trend Analyst searching for market trends…');
+  addActivity(targeted ? `🎯 Targeted Trend Search: "${targetedPrompt.substring(0,60)}…"` : '🔭 Trend Analyst searching for market trends…');
 
   const focusCtx = getFocusCtx();
 
   try {
-    const trendMsg = `Perform a comprehensive trend analysis run. Use web search to research current market trends across all six lenses. Identify a minimum of 15 distinct trends with real market signals.
+    let trendMsg;
+    if (targeted) {
+      trendMsg = `Perform a targeted trend analysis focused on this specific area: "${targetedPrompt}"
+
+Search deeply within this focus area using web search. Identify a minimum of 8 distinct trends within this specific focus area. Apply the same six lens framework but filter everything through this specific focus.
+
+${focusCtx ? `Additional Focus Criteria:\n${focusCtx}\n\n` : ''}
+
+Include macro and micro trends, right now and near term opportunities within this focus area. Every trend must have real market signals from your research.`;
+    } else {
+      trendMsg = `Perform a comprehensive weekly trend analysis run. Use web search to research current market trends across all six lenses. Identify a minimum of 15 distinct trends with real market signals.
 
 ${focusCtx ? `Focus areas to prioritize:\n${focusCtx}\n\n` : ''}
 
-Remember to include macro and micro trends, right now and near term opportunities, and especially AI-disruption trends where incumbents are vulnerable.`;
+Remember to include macro and micro trends, right now and near term opportunities, and especially AI-disruption trends where incumbents are vulnerable. Include a good mix of trends that could support both physical product businesses and digital/service businesses.`;
+    }
 
     const trendsOutput = await callClaude(TREND_ANALYST_PROMPT, trendMsg, 6000, true);
     setAgentStatus('trend', 'done', 'Done ✓');
@@ -986,7 +1062,7 @@ Remember to include macro and micro trends, right now and near term opportunitie
       }
     }
 
-    addActivity(`✅ Trend Analysis complete — ${saved} trends saved to library`);
+    addActivity(`✅ ${targeted ? 'Targeted Trend Search' : 'Trend Analysis'} complete — ${saved} trends saved to library`);
     loadTrendBadge();
 
   } catch(err) {
@@ -995,7 +1071,7 @@ Remember to include macro and micro trends, right now and near term opportunitie
   }
 
   trendBtn.disabled = false;
-  trendBtn.textContent = '🔭 Run Trend Analysis';
+  trendBtn.textContent = targeted ? '🎯 Run Targeted Trend Search' : '🔭 Run Weekly Trend Analysis';
   document.getElementById('systemStatus').textContent = '● All agents ready';
   document.getElementById('systemStatus').className = 'system-status';
   setAgentStatus('trend', 'idle', 'Idle');
@@ -1126,17 +1202,39 @@ STAGE SCORES: ${stageScoresSummary}
 FULL CONTEXT:
 ${context.substring(0, 7000)}
 
-Produce the final Blueprint:
-1. EXECUTIVE SUMMARY — 3-5 paragraphs for a decision maker who needs to understand the opportunity in under 2 minutes
-2. STAGE SCORES SUMMARY — table of all stage scores with brief reasoning for each
-3. KEY STRENGTHS — 3-5 things making this opportunity genuinely compelling
-4. KEY RISKS — 3-5 things that could make this fail and what to watch for
-5. CAPITAL SUMMARY — total path to breakeven, monthly operating cost at steady state, timeline to first revenue
-6. OVERALL OPPORTUNITY SCORE: [X]/10 — weighted average. AI Executability and Financial Viability weighted most heavily (35% combined), Market Analysis and GTM Strategy second (35% combined), Brand Development third (15%), Scout signal (15%). Show your calculation.
-7. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with clear reasoning
-8. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right
+Produce the final Blueprint in this exact structure:
 
-Format the overall score exactly as: OVERALL OPPORTUNITY SCORE: [number]/10`;
+1. EXECUTIVE SUMMARY — A comprehensive summary for a decision maker. Include:
+   - 2-3 paragraphs on the overall opportunity and why it matters now
+   - AGENT FINDINGS SUMMARY — approximately 100-150 words per agent summarizing the key findings from each stage:
+     * Scout Finding: [what opportunity was identified, why it exists, why now]
+     * AI Executability Finding: [key automation potential, score, and human time estimate]
+     * Market Analysis Finding: [key market validation signals and competitive insight]
+     * Business Architecture Finding: [key financial metrics, path to breakeven, capital required]
+     * Brand Development Finding: [recommended brand name and core positioning]
+     * GTM Strategy Finding: [primary acquisition channel and 30-day launch approach]
+     * AI Execution Design Finding: [core AI stack summary and human time commitment at steady state]
+
+2. STAGE SCORES SUMMARY — table of all stage scores with brief reasoning for each
+
+3. KEY STRENGTHS — 3-5 things making this opportunity genuinely compelling
+
+4. KEY RISKS — 3-5 things that could make this fail and what to watch for
+
+5. CAPITAL SUMMARY — total path to breakeven, monthly operating cost at steady state, timeline to first revenue
+
+6. BUSINESS CATEGORY — assign exactly one category from this list:
+   Health & Wellness | Home & Living | Consumer Goods | B2B & Professional | Technology & SaaS | Marketplace & Middleman | Education & Media | Finance & Wealth | Sustainability & Lifestyle | Other
+   Format exactly as: CATEGORY: [category name]
+
+7. OVERALL OPPORTUNITY SCORE: [X]/10 — weighted average. AI Executability and Financial Viability weighted most heavily (35% combined), Market Analysis and GTM Strategy second (35% combined), Brand Development third (15%), Scout signal (15%). Show your calculation.
+
+8. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with clear reasoning
+
+9. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right
+
+Format the overall score exactly as: OVERALL OPPORTUNITY SCORE: [number]/10
+Format the category exactly as: CATEGORY: [category name]`;
 
   const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
   setAgentStatus('orchestrator', 'done', 'Done ✓');
@@ -1160,14 +1258,19 @@ Format the overall score exactly as: OVERALL OPPORTUNITY SCORE: [number]/10`;
     overallScore = Math.round(overallScore * 10) / 10;
   }
 
+  // Extract category
+  const categoryMatch = blueprint.match(/CATEGORY:\s*([^\n]+)/i);
+  const category = categoryMatch ? categoryMatch[1].trim() : 'Other';
+
   await saveOpp(recordId, {
     'Orchestrator Summary': blueprint,
     'Opportunity Score': overallScore,
     'Risks & Challenges': blueprint,
+    'Category': category,
     'Status': 'Review'
   });
 
-  addActivity(`🎉 Blueprint complete! "${oppName}" ready for review. Score: ${overallScore}/10`);
+  addActivity(`🎉 Blueprint complete! "${oppName}" → ${category} | Score: ${overallScore}/10`);
   loadBoard();
   loadQueueBadge();
   return true;
@@ -1215,7 +1318,7 @@ async function runPipeline() {
 
       const trendBrief = trends.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
 
-      const scoutMsg = `You have been given a Trend Brief with ${trends.length} validated market trends. Find 2 specific business opportunities within these trends. Choose the trends with the strongest signals and clearest business opportunity potential.
+      const scoutMsg = `You have been given a Trend Brief with ${trends.length} validated market trends. Find 3 specific business opportunities within these trends. Choose the trends with the strongest signals and clearest business opportunity potential. Remember: approximately 50% of opportunities should be physical product businesses.
 
 TREND BRIEF:
 ${trendBrief}
@@ -1231,7 +1334,7 @@ For each opportunity use the format specified in your instructions. Separate wit
       const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
       addActivity(`📡 Scout found ${oppBlocks.length} opportunities — running pipelines…`);
 
-      for (const block of oppBlocks.slice(0, 2)) {
+      for (const block of oppBlocks.slice(0, 3)) {
         const nameMatch = block.match(/OPPORTUNITY_NAME:\s*(.+)/);
         const trendMatch = block.match(/SOURCE_TREND:\s*(.+)/);
         const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=TARGET_CUSTOMER:|$)/);
@@ -1482,33 +1585,47 @@ function toggleCard(id) {
   if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
 }
 
-const COLUMNS = [
-  { key: 'Signal Captured', id: 'signal' },
-  { key: 'AI Executability', id: 'ai-exec' },
-  { key: 'Market Analysis', id: 'market' },
-  { key: 'Business Design', id: 'business' },
-  { key: 'Brand Development', id: 'brand' },
-  { key: 'GTM Strategy', id: 'gtm' },
-  { key: 'AI Execution Design', id: 'exec' },
-  { key: 'Blueprint Draft', id: 'blueprint' },
-  { key: 'Review', id: 'review' },
-  { key: 'Approved', id: 'approved' },
-  { key: 'On Hold', id: 'hold' },
-  { key: 'Dropped', id: 'dropped' },
+const CATEGORY_COLUMNS = [
+  { key: 'Health & Wellness', id: 'health' },
+  { key: 'Home & Living', id: 'home' },
+  { key: 'Consumer Goods', id: 'consumer' },
+  { key: 'B2B & Professional', id: 'b2b' },
+  { key: 'Technology & SaaS', id: 'tech' },
+  { key: 'Marketplace & Middleman', id: 'marketplace' },
+  { key: 'Education & Media', id: 'education' },
+  { key: 'Finance & Wealth', id: 'finance' },
+  { key: 'Sustainability & Lifestyle', id: 'sustainability' },
+  { key: 'Other', id: 'other' },
 ];
+
+const PIPELINE_STATUSES = ['Signal Captured','AI Executability','Market Analysis','Business Design','Brand Development','GTM Strategy','AI Execution Design','Blueprint Draft'];
+
+function getCategoryForItem(item) {
+  const cat = item['Category'];
+  if (!cat) {
+    // If still in pipeline, show in pipeline column
+    if (PIPELINE_STATUSES.includes(item.Status)) return '__pipeline__';
+    if (item.Status === 'Dropped') return '__dropped__';
+    return 'Other';
+  }
+  return cat;
+}
 
 function filterItems(items) {
   if (activeFilter === 'all') return items;
-  if (activeFilter === 'active') return items.filter(i => !['Review','Approved','On Hold','Dropped'].includes(i.Status));
   if (activeFilter === 'review') return items.filter(i => i.Status === 'Review');
   if (activeFilter === 'approved') return items.filter(i => i.Status === 'Approved');
+  if (activeFilter === 'pipeline') return items.filter(i => PIPELINE_STATUSES.includes(i.Status));
+  if (activeFilter === 'dropped') return items.filter(i => i.Status === 'Dropped');
   return items;
 }
 
 function renderBoard(items) {
   const filtered = filterItems(items);
-  COLUMNS.forEach(col => {
-    const colItems = filtered.filter(i => i.Status === col.key);
+
+  // Render category columns
+  CATEGORY_COLUMNS.forEach(col => {
+    const colItems = filtered.filter(i => getCategoryForItem(i) === col.key);
     const el = document.getElementById('col-' + col.id);
     const countEl = document.getElementById('count-' + col.id);
     const colWrapper = document.getElementById('colwrap-' + col.id);
@@ -1516,6 +1633,25 @@ function renderBoard(items) {
     if (countEl) countEl.textContent = colItems.length;
     if (colWrapper) colWrapper.classList.toggle('col-empty', colItems.length === 0);
   });
+
+  // Pipeline column
+  const pipelineItems = filtered.filter(i => PIPELINE_STATUSES.includes(i.Status));
+  const pipelineEl = document.getElementById('col-pipeline');
+  const pipelineCount = document.getElementById('count-pipeline');
+  const pipelineWrapper = document.getElementById('colwrap-pipeline');
+  if (pipelineEl) pipelineEl.innerHTML = pipelineItems.length ? pipelineItems.map(buildCard).join('') : '';
+  if (pipelineCount) pipelineCount.textContent = pipelineItems.length;
+  if (pipelineWrapper) pipelineWrapper.classList.toggle('col-empty', pipelineItems.length === 0);
+
+  // Dropped column
+  const droppedItems = filtered.filter(i => i.Status === 'Dropped');
+  const droppedEl = document.getElementById('col-dropped');
+  const droppedCount = document.getElementById('count-dropped');
+  const droppedWrapper = document.getElementById('colwrap-dropped');
+  if (droppedEl) droppedEl.innerHTML = droppedItems.length ? droppedItems.map(buildCard).join('') : '';
+  if (droppedCount) droppedCount.textContent = droppedItems.length;
+  if (droppedWrapper) droppedWrapper.classList.toggle('col-empty', droppedItems.length === 0);
+
   document.getElementById('queueBadge').textContent = items.filter(i => i.Status === 'Review').length;
 }
 
