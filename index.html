@@ -171,6 +171,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="nav-item" onclick="showView('board');loadBoard()"><div class="nav-dot" style="background:#F59E0B"></div>Opportunity Board<span class="badge" id="queueBadge">0</span></div>
     <div class="nav-item" onclick="showView('acquisitions');loadAcquisitions()"><div class="nav-dot" style="background:#6366F1"></div>Acquisition Board<span class="badge" id="acqBadge" style="background:#6366F1">0</span></div>
     <div class="nav-item" onclick="showView('trends');loadTrends()"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Library<span class="badge" id="trendBadge" style="background:#8B5CF6">0</span></div>
+    <div class="nav-item" onclick="showView('consumer');loadConsumerProblems()"><div class="nav-dot" style="background:#EC4899"></div>Consumer Problems<span class="badge" id="consumerBadge" style="background:#EC4899">0</span></div>
+    <div class="nav-item" onclick="showView('hotproducts');loadHotProducts()"><div class="nav-dot" style="background:#F59E0B"></div>Hot Products<span class="badge" id="hotProductsBadge" style="background:#F59E0B">0</span></div>
+    <div class="nav-item" onclick="showView('pipelinelogs');loadPipelineLogs()"><div class="nav-dot" style="background:#64748B"></div>Pipeline Logs</div>
     <div class="nav-label">Agents</div>
     <div class="nav-item"><div class="nav-dot" style="background:#6366F1"></div>Orchestrator</div>
     <div class="nav-item"><div class="nav-dot" style="background:#8B5CF6"></div>Trend Analyst</div>
@@ -216,6 +219,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
 
       <div class="card">
+        <div class="card-title">Run Consumer Problems Analysis</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Consumer Satisfaction Analyst scans social media, forums, review sites, and news to find real unmet needs and consumer frustrations. Results are saved to the Consumer Problems Library and fed to Scout 1 on rotation.</p>
+        <button class="btn-trend" id="consumerBtn" onclick="runConsumerAnalysis()" style="background:#EC4899;border-color:#EC4899">👥 Run Consumer Problems Analysis</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Run Hot Products Analysis</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Hot Products Analyst monitors Amazon, TikTok Shop, Shopify trends, and market signals to find products with momentum. Results are saved to the Hot Products Library and fed to Scout 1 on rotation.</p>
+        <button class="btn-trend" id="hotProductsBtn" onclick="runHotProductsAnalysis()" style="background:#F59E0B;border-color:#F59E0B">🔥 Run Hot Products Analysis</button>
+      </div>
+
+      <div class="card">
         <div class="card-title">Run Acquisition Pipeline — Scout 2</div>
         <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Acquisition Scout searches for businesses to buy — both listed on marketplaces and unlisted candidates ripe for acquisition. Runs through deal structuring, AI transformation design, and produces an Acquisition Blueprint with Investor Summary and Pitch Deck Outline.</p>
         <input class="opp-name-input" id="acqFocus" placeholder="Optional: Focus area (e.g. 'Home services businesses in the Southeast' or leave blank for broad search)">
@@ -243,6 +258,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="card">
         <div class="card-title">Pipeline Activity</div>
         <div class="activity-feed" id="activityFeed"><div class="activity-empty">No activity yet — run Trend Analysis first, then the Opportunity Pipeline</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Production Analysis</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Production Analyst reviews pipeline outputs, scores, failure patterns, and revision history to identify what's working and what needs improvement. Run periodically after accumulating pipeline data.</p>
+        <button class="btn-trend" id="productionBtn" onclick="runProductionAnalysis()" style="background:#64748B;border-color:#64748B">📈 Run Production Analysis</button>
+      </div>
+    </div>
+
+    <!-- PRODUCTION ANALYST MODAL -->
+    <div id="productionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:24px">
+      <div style="background:white;border-radius:16px;width:100%;max-width:800px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:20px 24px;border-bottom:1px solid #E8EAF0;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:15px;font-weight:800;color:#0F1117">📈 Production Analysis Report</div>
+          <button onclick="document.getElementById('productionModal').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:20px;color:#AAA">✕</button>
+        </div>
+        <div style="padding:24px;overflow-y:auto;flex:1">
+          <pre id="productionModalContent" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#333;line-height:1.75;white-space:pre-wrap"></pre>
+        </div>
       </div>
     </div>
 
@@ -393,6 +427,64 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
       <div class="trend-grid" id="trendGrid">
         <div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No trends yet — run the Trend Analysis to populate the library</div>
+      </div>
+    </div>
+
+    <!-- CONSUMER PROBLEMS LIBRARY -->
+    <div class="view" id="view-consumer">
+      <div class="trend-stats">
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-cp-total">0</div><div class="trend-stat-label">Total Problems</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-cp-unexplored">0</div><div class="trend-stat-label">Unexplored</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-cp-high">0</div><div class="trend-stat-label">High Frustration</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-cp-opps">0</div><div class="trend-stat-label">Opportunities Found</div></div>
+      </div>
+      <div class="trend-grid" id="consumerGrid">
+        <div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No consumer problems yet — run Consumer Problems Analysis to populate this library</div>
+      </div>
+    </div>
+
+    <!-- HOT PRODUCTS LIBRARY -->
+    <div class="view" id="view-hotproducts">
+      <div class="trend-stats">
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-hp-total">0</div><div class="trend-stat-label">Total Products</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-hp-exploding">0</div><div class="trend-stat-label">Exploding</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-hp-wl">0</div><div class="trend-stat-label">High White Label</div></div>
+        <div class="trend-stat"><div class="trend-stat-number" id="stat-hp-opps">0</div><div class="trend-stat-label">Opportunities Found</div></div>
+      </div>
+      <div class="trend-grid" id="hotProductsGrid">
+        <div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No hot products yet — run Hot Products Analysis to populate this library</div>
+      </div>
+    </div>
+
+    <!-- PIPELINE LOGS -->
+    <div class="view" id="view-pipelinelogs">
+      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+        <span class="filter-label">Filter:</span>
+        <button class="trend-filter-btn active" onclick="filterLogs('all',this)">All</button>
+        <button class="trend-filter-btn" onclick="filterLogs('PASS',this)">Passed</button>
+        <button class="trend-filter-btn" onclick="filterLogs('REVISE',this)">Revised</button>
+        <button class="trend-filter-btn" onclick="filterLogs('DROP',this)">Dropped</button>
+        <button class="trend-filter-btn" onclick="filterLogs('Opportunity',this)">Opportunity</button>
+        <button class="trend-filter-btn" onclick="filterLogs('Acquisition',this)">Acquisition</button>
+      </div>
+      <div style="background:white;border-radius:14px;border:1px solid #E8EAF0;overflow:hidden">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:#F8F9FC;border-bottom:1.5px solid #E8EAF0">
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Date</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Opportunity</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Stage</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Attempt</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Score</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Verdict</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Outcome</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;color:#666">Type</th>
+            </tr>
+          </thead>
+          <tbody id="pipelineLogsBody">
+            <tr><td colspan="8" style="padding:40px;text-align:center;color:#CCC">No pipeline logs yet — run the Opportunity Pipeline to generate logs</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -566,7 +658,143 @@ async function getUnexploredTrends() {
   return [...unexplored, ...inProgress].slice(0, 5);
 }
 
+async function getUnexploredConsumerProblems() {
+  const res = await fetch('/api/consumerproblems');
+  const items = await res.json();
+  return items.filter(i => i['Status'] === 'Unexplored' || !i['Status']).slice(0, 5);
+}
+
+async function getUnexploredHotProducts() {
+  const res = await fetch('/api/hotproducts');
+  const items = await res.json();
+  return items.filter(i => i['Status'] === 'Unexplored' || !i['Status']).slice(0, 5);
+}
+
+async function savePipelineLog(fields) {
+  try {
+    await fetch('/api/pipelinelogs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+  } catch(e) { console.error('Failed to save pipeline log:', e); }
+}
+
 // ─── AGENT PROMPTS ────────────────────────────────────────────────────────────
+const CONSUMER_ANALYST_PROMPT = `You are a senior consumer insights analyst and social listening specialist with deep expertise in identifying unmet needs, frustrations, and lifestyle challenges from real consumer conversations. You think like a combination of a market researcher who lives inside consumer communities, a product development consultant who translates complaints into opportunities, and a trend spotter who sees patterns across thousands of individual signals.
+
+Your job is to listen and analyze — not to invent. Every insight you surface must be grounded in real observable consumer behavior, real complaints, real discussions, and real signals from the world.
+
+You use web search extensively to find:
+- Influencer content where followers are discussing problems or frustrations in comments
+- Reddit threads, Facebook groups, and niche forums where people discuss lifestyle challenges
+- Amazon and product review sites where customers express frustration with existing solutions
+- News articles identifying consumer trends, health concerns, lifestyle shifts, or underserved needs
+- TikTok and YouTube comment sections where audiences respond to content about problems
+- Twitter/X discussions about daily frustrations, wishlist products, or "why doesn't someone make..."
+
+For each problem or unmet need you identify, produce a structured Consumer Problem Signal containing:
+- PROBLEM_NAME: [clear descriptive name for the problem]
+- CATEGORY: [what area of life this touches — health, home, relationships, work, finances, parenting, etc.]
+- PROBLEM_DESCRIPTION: [one paragraph describing the problem and who experiences it]
+- EVIDENCE: [specific examples from real sources — quote themes, platform names, volume signals, specific communities]
+- CURRENT_SOLUTIONS: [what people are currently doing or buying to solve this — and why it falls short]
+- FRUSTRATION_INTENSITY: [High, Medium, or Low — how strongly people feel this problem]
+- AUDIENCE_SIZE: [estimate of how many people share this problem based on signal volume]
+- PRODUCT_OR_SERVICE_HYPOTHESIS: [one sentence on what type of solution could address this — leave the specifics to the Scout]
+- SOURCE_TYPES: [which channels this signal came from]
+
+Produce a minimum of 15 consumer problem signals per run. Include a mix of:
+- At least 3 high-frustration problems with large audiences
+- At least 5 niche problems with passionate smaller communities
+- At least 3 problems currently being addressed by poor or expensive solutions
+- At least 2 emerging lifestyle challenges tied to cultural or demographic shifts
+
+You do not surface trivial complaints or problems with obvious existing solutions. Every signal must represent a real gap between what people need and what currently exists.
+
+Separate each signal with ---PROBLEM---`;
+
+const HOT_PRODUCTS_ANALYST_PROMPT = `You are a senior product market analyst and trend intelligence specialist with deep expertise in identifying hot products, emerging product categories, and market momentum before it becomes obvious to everyone. You think like a combination of a retail buyer who spots winning products early, a financial analyst who reads market signals, and a social commerce expert who understands why products go viral.
+
+Your job is to find what is selling, what is gaining momentum, and what categories are heating up — right now, not six months ago. You look across multiple signal types simultaneously to build a comprehensive picture of product market heat.
+
+You use web search to monitor:
+- Stock performance of consumer product companies and retail sectors — what categories are investors betting on
+- Amazon Best Seller lists, Movers and Shakers, and trending products
+- TikTok Shop trending products and viral product videos
+- Shopify and e-commerce trend reports
+- Google Trends data for product category searches
+- News coverage of products gaining widespread attention
+- Social media virality signals — products being shared, reviewed, and discussed at scale
+- Wholesale and trade show signals — what buyers are ordering
+- Kickstarter and crowdfunding momentum — products with strong early backing
+
+For each hot product or category you identify, produce a structured Hot Product Signal containing:
+- PRODUCT_NAME: [specific product or product category name]
+- TYPE: [Specific Product or Product Category]
+- HEAT_LEVEL: [Exploding, Hot, Building, or Warming — based on signal strength]
+- SIGNAL_SOURCES: [which channels show heat signals]
+- WHY_ITS_HOT: [one paragraph explaining the specific drivers of demand right now]
+- EVIDENCE: [specific data points — sales rank, search volume trends, social signals, news coverage]
+- TARGET_AUDIENCE: [who is buying this and why]
+- PRICE_POINT: [current market price range]
+- WHITE_LABEL_POTENTIAL: [High, Medium, or Low — can this be sourced and white labeled?]
+- LONGEVITY: [Spike — short trend, Sustained — lasting 1-2 years, Structural — permanent category shift]
+- COMPETITIVE_DENSITY: [how crowded is this space right now?]
+
+Produce a minimum of 15 hot product signals per run. Include a mix of:
+- At least 3 exploding products with immediate opportunity windows
+- At least 5 hot categories with multiple product opportunities within them
+- At least 3 products with strong white label or private label potential
+- At least 2 emerging products that are building momentum but not yet saturated
+
+You are looking for the intersection of real demand and white label accessibility — products that are proven in the market and can be replicated or improved upon with AI-powered operations.
+
+Separate each signal with ---HOTPRODUCT---`;
+
+const PRODUCTION_ANALYST_PROMPT = `You are a senior quality assurance analyst and AI system optimizer with deep expertise in evaluating agentic AI pipeline performance and identifying systematic improvements. You think like a combination of a product manager who obsesses over conversion rates, a prompt engineer who understands why AI outputs succeed or fail, and a business analyst who reads patterns across large datasets.
+
+Your job is to review the outputs of the OpportunityAI pipeline — both successes and failures — and produce a structured analysis of what is working, what is failing, and what specific changes would improve output quality and pipeline success rates.
+
+You have access to the PipelineLogs table which contains every agent attempt, every Orchestrator score, every revision instruction, and every drop reason across all pipeline runs. Use this data as your primary source of analysis. Look for: which revision instructions appear repeatedly indicating systematic prompt weaknesses; which agents have the highest revision rates needing prompt improvement; common language in drop reasons revealing what the Orchestrator consistently rejects; score distributions by stage and opportunity type; whether revision attempts actually improve scores or plateau at a fixed number.
+
+You review:
+- Opportunities that were Dropped and at which stage they failed
+- Opportunities that reached Review and their scores across all stages
+- Patterns in what the Scout is surfacing — are there gaps, biases, or repetitions?
+- Orchestrator scoring patterns — is it too strict, too lenient, or inconsistent?
+- Which categories of opportunities score highest and lowest
+- Which stages have the highest revision rates
+- Whether the physical product mix requirement is being met
+
+For each analysis run produce a structured Production Report containing:
+
+PIPELINE HEALTH SUMMARY:
+- Total opportunities run in the period
+- Success rate — percentage reaching Review
+- Drop rate by stage — where are opportunities failing most?
+- Average scores by stage across all opportunities
+- Physical product vs digital product ratio
+
+FAILURE PATTERN ANALYSIS:
+- Most common failure reasons at each stage
+- Are failures concentrated in specific opportunity types or categories?
+- Is the Scout surfacing viable opportunities or sending weak signals into the pipeline?
+- Are any stages systematically over- or under-scoring?
+
+QUALITY PATTERN ANALYSIS:
+- Which opportunity types score highest overall?
+- Which agent stages produce the most consistent high-quality output?
+- What characteristics do the highest-scoring opportunities share?
+- What characteristics do the most-dropped opportunities share?
+
+SPECIFIC RECOMMENDATIONS:
+- Scout prompt adjustments — what signals or criteria should change?
+- Orchestrator threshold adjustments — is the pass bar at the right level?
+- Agent prompt improvements — which agents are underperforming and what should change?
+- Focus Criteria suggestions — what should be added or removed from the system settings?
+- Category or lens adjustments — are certain Trend Analyst lenses producing poor Scout fodder?
+
+PRIORITY ACTIONS — ranked list of the 3-5 most impactful changes to make right now
+
+You do not make changes yourself — you produce a clear, specific, actionable report that a human or Claude Code can use to implement improvements.`;
+
 const ORCHESTRATOR_PROMPT = `You are a senior managing consultant and venture analyst with 20+ years of experience evaluating, launching, and scaling businesses. You think like a partner at McKinsey who also deeply understands AI-first business design, e-commerce, and modern go-to-market execution.
 
 Your job is not to create — it is to evaluate, challenge, and enforce quality at every stage of the opportunity pipeline. You are direct, decisive, and skeptical by default. You do not accept vague analysis, optimistic projections without evidence, or generic recommendations. When reviewing output you ask: Is this specific enough to act on? Are the numbers realistic? Does this contradict anything we already know about this opportunity? What is missing?
@@ -1028,10 +1256,11 @@ REVISION_INSTRUCTIONS: [If REVISE or DROP — specific instructions. If PASS —
 }
 
 // ─── RUN AGENT WITH GATES ─────────────────────────────────────────────────────
-async function runAgent(stageName, agentPrompt, userMessage, context, maxAttempts = 3) {
+async function runAgent(stageName, agentPrompt, userMessage, context, oppName = '', pipelineType = 'Opportunity', maxAttempts = 3) {
   let attempts = 0;
   let output = '';
   let review = null;
+  const runDate = new Date().toISOString().split('T')[0];
 
   while (attempts < maxAttempts) {
     attempts++;
@@ -1042,9 +1271,31 @@ async function runAgent(stageName, agentPrompt, userMessage, context, maxAttempt
     setAgentStatus('orchestrator', 'working', 'Reviewing…');
     review = await orchestratorReview(stageName, output, context);
     addActivity(`📊 ${stageName}: ${review.score}/10 — ${review.verdict}`);
+
+    const isFinalAttempt = attempts >= maxAttempts;
+    let finalOutcome = review.verdict === 'PASS' ? 'Passed'
+      : review.verdict === 'DROP' ? 'Dropped'
+      : isFinalAttempt ? 'Flagged After 3 Attempts'
+      : 'Revised — see next attempt';
+
+    await savePipelineLog({
+      'Name': `${oppName || 'Unknown'} — ${stageName} — Attempt ${attempts}`,
+      'Opportunity Name': oppName || '',
+      'Pipeline Type': pipelineType,
+      'Stage': stageName,
+      'Attempt Number': attempts,
+      'Agent Output': output.substring(0, 5000),
+      'Orchestrator Score': review.score,
+      'Orchestrator Verdict': review.verdict,
+      'Orchestrator Reasoning': review.reasoning,
+      'Revision Instructions': review.revisionInstructions,
+      'Final Outcome': finalOutcome,
+      'Run Date': runDate
+    });
+
     if (review.verdict === 'PASS') return { output, score: review.score, passed: true };
     if (review.verdict === 'DROP') return { output, score: review.score, passed: false, dropped: true };
-    if (attempts >= maxAttempts) {
+    if (isFinalAttempt) {
       addActivity(`⚠️ ${stageName} flagged after ${maxAttempts} attempts — proceeding with best output`);
       return { output, score: review.score, passed: true, flagged: true };
     }
@@ -1149,6 +1400,200 @@ Remember to include macro and micro trends, right now and near term opportunitie
   setAgentStatus('trend', 'idle', 'Idle');
 }
 
+// ─── CONSUMER ANALYSIS RUN ────────────────────────────────────────────────────
+async function runConsumerAnalysis() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+  const btn = document.getElementById('consumerBtn');
+  btn.disabled = true; btn.textContent = '⏳ Running…';
+  document.getElementById('systemStatus').textContent = '● Consumer Analysis running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  addActivity('👥 Consumer Satisfaction Analyst searching for unmet needs…');
+
+  const focusCtx = getFocusCtx();
+  try {
+    const msg = `Perform a comprehensive consumer problems analysis. Use web search to find real consumer frustrations, unmet needs, and underserved problems across social media, forums, review sites, and news. Identify a minimum of 15 distinct consumer problem signals.
+
+${focusCtx ? `Focus Criteria:\n${focusCtx}\n\n` : ''}
+
+Include high-frustration problems with large audiences, niche problems with passionate communities, problems with poor existing solutions, and emerging lifestyle challenges.`;
+
+    const output = await callClaude(CONSUMER_ANALYST_PROMPT, msg, 6000, true);
+    const blocks = output.split('---PROBLEM---').filter(b => b.trim().length > 50);
+    addActivity(`📊 ${blocks.length} consumer problems identified — saving…`);
+
+    const runDate = new Date().toISOString().split('T')[0];
+    let saved = 0;
+    const clean = s => s ? s.replace(/\*\*/g, '').trim() : '';
+
+    for (const block of blocks) {
+      const get = (key, nextKey) => {
+        const match = block.match(new RegExp(`${key}:\\s*([\\s\\S]*?)(?=${nextKey}:|$)`));
+        return match ? clean(match[1]) : '';
+      };
+      const nameMatch = block.match(/PROBLEM_NAME:\s*(.+)/);
+      if (!nameMatch) continue;
+      try {
+        await fetch('/api/consumerproblems', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          'Name': clean(nameMatch[1]),
+          'Category': get('CATEGORY', 'PROBLEM_DESCRIPTION'),
+          'Problem Description': get('PROBLEM_DESCRIPTION', 'EVIDENCE'),
+          'Evidence': get('EVIDENCE', 'CURRENT_SOLUTIONS'),
+          'Current Solutions': get('CURRENT_SOLUTIONS', 'FRUSTRATION_INTENSITY'),
+          'Frustration Intensity': get('FRUSTRATION_INTENSITY', 'AUDIENCE_SIZE'),
+          'Audience Size': get('AUDIENCE_SIZE', 'PRODUCT_OR_SERVICE_HYPOTHESIS'),
+          'Product Hypothesis': get('PRODUCT_OR_SERVICE_HYPOTHESIS', 'SOURCE_TYPES'),
+          'Source Types': get('SOURCE_TYPES', 'ZZEND'),
+          'Status': 'Unexplored',
+          'Opportunities Found': 0,
+          'Date Identified': runDate,
+          'Source Run': `Consumer Run ${runDate}`
+        })});
+        saved++;
+      } catch(e) { console.error('Failed to save problem:', e); }
+    }
+
+    addActivity(`✅ Consumer Analysis complete — ${saved} problems saved`);
+    updateLibraryBadges();
+  } catch(err) {
+    addActivity(`❌ Consumer Analysis error: ${err.message}`);
+  }
+  btn.disabled = false; btn.textContent = '👥 Run Consumer Problems Analysis';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+// ─── HOT PRODUCTS ANALYSIS RUN ────────────────────────────────────────────────
+async function runHotProductsAnalysis() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+  const btn = document.getElementById('hotProductsBtn');
+  btn.disabled = true; btn.textContent = '⏳ Running…';
+  document.getElementById('systemStatus').textContent = '● Hot Products Analysis running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  addActivity('🔥 Hot Products Analyst scanning market signals…');
+
+  const focusCtx = getFocusCtx();
+  try {
+    const msg = `Perform a comprehensive hot products market scan. Use web search to find products and categories with strong momentum signals across Amazon, TikTok, Shopify reports, Google Trends, and news. Identify a minimum of 15 distinct hot product signals.
+
+${focusCtx ? `Focus Criteria:\n${focusCtx}\n\n` : ''}
+
+Include exploding products with immediate windows, hot categories, white label candidates, and building-momentum products not yet saturated.`;
+
+    const output = await callClaude(HOT_PRODUCTS_ANALYST_PROMPT, msg, 6000, true);
+    const blocks = output.split('---HOTPRODUCT---').filter(b => b.trim().length > 50);
+    addActivity(`📊 ${blocks.length} hot products identified — saving…`);
+
+    const runDate = new Date().toISOString().split('T')[0];
+    let saved = 0;
+    const clean = s => s ? s.replace(/\*\*/g, '').trim() : '';
+
+    for (const block of blocks) {
+      const get = (key, nextKey) => {
+        const match = block.match(new RegExp(`${key}:\\s*([\\s\\S]*?)(?=${nextKey}:|$)`));
+        return match ? clean(match[1]) : '';
+      };
+      const nameMatch = block.match(/PRODUCT_NAME:\s*(.+)/);
+      if (!nameMatch) continue;
+      try {
+        await fetch('/api/hotproducts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          'Name': clean(nameMatch[1]),
+          'Type': get('TYPE', 'HEAT_LEVEL'),
+          'Heat Level': get('HEAT_LEVEL', 'SIGNAL_SOURCES'),
+          'Signal Sources': get('SIGNAL_SOURCES', 'WHY_ITS_HOT'),
+          'Why Its Hot': get('WHY_ITS_HOT', 'EVIDENCE'),
+          'Evidence': get('EVIDENCE', 'TARGET_AUDIENCE'),
+          'Target Audience': get('TARGET_AUDIENCE', 'PRICE_POINT'),
+          'Price Point': get('PRICE_POINT', 'WHITE_LABEL_POTENTIAL'),
+          'White Label Potential': get('WHITE_LABEL_POTENTIAL', 'LONGEVITY'),
+          'Longevity': get('LONGEVITY', 'COMPETITIVE_DENSITY'),
+          'Competitive Density': get('COMPETITIVE_DENSITY', 'ZZEND'),
+          'Status': 'Unexplored',
+          'Opportunities Found': 0,
+          'Date Identified': runDate,
+          'Source Run': `Hot Products Run ${runDate}`
+        })});
+        saved++;
+      } catch(e) { console.error('Failed to save hot product:', e); }
+    }
+
+    addActivity(`✅ Hot Products Analysis complete — ${saved} products saved`);
+    updateLibraryBadges();
+  } catch(err) {
+    addActivity(`❌ Hot Products Analysis error: ${err.message}`);
+  }
+  btn.disabled = false; btn.textContent = '🔥 Run Hot Products Analysis';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+// ─── PRODUCTION ANALYST RUN ───────────────────────────────────────────────────
+async function runProductionAnalysis() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+  const btn = document.getElementById('productionBtn');
+  btn.disabled = true; btn.textContent = '⏳ Analyzing…';
+  document.getElementById('systemStatus').textContent = '● Production Analysis running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+  addActivity('📈 Production Analyst reviewing pipeline performance…');
+
+  try {
+    const [oppsRes, logsRes] = await Promise.all([
+      fetch('/api/opportunities'),
+      fetch('/api/pipelinelogs')
+    ]);
+    const opps = await oppsRes.json();
+    const logs = await logsRes.json();
+
+    const oppsSummary = opps.slice(0, 20).map(o =>
+      `Name: ${o.Name} | Status: ${o.Status} | Score: ${o['Opportunity Score'] || 'N/A'} | AI Score: ${o['AI Executability Score'] || 'N/A'} | Category: ${o['Category'] || 'N/A'}`
+    ).join('\n');
+
+    const logsSummary = logs.slice(0, 50).map(l =>
+      `${l['Opportunity Name']} | ${l['Stage']} | Attempt ${l['Attempt Number']} | Score: ${l['Orchestrator Score']} | Verdict: ${l['Orchestrator Verdict']} | Outcome: ${l['Final Outcome']} | Reasoning: ${(l['Orchestrator Reasoning'] || '').substring(0, 150)}`
+    ).join('\n');
+
+    const msg = `Analyze the OpportunityAI pipeline performance based on the following data.
+
+RECENT OPPORTUNITIES (last 20):
+${oppsSummary || 'No opportunities yet.'}
+
+PIPELINE LOGS (last 50 agent attempts):
+${logsSummary || 'No logs yet.'}
+
+Produce a complete Production Report covering: Pipeline Health Summary, Failure Pattern Analysis, Quality Pattern Analysis, Specific Recommendations, and Priority Actions.`;
+
+    const report = await callClaude(PRODUCTION_ANALYST_PROMPT, msg, 5000, false);
+
+    // Show in modal
+    const modal = document.getElementById('productionModal');
+    const content = document.getElementById('productionModalContent');
+    if (modal && content) {
+      content.textContent = report;
+      modal.style.display = 'flex';
+    }
+    addActivity('✅ Production Analysis complete — report ready');
+  } catch(err) {
+    addActivity(`❌ Production Analysis error: ${err.message}`);
+  }
+  btn.disabled = false; btn.textContent = '📈 Run Production Analysis';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+async function updateLibraryBadges() {
+  try {
+    const [t, c, h] = await Promise.all([
+      fetch('/api/trends').then(r => r.json()),
+      fetch('/api/consumerproblems').then(r => r.json()),
+      fetch('/api/hotproducts').then(r => r.json())
+    ]);
+    document.getElementById('trendBadge').textContent = t.length;
+    const cb = document.getElementById('consumerBadge');
+    const hb = document.getElementById('hotProductsBadge');
+    if (cb) cb.textContent = c.length;
+    if (hb) hb.textContent = h.length;
+  } catch(e) {}
+}
+
 // ─── FULL OPPORTUNITY PIPELINE ────────────────────────────────────────────────
 async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
   // Build initial context
@@ -1165,7 +1610,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
   addActivity(`🔭 Scout enriching opportunity signal…`);
   await saveOpp(recordId, { 'Status': 'Signal Captured' });
 
-  const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${context}`, context);
+  const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('scout', 'done', 'Done ✓');
   scores.scout = scout.score;
 
@@ -1179,7 +1624,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // AI EXECUTABILITY
   setAgentStatus('ai-analyst', 'working', 'Analyzing…');
-  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context);
+  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('ai-analyst', 'done', 'Done ✓');
   scores.aiExec = aiAnalyst.score;
 
@@ -1193,7 +1638,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // MARKET ANALYSIS
   setAgentStatus('market', 'working', 'Researching…');
-  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context);
+  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('market', 'done', 'Done ✓');
   scores.market = market.score;
 
@@ -1207,7 +1652,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // BUSINESS ARCHITECT
   setAgentStatus('architect', 'working', 'Designing…');
-  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context);
+  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('architect', 'done', 'Done ✓');
   scores.biz = biz.score;
 
@@ -1221,7 +1666,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // BRAND DEVELOPER
   setAgentStatus('brand', 'working', 'Creating…');
-  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with the best available context regardless of upstream completeness.\n\n${context}`, context);
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with the best available context regardless of upstream completeness.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('brand', 'done', 'Done ✓');
   scores.brand = brand.score;
 
@@ -1235,7 +1680,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // GTM STRATEGIST
   setAgentStatus('gtm', 'working', 'Planning…');
-  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context);
+  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('gtm', 'done', 'Done ✓');
   scores.gtm = gtm.score;
 
@@ -1249,7 +1694,7 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
 
   // AI EXECUTION DESIGNER
   setAgentStatus('exec', 'working', 'Designing…');
-  const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context);
+  const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context, oppName, 'Opportunity');
   setAgentStatus('exec', 'done', 'Done ✓');
   scores.exec = exec.score;
 
@@ -1371,38 +1816,56 @@ async function runPipeline() {
       addActivity(`🔍 Starting pipeline for: ${name}`);
       await runFullPipeline(record.id, name, signal);
     } else {
-      // Pull from Trend Library
-      addActivity(`📚 Pulling unexplored trends from library…`);
-      const trends = await getUnexploredTrends();
+      // Library rotation: trends → consumerproblems → hotproducts → repeat
+      const LIBRARY_SEQUENCE = ['trends', 'consumerproblems', 'hotproducts'];
+      const LIBRARY_LABELS = { trends: 'Trend Library', consumerproblems: 'Consumer Problems Library', hotproducts: 'Hot Products Library' };
+      const rotationIdx = parseInt(localStorage.getItem('opportunityLibraryRotation') || '0');
+      const currentLibrary = LIBRARY_SEQUENCE[rotationIdx % 3];
+      localStorage.setItem('opportunityLibraryRotation', String((rotationIdx + 1) % 3));
 
-      if (trends.length === 0) {
-        addActivity(`⚠️ No unexplored trends in library. Run Trend Analysis first.`);
-        runBtn.disabled = false;
-        runBtn.textContent = '▶ Run Opportunity Pipeline';
-        document.getElementById('systemStatus').textContent = '● All agents ready';
-        document.getElementById('systemStatus').className = 'system-status';
-        return;
+      addActivity(`📚 Pulling from ${LIBRARY_LABELS[currentLibrary]} (rotation ${rotationIdx % 3 + 1}/3)…`);
+
+      let sourceItems = [];
+      if (currentLibrary === 'trends') {
+        sourceItems = await getUnexploredTrends();
+      } else if (currentLibrary === 'consumerproblems') {
+        sourceItems = await getUnexploredConsumerProblems();
+      } else {
+        sourceItems = await getUnexploredHotProducts();
       }
 
-      // Scout finds opportunities from trends
+      if (sourceItems.length === 0) {
+        addActivity(`⚠️ No unexplored items in ${LIBRARY_LABELS[currentLibrary]}. Trying Trend Library…`);
+        sourceItems = await getUnexploredTrends();
+        if (sourceItems.length === 0) {
+          addActivity(`⚠️ No unexplored items in any library. Run analysis first.`);
+          runBtn.disabled = false;
+          runBtn.textContent = '▶ Run Opportunity Pipeline';
+          document.getElementById('systemStatus').textContent = '● All agents ready';
+          document.getElementById('systemStatus').className = 'system-status';
+          return;
+        }
+      }
+
+      // Build brief for Scout based on library type
       setAgentStatus('scout', 'working', 'Discovering…');
-      addActivity(`🔭 Scout finding opportunities within ${trends.length} trends…`);
+      addActivity(`🔭 Scout finding opportunities within ${sourceItems.length} ${LIBRARY_LABELS[currentLibrary]} items…`);
 
-      const trendBrief = trends.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
-
-      const scoutMsg = `You have been given a Trend Brief with ${trends.length} validated market trends. Find 3 specific business opportunities within these trends. Choose the trends with the strongest signals and clearest business opportunity potential. Remember: approximately 50% of opportunities should be physical product businesses.
-
-TREND BRIEF:
-${trendBrief}
-
-${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}
-
-For each opportunity use the format specified in your instructions. Separate with ---OPP---`;
+      let scoutMsg = '';
+      if (currentLibrary === 'trends') {
+        const brief = sourceItems.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
+        scoutMsg = `You have been given a Trend Brief with ${sourceItems.length} validated market trends. Find 3 specific business opportunities within these trends. Choose the trends with the strongest signals. Remember: approximately 50% of opportunities should be physical product businesses.\n\nTREND BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+      } else if (currentLibrary === 'consumerproblems') {
+        const brief = sourceItems.map((p, i) => `Problem ${i+1}: ${p['Name']}\nCategory: ${p['Category'] || ''}\nDescription: ${p['Problem Description'] || ''}\nFrustration: ${p['Frustration Intensity'] || ''}\nAudience: ${p['Audience Size'] || ''}\nCurrent Solutions (failing): ${p['Current Solutions'] || ''}\nHypothesis: ${p['Product Hypothesis'] || ''}`).join('\n\n---\n\n');
+        scoutMsg = `You have been given a Consumer Problems Brief with ${sourceItems.length} validated consumer pain points. Find 3 specific business opportunities that solve these problems. Focus on solutions that don't yet exist or where existing solutions are poor. Remember: approximately 50% should be physical product businesses.\n\nCONSUMER PROBLEMS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+      } else {
+        const brief = sourceItems.map((p, i) => `Hot Product ${i+1}: ${p['Name']}\nType: ${p['Type'] || ''}\nHeat Level: ${p['Heat Level'] || ''}\nWhy Its Hot: ${p['Why Its Hot'] || ''}\nTarget Audience: ${p['Target Audience'] || ''}\nPrice Point: ${p['Price Point'] || ''}\nWhite Label Potential: ${p['White Label Potential'] || ''}\nLongevity: ${p['Longevity'] || ''}`).join('\n\n---\n\n');
+        scoutMsg = `You have been given a Hot Products Brief with ${sourceItems.length} products and categories with proven market demand. Find 3 specific business opportunities to enter these markets — white label, private label, or differentiated versions. These are proven markets, so focus on entry angle and differentiation.\n\nHOT PRODUCTS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+      }
 
       const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 4000, true);
       setAgentStatus('scout', 'done', 'Done ✓');
 
-      // Parse opportunities
       const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
       addActivity(`📡 Scout found ${oppBlocks.length} opportunities — running pipelines…`);
 
@@ -1418,14 +1881,22 @@ For each opportunity use the format specified in your instructions. Separate wit
         const record = await createOpp(oppName, oppSignal, sourceTrend);
         addActivity(`🔍 Starting pipeline for: ${oppName}`);
 
-        // Mark source trend as In Progress
-        const sourceTrendRecord = trends.find(t => t['Name'] && t['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
-        if (sourceTrendRecord) {
-          await updateTrend(sourceTrendRecord.id, {
-            'Status': 'In Progress',
-            'Opportunities Found': (sourceTrendRecord['Opportunities Found'] || 0) + 1,
-            'Last Visited': new Date().toISOString().split('T')[0]
-          });
+        // Mark source item as In Progress
+        if (currentLibrary === 'trends') {
+          const sourceTrendRecord = sourceItems.find(t => t['Name'] && t['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
+          if (sourceTrendRecord) {
+            await updateTrend(sourceTrendRecord.id, { 'Status': 'In Progress', 'Opportunities Found': (sourceTrendRecord['Opportunities Found'] || 0) + 1, 'Last Visited': new Date().toISOString().split('T')[0] });
+          }
+        } else if (currentLibrary === 'consumerproblems') {
+          const sourceRecord = sourceItems.find(p => sourceTrend && p['Name'] && p['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
+          if (sourceRecord) {
+            await fetch(`/api/consumerproblems/${sourceRecord.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 'Status': 'In Progress', 'Opportunities Found': (sourceRecord['Opportunities Found'] || 0) + 1 }) });
+          }
+        } else {
+          const sourceRecord = sourceItems.find(p => sourceTrend && p['Name'] && p['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
+          if (sourceRecord) {
+            await fetch(`/api/hotproducts/${sourceRecord.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 'Status': 'In Progress', 'Opportunities Found': (sourceRecord['Opportunities Found'] || 0) + 1 }) });
+          }
         }
 
         await runFullPipeline(record.id, oppName, oppSignal, sourceTrend);
@@ -1879,6 +2350,7 @@ async function loadTrendBadge() {
 
 loadQueueBadge();
 loadTrendBadge();
+updateLibraryBadges();
 
 // ─── SCOUT 2 & ACQUISITION STRATEGIST PROMPTS ────────────────────────────────
 const ACQ_SCOUT_PROMPT = `You are a senior business acquisition scout with deep expertise in identifying small to mid-market businesses that are ripe for acquisition and AI transformation. You think like a combination of a seasoned M&A advisor who has closed hundreds of Main Street and lower middle market deals, a private equity analyst who can spot value where others see a tired business, and an AI transformation specialist who sees exactly what a business could become with the right technology applied.
@@ -2004,7 +2476,7 @@ async function runFullAcquisitionPipeline(recordId, businessName, businessProfil
   const scores = {};
 
   setAgentStatus('ai-analyst', 'working', 'Analyzing…');
-  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform an AI Executability Analysis for this EXISTING business being considered for acquisition. Focus on AI transformation potential.\n\n${context}`, context);
+  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform an AI Executability Analysis for this EXISTING business being considered for acquisition. Focus on AI transformation potential.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('ai-analyst', 'done', 'Done ✓');
   scores.aiExec = aiAnalyst.score;
   if (aiAnalyst.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` }); addActivity(`❌ "${businessName}" dropped.`); return false; }
@@ -2012,7 +2484,7 @@ async function runFullAcquisitionPipeline(recordId, businessName, businessProfil
   context += `\n\nAI EXECUTABILITY:\n${aiAnalyst.output}`;
 
   setAgentStatus('market', 'working', 'Researching…');
-  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a Market Analysis for the industry this acquisition target operates in.\n\n${context}`, context);
+  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a Market Analysis for the industry this acquisition target operates in.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('market', 'done', 'Done ✓');
   scores.market = market.score;
   if (market.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output }); return false; }
@@ -2020,7 +2492,7 @@ async function runFullAcquisitionPipeline(recordId, businessName, businessProfil
   context += `\n\nMARKET ANALYSIS:\n${market.output}`;
 
   setAgentStatus('architect', 'working', 'Modeling…');
-  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the post-acquisition financial model. Focus on acquisition ROI and post-transformation P&L.\n\n${context}`, context);
+  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the post-acquisition financial model. Focus on acquisition ROI and post-transformation P&L.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('architect', 'done', 'Done ✓');
   scores.biz = biz.score;
   if (biz.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Business Architecture': biz.output }); return false; }
@@ -2028,7 +2500,7 @@ async function runFullAcquisitionPipeline(recordId, businessName, businessProfil
   context += `\n\nBUSINESS ARCHITECTURE:\n${biz.output}`;
 
   setAgentStatus('acq-strategist', 'working', 'Structuring deal…');
-  const acqStrategy = await runAgent('Acquisition Strategy', ACQ_STRATEGIST_PROMPT, `Design the complete acquisition strategy.\n\n${context}`, context);
+  const acqStrategy = await runAgent('Acquisition Strategy', ACQ_STRATEGIST_PROMPT, `Design the complete acquisition strategy.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('acq-strategist', 'done', 'Done ✓');
   scores.acqStrategy = acqStrategy.score;
   if (acqStrategy.dropped) { await saveAcq(recordId, { 'Status': 'Dropped', 'Acquisition Strategy': acqStrategy.output }); return false; }
@@ -2036,21 +2508,21 @@ async function runFullAcquisitionPipeline(recordId, businessName, businessProfil
   context += `\n\nACQUISITION STRATEGY:\n${acqStrategy.output}`;
 
   setAgentStatus('brand', 'working', 'Assessing brand…');
-  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Assess the existing brand. Evaluate: preserve, refresh, or rebuild? What does post-acquisition brand strategy look like?\n\n${context}`, context);
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Assess the existing brand. Evaluate: preserve, refresh, or rebuild? What does post-acquisition brand strategy look like?\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('brand', 'done', 'Done ✓');
   scores.brand = brand.score;
   await saveAcq(recordId, { 'Brand Assessment': brand.output, 'Status': 'GTM Strategy' });
   context += `\n\nBRAND ASSESSMENT:\n${brand.output}`;
 
   setAgentStatus('gtm', 'working', 'Planning relaunch…');
-  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the post-acquisition go-to-market relaunch strategy. Focus on retaining existing customers while acquiring new ones.\n\n${context}`, context);
+  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the post-acquisition go-to-market relaunch strategy. Focus on retaining existing customers while acquiring new ones.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('gtm', 'done', 'Done ✓');
   scores.gtm = gtm.score;
   await saveAcq(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Transformation Design' });
   context += `\n\nGTM STRATEGY:\n${gtm.output}`;
 
   setAgentStatus('exec', 'working', 'Designing transformation…');
-  const aiTransform = await runAgent('AI Transformation Design', AI_TRANSFORMATION_PROMPT, `Design the complete AI transformation plan. TRANSFORMATION MODE.\n\n${context}`, context);
+  const aiTransform = await runAgent('AI Transformation Design', AI_TRANSFORMATION_PROMPT, `Design the complete AI transformation plan. TRANSFORMATION MODE.\n\n${context}`, context, businessName, 'Acquisition');
   setAgentStatus('exec', 'done', 'Done ✓');
   scores.aiTransform = aiTransform.score;
   await saveAcq(recordId, { 'AI Transformation Plan': aiTransform.output, 'Status': 'Blueprint Draft' });
@@ -2382,6 +2854,181 @@ ${sectionsHtml}
 }
 
 loadAcqBadge();
+
+// ─── CONSUMER PROBLEMS LIBRARY ────────────────────────────────────────────────
+let allConsumerProblems = [];
+
+function buildConsumerProblemCard(item) {
+  const name = item['Name'] || 'Unnamed';
+  const category = item['Category'] || '';
+  const desc = item['Problem Description'] || '';
+  const frustration = item['Frustration Intensity'] || '';
+  const audience = item['Audience Size'] || '';
+  const evidence = item['Evidence'] || '';
+  const currentSolutions = item['Current Solutions'] || '';
+  const hypothesis = item['Product Hypothesis'] || '';
+  const status = item['Status'] || 'Unexplored';
+  const opps = item['Opportunities Found'] || 0;
+  const date = item['Date Identified'] || '';
+  const frustrationColor = frustration === 'High' ? '#FEE2E2' : frustration === 'Medium' ? '#FEF3C7' : '#F0F0F2';
+  const frustrationText = frustration === 'High' ? '#991B1B' : frustration === 'Medium' ? '#92400E' : '#666';
+
+  return `<div class="trend-card">
+    <div class="trend-card-header">
+      <div>
+        <div class="trend-lens">${category}</div>
+        <div class="trend-name">${name}</div>
+      </div>
+      <div class="trend-badges">
+        ${frustration ? `<span class="trend-badge" style="background:${frustrationColor};color:${frustrationText}">${frustration} Frustration</span>` : ''}
+        <span class="trend-badge ${status === 'Unexplored' ? 'badge-unexplored' : status === 'In Progress' ? 'badge-inprogress' : 'badge-exhausted'}">${status}</span>
+      </div>
+    </div>
+    <div class="trend-description">${desc}</div>
+    <div class="trend-meta">
+      ${audience ? `<div class="trend-meta-item"><div class="trend-meta-label">Audience Size</div><div class="trend-meta-value">${audience.substring(0,150)}</div></div>` : ''}
+      ${currentSolutions ? `<div class="trend-meta-item"><div class="trend-meta-label">Current Solutions (failing)</div><div class="trend-meta-value">${currentSolutions.substring(0,150)}</div></div>` : ''}
+      ${evidence ? `<div class="trend-meta-item"><div class="trend-meta-label">Evidence</div><div class="trend-meta-value">${evidence.substring(0,150)}</div></div>` : ''}
+      ${hypothesis ? `<div class="trend-meta-item"><div class="trend-meta-label">Solution Hypothesis</div><div class="trend-meta-value" style="color:#EC4899;font-weight:600">${hypothesis.substring(0,150)}</div></div>` : ''}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span class="trend-opps-count">${opps} opportunities explored</span>
+      <span style="font-size:11px;color:#CCC">Identified: ${date}</span>
+    </div>
+  </div>`;
+}
+
+async function loadConsumerProblems() {
+  try {
+    const res = await fetch('/api/consumerproblems');
+    allConsumerProblems = await res.json();
+    const grid = document.getElementById('consumerGrid');
+    if (allConsumerProblems.length === 0) {
+      grid.innerHTML = '<div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No consumer problems yet — run Consumer Problems Analysis to populate this library</div>';
+    } else {
+      grid.innerHTML = allConsumerProblems.map(buildConsumerProblemCard).join('');
+    }
+    document.getElementById('stat-cp-total').textContent = allConsumerProblems.length;
+    document.getElementById('stat-cp-unexplored').textContent = allConsumerProblems.filter(p => p['Status'] === 'Unexplored' || !p['Status']).length;
+    document.getElementById('stat-cp-high').textContent = allConsumerProblems.filter(p => p['Frustration Intensity'] === 'High').length;
+    document.getElementById('stat-cp-opps').textContent = allConsumerProblems.reduce((s, p) => s + (p['Opportunities Found'] || 0), 0);
+    const cb = document.getElementById('consumerBadge');
+    if (cb) cb.textContent = allConsumerProblems.length;
+  } catch(e) { console.error('Consumer problems error:', e); }
+}
+
+// ─── HOT PRODUCTS LIBRARY ─────────────────────────────────────────────────────
+let allHotProducts = [];
+
+function buildHotProductCard(item) {
+  const name = item['Name'] || 'Unnamed';
+  const type = item['Type'] || '';
+  const heat = item['Heat Level'] || '';
+  const why = item['Why Its Hot'] || '';
+  const evidence = item['Evidence'] || '';
+  const audience = item['Target Audience'] || '';
+  const price = item['Price Point'] || '';
+  const wl = item['White Label Potential'] || '';
+  const longevity = item['Longevity'] || '';
+  const density = item['Competitive Density'] || '';
+  const status = item['Status'] || 'Unexplored';
+  const opps = item['Opportunities Found'] || 0;
+  const date = item['Date Identified'] || '';
+  const heatColor = heat === 'Exploding' ? '#FEE2E2' : heat === 'Hot' ? '#FEF3C7' : heat === 'Building' ? '#D1FAE5' : '#F0F0F2';
+  const heatText = heat === 'Exploding' ? '#991B1B' : heat === 'Hot' ? '#92400E' : heat === 'Building' ? '#065F46' : '#666';
+  const wlColor = wl === 'High' ? '#D1FAE5' : wl === 'Medium' ? '#FEF3C7' : '#F0F0F2';
+  const wlText = wl === 'High' ? '#065F46' : wl === 'Medium' ? '#92400E' : '#666';
+
+  return `<div class="trend-card">
+    <div class="trend-card-header">
+      <div>
+        <div class="trend-lens">${type}</div>
+        <div class="trend-name">${name}</div>
+      </div>
+      <div class="trend-badges">
+        ${heat ? `<span class="trend-badge" style="background:${heatColor};color:${heatText}">${heat}</span>` : ''}
+        ${wl ? `<span class="trend-badge" style="background:${wlColor};color:${wlText}">WL: ${wl}</span>` : ''}
+        <span class="trend-badge ${status === 'Unexplored' ? 'badge-unexplored' : status === 'In Progress' ? 'badge-inprogress' : 'badge-exhausted'}">${status}</span>
+      </div>
+    </div>
+    <div class="trend-description">${why}</div>
+    <div class="trend-meta">
+      ${price ? `<div class="trend-meta-item"><div class="trend-meta-label">Price Point</div><div class="trend-meta-value">${price}</div></div>` : ''}
+      ${longevity ? `<div class="trend-meta-item"><div class="trend-meta-label">Longevity</div><div class="trend-meta-value">${longevity}</div></div>` : ''}
+      ${audience ? `<div class="trend-meta-item"><div class="trend-meta-label">Target Audience</div><div class="trend-meta-value">${audience.substring(0,150)}</div></div>` : ''}
+      ${density ? `<div class="trend-meta-item"><div class="trend-meta-label">Competitive Density</div><div class="trend-meta-value">${density.substring(0,150)}</div></div>` : ''}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span class="trend-opps-count">${opps} opportunities explored</span>
+      <span style="font-size:11px;color:#CCC">Identified: ${date}</span>
+    </div>
+  </div>`;
+}
+
+async function loadHotProducts() {
+  try {
+    const res = await fetch('/api/hotproducts');
+    allHotProducts = await res.json();
+    const grid = document.getElementById('hotProductsGrid');
+    if (allHotProducts.length === 0) {
+      grid.innerHTML = '<div class="activity-empty" style="background:white;border-radius:14px;border:1px solid #E8EAF0;padding:40px;">No hot products yet — run Hot Products Analysis to populate this library</div>';
+    } else {
+      grid.innerHTML = allHotProducts.map(buildHotProductCard).join('');
+    }
+    document.getElementById('stat-hp-total').textContent = allHotProducts.length;
+    document.getElementById('stat-hp-exploding').textContent = allHotProducts.filter(p => p['Heat Level'] === 'Exploding').length;
+    document.getElementById('stat-hp-wl').textContent = allHotProducts.filter(p => p['White Label Potential'] === 'High').length;
+    document.getElementById('stat-hp-opps').textContent = allHotProducts.reduce((s, p) => s + (p['Opportunities Found'] || 0), 0);
+    const hb = document.getElementById('hotProductsBadge');
+    if (hb) hb.textContent = allHotProducts.length;
+  } catch(e) { console.error('Hot products error:', e); }
+}
+
+// ─── PIPELINE LOGS VIEW ───────────────────────────────────────────────────────
+let allPipelineLogs = [];
+let activeLogFilter = 'all';
+
+function renderPipelineLogs(logs) {
+  const filtered = activeLogFilter === 'all' ? logs
+    : logs.filter(l => l['Orchestrator Verdict'] === activeLogFilter || l['Pipeline Type'] === activeLogFilter);
+
+  const verdictStyle = v => v === 'PASS'
+    ? 'background:#D1FAE5;color:#065F46'
+    : v === 'DROP' ? 'background:#FEE2E2;color:#991B1B'
+    : 'background:#FEF3C7;color:#92400E';
+
+  const tbody = document.getElementById('pipelineLogsBody');
+  if (!tbody) return;
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:40px;text-align:center;color:#CCC">No logs match this filter</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(l => `<tr style="border-bottom:1px solid #F5F5F7">
+    <td style="padding:10px 14px;color:#888">${l['Run Date'] || ''}</td>
+    <td style="padding:10px 14px;font-weight:600;color:#0F1117;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l['Opportunity Name'] || ''}</td>
+    <td style="padding:10px 14px;color:#555">${l['Stage'] || ''}</td>
+    <td style="padding:10px 14px;text-align:center;color:#555">${l['Attempt Number'] || ''}</td>
+    <td style="padding:10px 14px;font-weight:700;color:${(l['Orchestrator Score'] || 0) >= 7 ? '#065F46' : '#991B1B'}">${l['Orchestrator Score'] || '—'}/10</td>
+    <td style="padding:10px 14px"><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;${verdictStyle(l['Orchestrator Verdict'])}">${l['Orchestrator Verdict'] || ''}</span></td>
+    <td style="padding:10px 14px;font-size:11px;color:#666">${l['Final Outcome'] || ''}</td>
+    <td style="padding:10px 14px;font-size:11px;color:#AAA">${l['Pipeline Type'] || ''}</td>
+  </tr>`).join('');
+}
+
+function filterLogs(filter, btn) {
+  activeLogFilter = filter;
+  document.querySelectorAll('#view-pipelinelogs .trend-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPipelineLogs(allPipelineLogs);
+}
+
+async function loadPipelineLogs() {
+  try {
+    const res = await fetch('/api/pipelinelogs');
+    allPipelineLogs = await res.json();
+    renderPipelineLogs(allPipelineLogs);
+  } catch(e) { console.error('Pipeline logs error:', e); }
+}
 </script>
 </body>
 </html>

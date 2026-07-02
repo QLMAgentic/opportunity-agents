@@ -402,6 +402,107 @@ app.delete('/api/trends/:id', async (req, res) => {
   }
 });
 
+// ─── CONSUMER PROBLEMS ───────────────────────────────────────────────────────
+app.post('/api/consumerproblems', async (req, res) => {
+  try {
+    const record = await base('ConsumerProblems').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/consumerproblems/:id', async (req, res) => {
+  try {
+    const record = await base('ConsumerProblems').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/consumerproblems', async (req, res) => {
+  try {
+    const records = await base('ConsumerProblems').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/consumerproblems/:id', async (req, res) => {
+  try {
+    await base('ConsumerProblems').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── HOT PRODUCTS ─────────────────────────────────────────────────────────────
+app.post('/api/hotproducts', async (req, res) => {
+  try {
+    const record = await base('HotProducts').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/hotproducts/:id', async (req, res) => {
+  try {
+    const record = await base('HotProducts').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/hotproducts', async (req, res) => {
+  try {
+    const records = await base('HotProducts').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/hotproducts/:id', async (req, res) => {
+  try {
+    await base('HotProducts').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── PIPELINE LOGS ────────────────────────────────────────────────────────────
+app.post('/api/pipelinelogs', async (req, res) => {
+  try {
+    const record = await base('PipelineLogs').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/pipelinelogs', async (req, res) => {
+  try {
+    const opts = { sort: [{ field: 'Run Date', direction: 'desc' }], maxRecords: 200 };
+    if (req.query.opportunityId) {
+      opts.filterByFormula = `{Opportunity ID} = '${req.query.opportunityId}'`;
+    }
+    const records = await base('PipelineLogs').select(opts).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── LEGACY ───────────────────────────────────────────────────────────────────
 app.get('/api/queue', async (req, res) => {
   try {
