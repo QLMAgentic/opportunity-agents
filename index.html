@@ -1225,6 +1225,34 @@ SCORING GUIDANCE:
 5-6 — System design incomplete, key functions lack automation coverage, human time exceeds target, or stack cost threatens capital constraint.
 4 or below — Cannot achieve four hour workweek target, critical functions require ongoing human involvement, or stack cost makes business unviable.`;
 
+async function callClaudeHaiku(systemPrompt, userMessage, maxTokens = 800) {
+  const body = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }]
+  };
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'Claude Haiku API error');
+  }
+
+  const data = await response.json();
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+}
+
 // ─── ORCHESTRATOR REVIEW ──────────────────────────────────────────────────────
 async function orchestratorReview(stage, agentOutput, context) {
   const prompt = `Review this ${stage} output.
@@ -1241,7 +1269,7 @@ VERDICT: [PASS or REVISE or DROP]
 REASONING: [2-3 sentences]
 REVISION_INSTRUCTIONS: [If REVISE or DROP — specific instructions. If PASS — leave blank]`;
 
-  const review = await callClaude(ORCHESTRATOR_PROMPT, prompt, 600, false);
+  const review = await callClaudeHaiku(ORCHESTRATOR_PROMPT, prompt, 800);
   const scoreMatch = review.match(/SCORE:\s*(\d+(?:\.\d+)?)/);
   const verdictMatch = review.match(/VERDICT:\s*(PASS|REVISE|DROP)/);
   const reasoningMatch = review.match(/REASONING:\s*([\s\S]*?)(?=REVISION_INSTRUCTIONS:|$)/);
