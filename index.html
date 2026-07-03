@@ -1290,23 +1290,60 @@ async function callClaudeHaiku(systemPrompt, userMessage, maxTokens = 800) {
   return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
 }
 
+function buildAgentContext(oppName, signal, stageOutputs, forStage) {
+  const base = `Opportunity: ${oppName}\nOriginal Signal: ${signal ? signal.substring(0, 500) : ''}`;
+
+  const extracts = {
+    'AI Executability': base,
+    'Market Analysis': base + (stageOutputs.scout ? `\n\nOpportunity Summary:\n${stageOutputs.scout.substring(0, 800)}` : ''),
+    'Business Design': base +
+      (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 600)}` : '') +
+      (stageOutputs.market ? `\n\nMarket & Customer:\n${stageOutputs.market.substring(0, 800)}` : '') +
+      (stageOutputs.aiExec ? `\n\nAI Executability Score: ${stageOutputs.aiExecScore}/10. Key finding: ${stageOutputs.aiExec.substring(0, 400)}` : ''),
+    'Brand Development': base +
+      (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 500)}` : '') +
+      (stageOutputs.market ? `\n\nTarget Customer:\n${stageOutputs.market.substring(0, 600)}` : '') +
+      (stageOutputs.biz ? `\n\nBusiness Model Summary:\n${stageOutputs.biz.substring(0, 400)}` : ''),
+    'GTM Strategy': base +
+      (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 500)}` : '') +
+      (stageOutputs.market ? `\n\nMarket & Customer:\n${stageOutputs.market.substring(0, 600)}` : '') +
+      (stageOutputs.biz ? `\n\nBusiness Model:\n${stageOutputs.biz.substring(0, 500)}` : '') +
+      (stageOutputs.brand ? `\n\nBrand:\n${stageOutputs.brand.substring(0, 400)}` : ''),
+    'AI Execution Design': base +
+      (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 400)}` : '') +
+      (stageOutputs.biz ? `\n\nBusiness Model:\n${stageOutputs.biz.substring(0, 500)}` : '') +
+      (stageOutputs.gtm ? `\n\nGTM Strategy:\n${stageOutputs.gtm.substring(0, 600)}` : '') +
+      (stageOutputs.aiExec ? `\n\nAI Executability:\n${stageOutputs.aiExec.substring(0, 400)}` : ''),
+    'Blueprint Draft': base +
+      (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 600)}` : '') +
+      (stageOutputs.aiExec ? `\n\nAI Exec (Score ${stageOutputs.aiExecScore}/10):\n${stageOutputs.aiExec.substring(0, 600)}` : '') +
+      (stageOutputs.market ? `\n\nMarket:\n${stageOutputs.market.substring(0, 600)}` : '') +
+      (stageOutputs.biz ? `\n\nFinancials:\n${stageOutputs.biz.substring(0, 600)}` : '') +
+      (stageOutputs.brand ? `\n\nBrand:\n${stageOutputs.brand.substring(0, 500)}` : '') +
+      (stageOutputs.gtm ? `\n\nGTM:\n${stageOutputs.gtm.substring(0, 500)}` : '') +
+      (stageOutputs.exec ? `\n\nAI Execution:\n${stageOutputs.exec.substring(0, 500)}` : '')
+  };
+
+  return extracts[forStage] || base;
+}
+
 // ─── ORCHESTRATOR REVIEW ──────────────────────────────────────────────────────
 async function orchestratorReview(stage, agentOutput, context) {
-  const prompt = `Review this ${stage} output.
+  const prompt = `Review this ${stage} output and score it.
 
-OPPORTUNITY CONTEXT:
-${context.substring(0, 1500)}
+OPPORTUNITY (brief):
+${context.substring(0, 600)}
 
-${stage.toUpperCase()} OUTPUT:
-${agentOutput.substring(0, 2500)}
+${stage.toUpperCase()} OUTPUT (first 1500 chars):
+${agentOutput.substring(0, 1500)}
 
 Respond in EXACTLY this format:
 SCORE: [number 1-10]
 VERDICT: [PASS or REVISE or DROP]
-REASONING: [2-3 sentences]
+REASONING: [2 sentences max]
 REVISION_INSTRUCTIONS: [If REVISE or DROP — specific instructions. If PASS — leave blank]`;
 
-  const review = await callClaudeHaiku(ORCHESTRATOR_PROMPT, prompt, 800);
+  const review = await callClaudeHaiku(ORCHESTRATOR_PROMPT, prompt, 600);
   const scoreMatch = review.match(/SCORE:\s*(\d+(?:\.\d+)?)/);
   const verdictMatch = review.match(/VERDICT:\s*(PASS|REVISE|DROP)/);
   const reasoningMatch = review.match(/REASONING:\s*([\s\S]*?)(?=REVISION_INSTRUCTIONS:|$)/);
@@ -1661,21 +1698,18 @@ async function updateLibraryBadges() {
 
 // ─── FULL OPPORTUNITY PIPELINE ────────────────────────────────────────────────
 async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
-  // Build initial context
-  let context = `Opportunity: ${oppName}\nSignal: ${signal}`;
-  if (sourceTrend) context += `\nSource Trend: ${sourceTrend}`;
-
   const focusCtx = getFocusCtx();
-  if (focusCtx) context = `Focus Criteria:\n${focusCtx}\n\n${context}`;
-
+  const baseSignal = signal ? signal.substring(0, 600) : '';
   const scores = {};
+  const stageOutputs = {};
 
   // SCOUT
   setAgentStatus('scout', 'working', 'Discovering…');
   addActivity(`🔭 Scout enriching opportunity signal…`);
   await saveOpp(recordId, { 'Status': 'Signal Captured' });
 
-  const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${context}`, context, oppName, 'Opportunity');
+  const scoutCtx = focusCtx ? `Focus Criteria:\n${focusCtx}\n\nOpportunity: ${oppName}\nSignal: ${baseSignal}` : `Opportunity: ${oppName}\nSignal: ${baseSignal}`;
+  const scout = await runAgent('Scout', SCOUT_PROMPT, `Enrich this opportunity signal into a full Opportunity Signal document.\n\n${scoutCtx}`, scoutCtx, oppName, 'Opportunity');
   setAgentStatus('scout', 'done', 'Done ✓');
   scores.scout = scout.score;
 
@@ -1684,16 +1718,38 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     addActivity(`❌ "${oppName}" dropped at Scout.`);
     return false;
   }
+
+  stageOutputs.scout = scout.output;
   const influencerFitMatch = scout.output.match(/INFLUENCER_AFFILIATE_FIT:\s*(.+)/);
   const influencerFit = influencerFitMatch ? influencerFitMatch[1].replace(/\*\*/g, '').trim().split(' ')[0] : '';
-  await saveOpp(recordId, { 'Signal': scout.output, 'Status': 'AI Executability', 'Influencer Affiliate Fit': influencerFit });
-  context += `\n\nSCOUT OUTPUT:\n${scout.output}`;
+  const categoryKeywords = {
+    'Health & Wellness': ['health','wellness','supplement','fitness','medical','mental','longevity','aging','perimenopause','gut','nutrition','sleep','weight','pain','anxiety','stress','vitamin','probiotic'],
+    'Home & Living': ['home','house','garden','pet','outdoor','cleaning','decor','furniture','kitchen','bathroom','lawn'],
+    'Consumer Goods': ['beauty','skincare','hair','apparel','clothing','fashion','baby','food','beverage','drink','candle','gift'],
+    'B2B & Professional': ['b2b','business','professional','HR','legal','accounting','compliance','enterprise','corporate','CFO','bookkeeping'],
+    'Technology & SaaS': ['software','saas','app','platform','AI','tech','digital','automation','tool','dashboard','API','subscription'],
+    'Marketplace & Middleman': ['marketplace','middleman','broker','lead','aggregator','connector','arbitrage','sourcing','matching'],
+    'Education & Media': ['course','coaching','education','learning','newsletter','content','media','community','training','podcast'],
+    'Finance & Wealth': ['finance','fintech','investing','wealth','insurance','real estate','credit','loan','tax','retirement'],
+    'Sustainability & Lifestyle': ['sustainable','eco','green','conscious','travel','experience','outdoor','adventure','lifestyle'],
+  };
+  const signalText = (scout.output + ' ' + oppName).toLowerCase();
+  let autoCategory = 'Other';
+  let highestKwScore = 0;
+  for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+    const kwScore = keywords.filter(k => signalText.includes(k)).length;
+    if (kwScore > highestKwScore) { highestKwScore = kwScore; autoCategory = cat; }
+  }
+  await saveOpp(recordId, { 'Signal': scout.output, 'Status': 'AI Executability', 'Influencer Affiliate Fit': influencerFit, 'Category': autoCategory });
 
   // AI EXECUTABILITY
   setAgentStatus('ai-analyst', 'working', 'Analyzing…');
-  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context, oppName, 'Opportunity');
+  const aiCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'AI Executability');
+  const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${aiCtx}`, aiCtx, oppName, 'Opportunity');
   setAgentStatus('ai-analyst', 'done', 'Done ✓');
   scores.aiExec = aiAnalyst.score;
+  stageOutputs.aiExec = aiAnalyst.output;
+  stageOutputs.aiExecScore = aiAnalyst.score;
 
   if (aiAnalyst.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Orchestrator Summary': `Dropped at AI Executability. Score: ${aiAnalyst.score}/10.` });
@@ -1701,27 +1757,29 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     return false;
   }
   await saveOpp(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
-  context += `\n\nAI EXECUTABILITY ANALYSIS:\n${aiAnalyst.output}`;
 
   // MARKET ANALYSIS
   setAgentStatus('market', 'working', 'Researching…');
-  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context, oppName, 'Opportunity');
+  const marketCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'Market Analysis');
+  const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${marketCtx}`, marketCtx, oppName, 'Opportunity');
   setAgentStatus('market', 'done', 'Done ✓');
   scores.market = market.score;
+  stageOutputs.market = market.output;
 
   if (market.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output, 'Orchestrator Summary': `Dropped at Market Analysis. Score: ${market.score}/10.` });
     addActivity(`❌ "${oppName}" dropped at Market Analysis.`);
     return false;
   }
-  await saveOpp(recordId, { 'Market Analysis': market.output, 'Competitive Landscape': market.output, 'Target Customer': market.output, 'Status': 'Business Design' });
-  context += `\n\nMARKET ANALYSIS:\n${market.output}`;
+  await saveOpp(recordId, { 'Market Analysis': market.output, 'Status': 'Business Design' });
 
   // BUSINESS ARCHITECT
   setAgentStatus('architect', 'working', 'Designing…');
-  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context, oppName, 'Opportunity');
+  const bizCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'Business Design');
+  const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${bizCtx}`, bizCtx, oppName, 'Opportunity');
   setAgentStatus('architect', 'done', 'Done ✓');
   scores.biz = biz.score;
+  stageOutputs.biz = biz.output;
 
   if (biz.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'Business Model': biz.output, 'Orchestrator Summary': `Dropped at Business Design. Score: ${biz.score}/10.` });
@@ -1729,13 +1787,14 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     return false;
   }
   await saveOpp(recordId, { 'Business Model': biz.output, 'Revenue Projections': biz.output, 'Financial Analysis': biz.output, 'Status': 'Brand Development' });
-  context += `\n\nBUSINESS ARCHITECTURE:\n${biz.output}`;
 
   // BRAND DEVELOPER
   setAgentStatus('brand', 'working', 'Creating…');
-  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with the best available context regardless of upstream completeness.\n\n${context}`, context, oppName, 'Opportunity');
+  const brandCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'Brand Development');
+  const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with best available context.\n\n${brandCtx}`, brandCtx, oppName, 'Opportunity');
   setAgentStatus('brand', 'done', 'Done ✓');
   scores.brand = brand.score;
+  stageOutputs.brand = brand.output;
 
   if (brand.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'Brand Name & Positioning': brand.output, 'Orchestrator Summary': `Dropped at Brand Development. Score: ${brand.score}/10.` });
@@ -1743,13 +1802,14 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     return false;
   }
   await saveOpp(recordId, { 'Brand Name & Positioning': brand.output, 'Brand Identity Direction': brand.output, 'Status': 'GTM Strategy' });
-  context += `\n\nBRAND DEVELOPMENT:\n${brand.output}`;
 
   // GTM STRATEGIST
   setAgentStatus('gtm', 'working', 'Planning…');
-  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context, oppName, 'Opportunity');
+  const gtmCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'GTM Strategy');
+  const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${gtmCtx}`, gtmCtx, oppName, 'Opportunity');
   setAgentStatus('gtm', 'done', 'Done ✓');
   scores.gtm = gtm.score;
+  stageOutputs.gtm = gtm.output;
 
   if (gtm.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output, 'Orchestrator Summary': `Dropped at GTM Strategy. Score: ${gtm.score}/10.` });
@@ -1757,13 +1817,14 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     return false;
   }
   await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
-  context += `\n\nGTM STRATEGY:\n${gtm.output}`;
 
   // AI EXECUTION DESIGNER
   setAgentStatus('exec', 'working', 'Designing…');
-  const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context, oppName, 'Opportunity');
+  const execCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'AI Execution Design');
+  const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${execCtx}`, execCtx, oppName, 'Opportunity');
   setAgentStatus('exec', 'done', 'Done ✓');
   scores.exec = exec.score;
+  stageOutputs.exec = exec.output;
 
   if (exec.dropped) {
     await saveOpp(recordId, { 'Status': 'Dropped', 'AI Stack Plan': exec.output, 'Orchestrator Summary': `Dropped at AI Execution Design. Score: ${exec.score}/10.` });
@@ -1771,88 +1832,38 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     return false;
   }
   await saveOpp(recordId, { 'AI Stack Plan': exec.output, 'Execution Roadmap': exec.output, 'Status': 'Blueprint Draft' });
-  context += `\n\nAI EXECUTION DESIGN:\n${exec.output}`;
 
   // ORCHESTRATOR FINAL BLUEPRINT
   setAgentStatus('orchestrator', 'working', 'Compiling Blueprint…');
   addActivity(`📋 Orchestrator compiling final Blueprint…`);
 
   const stageScoresSummary = Object.entries(scores).map(([k,v]) => `${k}: ${v}/10`).join(', ');
+  const blueprintCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'Blueprint Draft');
 
   const blueprintMsg = `Compile the complete Opportunity Launch Blueprint.
 
 STAGE SCORES: ${stageScoresSummary}
 
-FULL CONTEXT:
-${context.substring(0, 7000)}
+CONTEXT:
+${blueprintCtx}
 
-Produce the final Blueprint in this exact structure:
-
-1. EXECUTIVE SUMMARY — A comprehensive summary for a decision maker. Include:
-   - 2-3 paragraphs on the overall opportunity and why it matters now
-   - AGENT FINDINGS SUMMARY — approximately 100-150 words per agent summarizing the key findings from each stage:
-     * Scout Finding: [what opportunity was identified, why it exists, why now]
-     * AI Executability Finding: [key automation potential, score, and human time estimate]
-     * Market Analysis Finding: [key market validation signals and competitive insight]
-     * Business Architecture Finding: [key financial metrics, path to breakeven, capital required]
-     * Brand Development Finding: [recommended brand name and core positioning]
-     * GTM Strategy Finding: [primary acquisition channel and 30-day launch approach]
-     * AI Execution Design Finding: [core AI stack summary and human time commitment at steady state]
-
-2. STAGE SCORES SUMMARY — table of all stage scores with brief reasoning for each
-
-3. KEY STRENGTHS — 3-5 things making this opportunity genuinely compelling
-
-4. KEY RISKS — 3-5 things that could make this fail and what to watch for
-
-5. CAPITAL SUMMARY — total path to breakeven, monthly operating cost at steady state, timeline to first revenue
-
-6. BUSINESS CATEGORY — assign exactly one category from this list:
-   Health & Wellness | Home & Living | Consumer Goods | B2B & Professional | Technology & SaaS | Marketplace & Middleman | Education & Media | Finance & Wealth | Sustainability & Lifestyle | Other
-   Format exactly as: CATEGORY: [category name]
-
-7. OVERALL OPPORTUNITY SCORE: [X]/10 — weighted average. AI Executability and Financial Viability weighted most heavily (35% combined), Market Analysis and GTM Strategy second (35% combined), Brand Development third (15%), Scout signal (15%). Show your calculation.
-
-8. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS with clear reasoning
-
-9. MOST IMPORTANT ADVICE — if Pursue or Consider, the single most important thing to get right
-
-Format the overall score exactly as: OVERALL OPPORTUNITY SCORE: [number]/10
-Format the category exactly as: CATEGORY: [category name]`;
+Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent). 2. STAGE SCORES SUMMARY. 3. KEY STRENGTHS — 3-5 points. 4. KEY RISKS — 3-5 points. 5. CAPITAL SUMMARY. 6. CATEGORY: [one of: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle, Other]. 7. OVERALL OPPORTUNITY SCORE: [X]/10. 8. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS. 9. MOST IMPORTANT ADVICE.`;
 
   const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
   setAgentStatus('orchestrator', 'done', 'Done ✓');
 
-  // Extract score with multiple patterns
-  const scorePatterns = [
-    /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i,
-    /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)/i,
-    /overall score[:\s]+(\d+(?:\.\d+)?)\/10/i,
-    /opportunity score[:\s]+(\d+(?:\.\d+)?)/i,
-  ];
+  const scorePatterns = [/OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i, /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)/i];
   let overallScore = null;
-  for (const pattern of scorePatterns) {
-    const match = blueprint.match(pattern);
-    if (match) { overallScore = parseFloat(match[1]); break; }
-  }
+  for (const pattern of scorePatterns) { const match = blueprint.match(pattern); if (match) { overallScore = parseFloat(match[1]); break; } }
   if (!overallScore) {
-    // Calculate weighted average from stage scores
-    const w = { scout: 0.15, aiExec: 0.20, market: 0.175, biz: 0.175, brand: 0.15, gtm: 0.175, exec: 0.175 };
-    overallScore = Object.entries(scores).reduce((sum, [k,v]) => sum + (v * (w[k] || 0.14)), 0);
-    overallScore = Math.round(overallScore * 10) / 10;
+    const w = { scout: 0.10, aiExec: 0.20, market: 0.15, biz: 0.20, brand: 0.10, gtm: 0.15, exec: 0.10 };
+    overallScore = Math.round(Object.entries(scores).reduce((sum, [k,v]) => sum + (v * (w[k] || 0.10)), 0) * 10) / 10;
   }
 
-  // Extract category
   const categoryMatch = blueprint.match(/CATEGORY:\s*([^\n]+)/i);
-  const category = categoryMatch ? categoryMatch[1].trim() : 'Other';
+  const category = categoryMatch ? categoryMatch[1].trim() : autoCategory;
 
-  await saveOpp(recordId, {
-    'Orchestrator Summary': blueprint,
-    'Opportunity Score': overallScore,
-    'Risks & Challenges': blueprint,
-    'Category': category,
-    'Status': 'Review'
-  });
+  await saveOpp(recordId, { 'Orchestrator Summary': blueprint, 'Opportunity Score': overallScore, 'Risks & Challenges': blueprint, 'Category': category, 'Status': 'Review' });
 
   addActivity(`🎉 Blueprint complete! "${oppName}" → ${category} | Score: ${overallScore}/10`);
   loadBoard();
