@@ -824,7 +824,18 @@ Brand Development: A 7 means at least 10 name options with availability checks, 
 GTM Strategy: A 7 means specific launch channels are named with reasoning for why they fit this customer, a 90-day action plan with sequenced steps, nano-influencer strategy identified, and a clear answer to how the first 100 customers are acquired. A generic "use social media" approach scores no higher than 4.
 AI Execution Design: A 7 means specific tools are named for each business function with current pricing, the operational workflow is mapped end to end, the human owner's actual daily time commitment is stated in hours, and the implementation roadmap is executable by a non-technical operator. Vague references to "AI tools" without specifics score no higher than 3.
 
-Final Opportunity Score: Weighted average of all stage scores. Weight AI Executability and Financial Viability most heavily. Weight Market Analysis and GTM Strategy second. Weight Brand Development third. Present with a clear overall recommendation: Pursue, Consider, or Pass.`;
+Final Opportunity Score: Weighted average of all stage scores with the following weights:
+- AI Executability / Lean Operations: 20%
+- Financial Viability / Business Architecture: 20%
+- Market Analysis: 15%
+- GTM Strategy: 15%
+- Influencer & Affiliate Distribution Fit: 15% — PREFERENTIAL FACTOR. We have platform access to influencer and affiliate networks at no additional platform cost. Opportunities that are naturally suited to influencer seeding and affiliate promotion receive a significant scoring advantage. Evaluate based on: visual appeal and demonstrability, relatability of the problem solved, niche community fit, product seeding viability (can a nano-influencer authentically promote this with a free sample?), and affiliate commission structure potential.
+- Brand Development: 10%
+- Scout Signal Quality: 5%
+
+When two opportunities score similarly across other dimensions, always rank higher the one with stronger influencer and affiliate distribution fit. This is a genuine competitive advantage that reduces customer acquisition cost significantly.
+
+Present with a clear overall recommendation: Pursue, Consider, or Pass.`;
 
 const TREND_ANALYST_PROMPT = `You are a senior trend analyst and market intelligence specialist with deep expertise in identifying macro and micro trends that create business opportunities. You think like a combination of a demographic analyst who understands generational shifts, a consumer behavior researcher who tracks where money is moving, a technology futurist who sees AI disruption patterns early, and a venture scout who identifies markets before they become obvious.
 
@@ -891,6 +902,9 @@ For each opportunity produce:
 - COMPETITIVE_LANDSCAPE: [wide open, lightly contested, or crowded with specific gap — with specific competitor examples]
 - CAPITAL_ESTIMATE: [estimated total to reach breakeven with brief reasoning]
 - CONFIDENCE: [High, Medium, or Speculative with one sentence reasoning]
+- INFLUENCER_AFFILIATE_FIT: [High, Medium, or Low — how well does this opportunity lend itself to influencer and affiliate promotion? High means the product or service is visual, demonstrable, solves a relatable problem, and would resonate with an influencer's audience. Products that photograph well, have a clear before/after, solve a visible frustration, or appeal to a defined niche community score High. B2B software or highly technical products score Low.]
+
+DISTRIBUTION ADVANTAGE — PREFERENTIAL TREATMENT: We have platform access to influencer and affiliate networks at no additional platform cost. Opportunities where influencer seeding and affiliate promotion are the natural primary acquisition channel receive preferential treatment. When evaluating two otherwise equal opportunities, always favor the one with stronger influencer and affiliate fit. Physical products, lifestyle products, health and wellness products, beauty, home goods, and consumer goods with clear visual appeal and relatable benefits score highest on this dimension. The ideal opportunity is one where a nano-influencer can demonstrate real value to their audience with a free product sample and drive immediate sales.
 
 You do not surface obvious ideas, saturated markets, opportunities requiring heavy human labor, significant capital beyond the stated threshold, or specialized licenses. If an idea does not pass your own internal filter, discard it and find a better one.
 
@@ -1102,6 +1116,15 @@ Customer Acquisition Strategy:
 - How the first 100 customers get acquired — specific, tactical, step by step
 - Customer acquisition cost estimate — realistic cost to acquire one customer through each channel
 - Conversion strategy — how a potential customer becomes a paying customer
+
+DISTRIBUTION ADVANTAGE — PLATFORM ACCESS: We have existing platform access to influencer and affiliate networks at no additional platform cost. This is a significant competitive advantage that should shape the entire GTM strategy. The primary question is not whether to use influencers and affiliates — it is how to structure the seeding and affiliate program to maximize this advantage. For every opportunity, design the GTM strategy around this distribution channel first, then layer in other channels as secondary support.
+
+AFFILIATE PROGRAM DESIGN — include in every GTM plan:
+- Recommended affiliate commission structure for this specific product or service
+- What makes this product attractive to affiliates — commission rate, conversion rate potential, average order value
+- How to recruit affiliates through the existing platform access
+- Whether a tiered affiliate structure makes sense — higher commissions for higher volume affiliates
+- Product seeding strategy — what to send, to whom, and what to ask for in return
 
 Influencer Strategy — LEAD WITH NANO-INFLUENCERS:
 - Nano-influencers — under 10,000 followers — are the primary launch vehicle. They typically work for product only with no cash outlay, have highly engaged niche audiences, and provide authentic social proof
@@ -1654,7 +1677,9 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     addActivity(`❌ "${oppName}" dropped at Scout.`);
     return false;
   }
-  await saveOpp(recordId, { 'Signal': scout.output, 'Status': 'AI Executability' });
+  const influencerFitMatch = scout.output.match(/INFLUENCER_AFFILIATE_FIT:\s*(.+)/);
+  const influencerFit = influencerFitMatch ? influencerFitMatch[1].replace(/\*\*/g, '').trim().split(' ')[0] : '';
+  await saveOpp(recordId, { 'Signal': scout.output, 'Status': 'AI Executability', 'Influencer Affiliate Fit': influencerFit });
   context += `\n\nSCOUT OUTPUT:\n${scout.output}`;
 
   // AI EXECUTABILITY
@@ -2140,6 +2165,7 @@ function buildCard(item) {
         ${oppScore ? `<span class="opp-score">🎯 ${oppScore}/10</span>` : ''}
         ${aiScore ? `<span class="ai-score">🤖 AI ${aiScore}/10</span>` : ''}
         ${sourceTrend ? `<span class="source-trend">📈 ${sourceTrend.substring(0,30)}</span>` : ''}
+        ${item['Influencer Affiliate Fit'] ? `<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${item['Influencer Affiliate Fit']==='High'?'#FEF3C7':'#F3F4F6'};color:${item['Influencer Affiliate Fit']==='High'?'#92400E':'#6B7280'}">📣 Influencer Fit: ${item['Influencer Affiliate Fit']}</span>` : ''}
         <span class="card-date">${date}</span>
         <button class="expand-btn" id="expand-${item.id}">▼</button>
       </div>
