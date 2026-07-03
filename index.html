@@ -2201,16 +2201,17 @@ function buildCardActions(item) {
   const id = item.id;
   const status = item.Status || '';
   const del = `<button class="btn-delete" onclick="deleteItem('${id}')">🗑 Delete</button>`;
+  const copyId = `<button class="btn-revise" onclick="navigator.clipboard.writeText('${id}').then(()=>{this.textContent='✓ Copied';setTimeout(()=>this.textContent='📋 Copy ID',1500)})" title="Copy record ID for pipeline resume">📋 Copy ID</button>`;
   const note = `<input class="revision-note-input" id="note-${id}" placeholder="Notes…">`;
   const exportBtns = `
     <button class="btn-revise" onclick="printBlueprint('${id}')" title="Print or save as PDF">🖨️ Print PDF</button>
     <button class="btn-revise" onclick="downloadWord('${id}')" title="Download Word document">📄 Word Doc</button>
   `;
-  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${exportBtns}${del}`;
-  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${exportBtns}${del}`;
-  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${exportBtns}${del}`;
-  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${del}`;
-  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${del}`;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" onclick="updateItem('${id}','Blueprint Draft')">↩ Revise</button><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button>${exportBtns}${copyId}${del}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${exportBtns}${copyId}${del}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button>${exportBtns}${copyId}${del}`;
+  if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button>${copyId}${del}`;
+  return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-hold" onclick="updateItem('${id}','On Hold')">⏸ Hold</button><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button>${copyId}${del}`;
 }
 
 // ─── EXPORT FUNCTIONS ─────────────────────────────────────────────────────────
