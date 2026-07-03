@@ -1942,7 +1942,7 @@ async function runPipeline() {
         scoutMsg = `You have been given a Hot Products Brief with ${sourceItems.length} products and categories with proven market demand. Find 7 specific business opportunities to enter these markets — white label, private label, or differentiated versions. These are proven markets, so focus on entry angle and differentiation.\n\nHOT PRODUCTS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
       }
 
-      const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 4000, true);
+      const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 8000, true);
       setAgentStatus('scout', 'done', 'Done ✓');
 
       const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
