@@ -1848,7 +1848,7 @@ STAGE SCORES: ${stageScoresSummary}
 CONTEXT:
 ${blueprintCtx}
 
-Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent). 2. STAGE SCORES SUMMARY. 3. KEY STRENGTHS — 3-5 points. 4. KEY RISKS — 3-5 points. 5. CAPITAL SUMMARY. 6. CATEGORY: [one of: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle, Other]. 7. OVERALL OPPORTUNITY SCORE: [X]/10. 8. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS. 9. MOST IMPORTANT ADVICE.`;
+Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent). 2. STAGE SCORES SUMMARY — for each stage list the score and one sentence of reasoning. Flag any stage scoring below 7 as ⚠️ WATCH POINT with a specific note on what the gap is and what to verify before pursuing. 3. KEY STRENGTHS — 3-5 points. 4. KEY RISKS — 3-5 points. 5. CAPITAL SUMMARY. 6. CATEGORY: [one of: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle, Other]. 7. OVERALL OPPORTUNITY SCORE: [X]/10. 8. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS. 9. MOST IMPORTANT ADVICE.`;
 
   const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
   setAgentStatus('orchestrator', 'done', 'Done ✓');
