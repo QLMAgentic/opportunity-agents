@@ -216,6 +216,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="input-footer">
           <button class="btn-run" id="runBtn" onclick="runPipeline()">▶ Run Opportunity Pipeline</button>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E8EAF0">
+          <p style="font-size:12px;color:#AAA;margin-bottom:8px">Resume an interrupted pipeline by entering the Airtable record ID:</p>
+          <div style="display:flex;gap:8px">
+            <input class="opp-name-input" id="resumeRecordId" placeholder="Airtable Record ID (e.g. recXXXXXXXXXXXXXX)" style="margin-bottom:0;flex:1">
+            <button class="btn-run" id="resumeBtn" onclick="resumePipeline()" style="white-space:nowrap;padding:10px 18px">↩ Resume</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -1969,6 +1976,180 @@ async function runPipeline() {
 
   runBtn.disabled = false;
   runBtn.textContent = '▶ Run Opportunity Pipeline';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+}
+
+// ─── RESUME PIPELINE ──────────────────────────────────────────────────────────
+async function resumePipeline() {
+  const recordId = document.getElementById('resumeRecordId').value.trim();
+  if (!recordId || !recordId.startsWith('rec')) {
+    alert('Please enter a valid Airtable record ID starting with "rec"');
+    return;
+  }
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded. Please wait and try again.'); return; }
+
+  const resumeBtn = document.getElementById('resumeBtn');
+  resumeBtn.disabled = true;
+  resumeBtn.textContent = '⏳ Loading…';
+
+  try {
+    const res = await fetch(`/api/opportunities/${recordId}`);
+    if (!res.ok) { alert('Record not found. Check the record ID and try again.'); resumeBtn.disabled = false; resumeBtn.textContent = '↩ Resume'; return; }
+
+    const record = await res.json();
+    const currentStatus = record['Status'];
+    const oppName = record['Name'];
+
+    addActivity(`↩ Resuming pipeline for: "${oppName}" — current stage: ${currentStatus}`);
+    document.getElementById('systemStatus').textContent = '● Pipeline resuming…';
+    document.getElementById('systemStatus').className = 'system-status working';
+    resumeBtn.textContent = '⏳ Running…';
+
+    if (currentStatus === 'Review' || currentStatus === 'Approved') {
+      addActivity(`✅ "${oppName}" is already complete — Status: ${currentStatus}`);
+      resumeBtn.disabled = false; resumeBtn.textContent = '↩ Resume';
+      document.getElementById('systemStatus').textContent = '● All agents ready';
+      document.getElementById('systemStatus').className = 'system-status';
+      return;
+    }
+
+    if (currentStatus === 'Dropped') {
+      addActivity(`❌ "${oppName}" was dropped. Reopen it in Airtable first if you want to retry.`);
+      resumeBtn.disabled = false; resumeBtn.textContent = '↩ Resume';
+      document.getElementById('systemStatus').textContent = '● All agents ready';
+      document.getElementById('systemStatus').className = 'system-status';
+      return;
+    }
+
+    // Rebuild context from existing Airtable fields
+    const focusCtx = getFocusCtx();
+    let context = `Opportunity: ${oppName}\nSignal: ${record['Signal'] || ''}`;
+    if (focusCtx) context = `Focus Criteria:\n${focusCtx}\n\n${context}`;
+
+    if (record['Signal']) context += `\n\nSCOUT OUTPUT:\n${record['Signal']}`;
+    if (record['AI Executability Notes']) context += `\n\nAI EXECUTABILITY ANALYSIS:\n${record['AI Executability Notes']}`;
+    if (record['Market Analysis']) context += `\n\nMARKET ANALYSIS:\n${record['Market Analysis']}`;
+    if (record['Business Model']) context += `\n\nBUSINESS ARCHITECTURE:\n${record['Business Model']}`;
+    if (record['Brand Name & Positioning']) context += `\n\nBRAND DEVELOPMENT:\n${record['Brand Name & Positioning']}`;
+    if (record['GTM Plan']) context += `\n\nGTM STRATEGY:\n${record['GTM Plan']}`;
+    if (record['AI Stack Plan']) context += `\n\nAI EXECUTION DESIGN:\n${record['AI Stack Plan']}`;
+
+    const scores = {};
+    if (record['AI Executability Score']) scores.aiExec = record['AI Executability Score'];
+
+    addActivity(`📋 Context rebuilt from Airtable — resuming from: ${currentStatus}`);
+
+    if (['Signal Captured', 'AI Executability'].includes(currentStatus)) {
+      setAgentStatus('ai-analyst', 'working', 'Analyzing…');
+      const aiAnalyst = await runAgent('AI Executability', AI_ANALYST_PROMPT, `Perform a complete AI Executability Analysis.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('ai-analyst', 'done', 'Done ✓');
+      scores.aiExec = aiAnalyst.score;
+      if (aiAnalyst.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score }); addActivity(`❌ Dropped at AI Executability.`); return; }
+      await saveOpp(recordId, { 'AI Executability Notes': aiAnalyst.output, 'AI Executability Score': aiAnalyst.score, 'Status': 'Market Analysis' });
+      context += `\n\nAI EXECUTABILITY ANALYSIS:\n${aiAnalyst.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis'].includes(currentStatus)) {
+      setAgentStatus('market', 'working', 'Researching…');
+      const market = await runAgent('Market Analysis', MARKET_ANALYST_PROMPT, `Perform a complete Market Analysis.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('market', 'done', 'Done ✓');
+      scores.market = market.score;
+      if (market.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'Market Analysis': market.output }); addActivity(`❌ Dropped at Market Analysis.`); return; }
+      await saveOpp(recordId, { 'Market Analysis': market.output, 'Competitive Landscape': market.output, 'Target Customer': market.output, 'Status': 'Business Design' });
+      context += `\n\nMARKET ANALYSIS:\n${market.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design'].includes(currentStatus)) {
+      setAgentStatus('architect', 'working', 'Designing…');
+      const biz = await runAgent('Business Architecture', BUSINESS_ARCHITECT_PROMPT, `Design the complete business model and financial structure.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('architect', 'done', 'Done ✓');
+      scores.biz = biz.score;
+      if (biz.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'Business Model': biz.output }); addActivity(`❌ Dropped at Business Design.`); return; }
+      await saveOpp(recordId, { 'Business Model': biz.output, 'Revenue Projections': biz.output, 'Financial Analysis': biz.output, 'Status': 'Brand Development' });
+      context += `\n\nBUSINESS ARCHITECTURE:\n${biz.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development'].includes(currentStatus)) {
+      setAgentStatus('brand', 'working', 'Creating…');
+      const brand = await runAgent('Brand Development', BRAND_DEVELOPER_PROMPT, `Develop the complete brand foundation. Proceed with best available context.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('brand', 'done', 'Done ✓');
+      scores.brand = brand.score;
+      if (brand.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'Brand Name & Positioning': brand.output }); addActivity(`❌ Dropped at Brand Development.`); return; }
+      await saveOpp(recordId, { 'Brand Name & Positioning': brand.output, 'Brand Identity Direction': brand.output, 'Status': 'GTM Strategy' });
+      context += `\n\nBRAND DEVELOPMENT:\n${brand.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development', 'GTM Strategy'].includes(currentStatus)) {
+      setAgentStatus('gtm', 'working', 'Planning…');
+      const gtm = await runAgent('GTM Strategy', GTM_STRATEGIST_PROMPT, `Design the complete go-to-market strategy.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('gtm', 'done', 'Done ✓');
+      scores.gtm = gtm.score;
+      if (gtm.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output }); addActivity(`❌ Dropped at GTM Strategy.`); return; }
+      await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
+      context += `\n\nGTM STRATEGY:\n${gtm.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development', 'GTM Strategy', 'AI Execution Design'].includes(currentStatus)) {
+      setAgentStatus('exec', 'working', 'Designing…');
+      const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the complete AI execution system.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('exec', 'done', 'Done ✓');
+      scores.exec = exec.score;
+      if (exec.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'AI Stack Plan': exec.output }); addActivity(`❌ Dropped at AI Execution Design.`); return; }
+      await saveOpp(recordId, { 'AI Stack Plan': exec.output, 'Execution Roadmap': exec.output, 'Status': 'Blueprint Draft' });
+      context += `\n\nAI EXECUTION DESIGN:\n${exec.output}`;
+    }
+
+    // Final Blueprint
+    setAgentStatus('orchestrator', 'working', 'Compiling Blueprint…');
+    addActivity(`📋 Orchestrator compiling final Blueprint…`);
+
+    const stageScoresSummary = Object.entries(scores).map(([k,v]) => `${k}: ${v}/10`).join(', ');
+
+    const blueprintMsg = `Compile the complete Opportunity Launch Blueprint.
+
+STAGE SCORES: ${stageScoresSummary}
+
+FULL CONTEXT:
+${context.substring(0, 7000)}
+
+Produce the final Blueprint with Executive Summary including Agent Findings Summary, Stage Scores, Key Strengths, Key Risks, Capital Summary, Business Category (format as CATEGORY: [name]), Overall Opportunity Score (format as OVERALL OPPORTUNITY SCORE: [X]/10), Final Recommendation, and Most Important Advice.`;
+
+    const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
+    setAgentStatus('orchestrator', 'done', 'Done ✓');
+
+    let overallScore = null;
+    for (const pattern of [/OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i, /OVERALL OPPORTUNITY SCORE:\s*(\d+(?:\.\d+)?)/i]) {
+      const match = blueprint.match(pattern);
+      if (match) { overallScore = parseFloat(match[1]); break; }
+    }
+    if (!overallScore) {
+      const w = { aiExec: 0.20, market: 0.15, biz: 0.20, brand: 0.10, gtm: 0.15, exec: 0.15 };
+      overallScore = Math.round(Object.entries(scores).reduce((sum, [k,v]) => sum + (v * (w[k] || 0.10)), 0) * 10) / 10;
+    }
+
+    const categoryMatch = blueprint.match(/CATEGORY:\s*([^\n]+)/i);
+    const category = categoryMatch ? categoryMatch[1].trim() : (record['Category'] || 'Other');
+
+    await saveOpp(recordId, {
+      'Orchestrator Summary': blueprint,
+      'Opportunity Score': overallScore,
+      'Risks & Challenges': blueprint,
+      'Category': category,
+      'Status': 'Review'
+    });
+
+    addActivity(`🎉 Resume complete! "${oppName}" is ready for review. Score: ${overallScore}/10`);
+    loadBoard();
+    loadQueueBadge();
+
+  } catch(err) {
+    addActivity(`❌ Resume error: ${err.message}`);
+    console.error(err);
+  }
+
+  resumeBtn.disabled = false;
+  resumeBtn.textContent = '↩ Resume';
   document.getElementById('systemStatus').textContent = '● All agents ready';
   document.getElementById('systemStatus').className = 'system-status';
 }
