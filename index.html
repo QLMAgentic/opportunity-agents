@@ -210,7 +210,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
       <div class="card">
         <div class="card-title">Run Opportunity Pipeline — Daily</div>
-        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 3 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 7 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
         <input class="opp-name-input" id="oppName" placeholder="Opportunity name (optional — leave blank for Scout to discover)">
         <textarea class="signal-input" id="signalInput" placeholder="Optional: Describe a specific opportunity signal to evaluate. Leave blank to let Scout pull from Trend Library…"></textarea>
         <div class="input-footer">
@@ -1933,13 +1933,13 @@ async function runPipeline() {
       let scoutMsg = '';
       if (currentLibrary === 'trends') {
         const brief = sourceItems.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Trend Brief with ${sourceItems.length} validated market trends. Find 3 specific business opportunities within these trends. Choose the trends with the strongest signals. Remember: approximately 50% of opportunities should be physical product businesses.\n\nTREND BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+        scoutMsg = `You have been given a Trend Brief with ${sourceItems.length} validated market trends. Find 7 specific business opportunities within these trends. Choose the trends with the strongest signals. Remember: approximately 50% of opportunities should be physical product businesses.\n\nTREND BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
       } else if (currentLibrary === 'consumerproblems') {
         const brief = sourceItems.map((p, i) => `Problem ${i+1}: ${p['Name']}\nCategory: ${p['Category'] || ''}\nDescription: ${p['Problem Description'] || ''}\nFrustration: ${p['Frustration Intensity'] || ''}\nAudience: ${p['Audience Size'] || ''}\nCurrent Solutions (failing): ${p['Current Solutions'] || ''}\nHypothesis: ${p['Product Hypothesis'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Consumer Problems Brief with ${sourceItems.length} validated consumer pain points. Find 3 specific business opportunities that solve these problems. Focus on solutions that don't yet exist or where existing solutions are poor. Remember: approximately 50% should be physical product businesses.\n\nCONSUMER PROBLEMS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+        scoutMsg = `You have been given a Consumer Problems Brief with ${sourceItems.length} validated consumer pain points. Find 7 specific business opportunities that solve these problems. Focus on solutions that don't yet exist or where existing solutions are poor. Remember: approximately 50% should be physical product businesses.\n\nCONSUMER PROBLEMS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
       } else {
         const brief = sourceItems.map((p, i) => `Hot Product ${i+1}: ${p['Name']}\nType: ${p['Type'] || ''}\nHeat Level: ${p['Heat Level'] || ''}\nWhy Its Hot: ${p['Why Its Hot'] || ''}\nTarget Audience: ${p['Target Audience'] || ''}\nPrice Point: ${p['Price Point'] || ''}\nWhite Label Potential: ${p['White Label Potential'] || ''}\nLongevity: ${p['Longevity'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Hot Products Brief with ${sourceItems.length} products and categories with proven market demand. Find 3 specific business opportunities to enter these markets — white label, private label, or differentiated versions. These are proven markets, so focus on entry angle and differentiation.\n\nHOT PRODUCTS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
+        scoutMsg = `You have been given a Hot Products Brief with ${sourceItems.length} products and categories with proven market demand. Find 7 specific business opportunities to enter these markets — white label, private label, or differentiated versions. These are proven markets, so focus on entry angle and differentiation.\n\nHOT PRODUCTS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
       }
 
       const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 4000, true);
@@ -1948,7 +1948,7 @@ async function runPipeline() {
       const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
       addActivity(`📡 Scout found ${oppBlocks.length} opportunities — running pipelines…`);
 
-      for (const block of oppBlocks.slice(0, 3)) {
+      for (const block of oppBlocks.slice(0, 7)) {
         const nameMatch = block.match(/OPPORTUNITY_NAME:\s*(.+)/);
         const trendMatch = block.match(/SOURCE_TREND:\s*(.+)/);
         const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=TARGET_CUSTOMER:|$)/);
