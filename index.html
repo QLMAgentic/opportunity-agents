@@ -2068,7 +2068,7 @@ LIBRARY_INTERSECTION: [which libraries this draws from]
 
 Separate with ---OPP---`;
 
-    const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 3000, true);
+    const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 7000, true);
     setAgentStatus('scout', 'done', 'Done ✓');
 
     const oppBlocks = scoutOutput.split('---OPP---').filter(b => b.trim().length > 30);
