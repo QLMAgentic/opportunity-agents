@@ -2030,34 +2030,41 @@ async function runFastMode() {
   addActivity(`⚡ Fast Mode: targeting ${targetCount} opportunities in parallel…`);
 
   try {
-    const rotation = ['trends', 'consumerproblems', 'hotproducts'];
-    const rotIdx = parseInt(localStorage.getItem('libraryRotation') || '0');
-    const library = rotation[rotIdx % rotation.length];
-    localStorage.setItem('libraryRotation', (rotIdx + 1).toString());
-    addActivity(`📚 Drawing from: ${library} library`);
+    addActivity(`📚 Pulling from all three libraries for cross-signal opportunities…`);
 
-    let libraryRecords = [];
-    try {
-      const res = await fetch(`/api/${library}`);
-      const records = await res.json();
-      libraryRecords = records.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 10);
-    } catch(e) { console.log('Library fetch error:', e); }
+    const [trendRecords, problemRecords, hotRecords] = await Promise.all([
+      fetch('/api/trends').then(r => r.json()).catch(() => []),
+      fetch('/api/consumerproblems').then(r => r.json()).catch(() => []),
+      fetch('/api/hotproducts').then(r => r.json()).catch(() => [])
+    ]);
 
-    const trendBrief = libraryRecords.length > 0
-      ? libraryRecords.map((r, i) => `Signal ${i+1}: ${r['Name'] || ''} — ${(r['Description'] || r['Problem Description'] || r['Why Its Hot'] || '').substring(0, 150)}`).join('\n')
-      : 'Use general market knowledge and web search to find opportunities';
+    const trendItems = trendRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
+    const problemItems = problemRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
+    const hotItems = hotRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
 
-    const scoutMsg = `Find exactly ${targetCount} specific business opportunities quickly. Each should be a distinct opportunity in a different market or niche.
+    addActivity(`🔭 Cross-referencing ${trendItems.length} trends, ${problemItems.length} problems, ${hotItems.length} hot products…`);
 
-${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}LIBRARY SIGNALS TO DRAW FROM:
-${trendBrief}
+    const trendBrief = trendItems.map((t, i) => `Trend ${i+1}: ${t['Name'] || ''} — ${(t['Description'] || '').substring(0, 120)}`).join('\n');
+    const problemBrief = problemItems.map((p, i) => `Problem ${i+1}: ${p['Name'] || ''} — ${(p['Problem Description'] || '').substring(0, 120)}`).join('\n');
+    const hotBrief = hotItems.map((p, i) => `Hot Product ${i+1}: ${p['Name'] || ''} — ${(p['Why Its Hot'] || '').substring(0, 120)}`).join('\n');
+
+    const scoutMsg = `You have been given three intelligence sources. Find exactly ${targetCount} business opportunities that appear across multiple sources — ideally all three, minimum two. A strong opportunity shows up as a market trend AND addresses a real consumer problem AND has a proven hot product category behind it. Prioritize highest cross-source intersection. Single-source opportunities are lowest priority.
+
+${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}MARKET TRENDS:
+${trendBrief || 'No trend data — use web search'}
+
+CONSUMER PROBLEMS:
+${problemBrief || 'No problem data — use web search'}
+
+HOT PRODUCTS:
+${hotBrief || 'No hot product data — use web search'}
 
 Remember: approximately 50% should be physical product businesses. Give preferential consideration to opportunities with strong influencer and affiliate promotion potential.
 
 For each opportunity:
 OPPORTUNITY_NAME: [clear specific name]
-SIGNAL: [2-3 sentences describing what the business is, who it serves, and why now]
-CONFIDENCE: [High/Medium/Speculative]
+SIGNAL: [2-3 sentences: what the business is, who it serves, why now]
+LIBRARY_INTERSECTION: [which libraries this draws from]
 
 Separate with ---OPP---`;
 
@@ -2126,63 +2133,62 @@ async function runPipeline() {
       addActivity(`🔍 Starting pipeline for: ${name}`);
       await runFullPipeline(record.id, name, signal);
     } else {
-      // Library rotation: trends → consumerproblems → hotproducts → repeat
-      const LIBRARY_SEQUENCE = ['trends', 'consumerproblems', 'hotproducts'];
-      const LIBRARY_LABELS = { trends: 'Trend Library', consumerproblems: 'Consumer Problems Library', hotproducts: 'Hot Products Library' };
-      const rotationIdx = parseInt(localStorage.getItem('opportunityLibraryRotation') || '0');
-      const currentLibrary = LIBRARY_SEQUENCE[rotationIdx % 3];
-      localStorage.setItem('opportunityLibraryRotation', String((rotationIdx + 1) % 3));
+      // Pull from ALL three libraries simultaneously and find cross-library intersections
+      addActivity(`📚 Pulling from all three libraries for cross-signal opportunities…`);
 
-      addActivity(`📚 Pulling from ${LIBRARY_LABELS[currentLibrary]} (rotation ${rotationIdx % 3 + 1}/3)…`);
+      const [trendItems, problemItems, hotItems] = await Promise.all([
+        getUnexploredTrends(),
+        getUnexploredConsumerProblems(),
+        getUnexploredHotProducts()
+      ]);
 
-      let sourceItems = [];
-      if (currentLibrary === 'trends') {
-        sourceItems = await getUnexploredTrends();
-      } else if (currentLibrary === 'consumerproblems') {
-        sourceItems = await getUnexploredConsumerProblems();
-      } else {
-        sourceItems = await getUnexploredHotProducts();
+      if (trendItems.length === 0 && problemItems.length === 0 && hotItems.length === 0) {
+        addActivity(`⚠️ No unexplored items in any library. Run analysis first.`);
+        runBtn.disabled = false;
+        runBtn.textContent = '🔬 Deep Mode — Full Blueprint (Brand + GTM + AI Stack)';
+        document.getElementById('systemStatus').textContent = '● All agents ready';
+        document.getElementById('systemStatus').className = 'system-status';
+        return;
       }
 
-      if (sourceItems.length === 0) {
-        addActivity(`⚠️ No unexplored items in ${LIBRARY_LABELS[currentLibrary]}. Trying Trend Library…`);
-        sourceItems = await getUnexploredTrends();
-        if (sourceItems.length === 0) {
-          addActivity(`⚠️ No unexplored items in any library. Run analysis first.`);
-          runBtn.disabled = false;
-          runBtn.textContent = '▶ Run Opportunity Pipeline';
-          document.getElementById('systemStatus').textContent = '● All agents ready';
-          document.getElementById('systemStatus').className = 'system-status';
-          return;
-        }
-      }
+      const trendBrief = trendItems.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}`).join('\n\n');
+      const problemBrief = problemItems.map((p, i) => `Problem ${i+1}: ${p['Name']}\nDescription: ${p['Problem Description'] || ''}\nFrustration: ${p['Frustration Intensity'] || ''}\nHypothesis: ${p['Product Hypothesis'] || ''}`).join('\n\n');
+      const hotBrief = hotItems.map((p, i) => `Hot Product ${i+1}: ${p['Name']}\nWhy Its Hot: ${p['Why Its Hot'] || ''}\nTarget Audience: ${p['Target Audience'] || ''}\nWhite Label Potential: ${p['White Label Potential'] || ''}`).join('\n\n');
 
-      // Build brief for Scout based on library type
       setAgentStatus('scout', 'working', 'Discovering…');
-      addActivity(`🔭 Scout finding opportunities within ${sourceItems.length} ${LIBRARY_LABELS[currentLibrary]} items…`);
+      addActivity(`🔭 Scout cross-referencing ${trendItems.length} trends, ${problemItems.length} problems, ${hotItems.length} hot products…`);
 
-      let scoutMsg = '';
-      if (currentLibrary === 'trends') {
-        const brief = sourceItems.map((t, i) => `Trend ${i+1}: ${t['Name']}\nDescription: ${t['Description'] || ''}\nLens: ${t['Lens'] || ''}\nMomentum: ${t['Momentum'] || ''}\nTiming: ${t['Timing'] || ''}\nIncumbent Vulnerability: ${t['Incumbent Vulnerability'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Trend Brief with ${sourceItems.length} validated market trends. Find 7 specific business opportunities within these trends. Choose the trends with the strongest signals. Remember: approximately 50% of opportunities should be physical product businesses.\n\nTREND BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
-      } else if (currentLibrary === 'consumerproblems') {
-        const brief = sourceItems.map((p, i) => `Problem ${i+1}: ${p['Name']}\nCategory: ${p['Category'] || ''}\nDescription: ${p['Problem Description'] || ''}\nFrustration: ${p['Frustration Intensity'] || ''}\nAudience: ${p['Audience Size'] || ''}\nCurrent Solutions (failing): ${p['Current Solutions'] || ''}\nHypothesis: ${p['Product Hypothesis'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Consumer Problems Brief with ${sourceItems.length} validated consumer pain points. Find 7 specific business opportunities that solve these problems. Focus on solutions that don't yet exist or where existing solutions are poor. Remember: approximately 50% should be physical product businesses.\n\nCONSUMER PROBLEMS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
-      } else {
-        const brief = sourceItems.map((p, i) => `Hot Product ${i+1}: ${p['Name']}\nType: ${p['Type'] || ''}\nHeat Level: ${p['Heat Level'] || ''}\nWhy Its Hot: ${p['Why Its Hot'] || ''}\nTarget Audience: ${p['Target Audience'] || ''}\nPrice Point: ${p['Price Point'] || ''}\nWhite Label Potential: ${p['White Label Potential'] || ''}\nLongevity: ${p['Longevity'] || ''}`).join('\n\n---\n\n');
-        scoutMsg = `You have been given a Hot Products Brief with ${sourceItems.length} products and categories with proven market demand. Find 7 specific business opportunities to enter these markets — white label, private label, or differentiated versions. These are proven markets, so focus on entry angle and differentiation.\n\nHOT PRODUCTS BRIEF:\n${brief}\n\n${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}Separate with ---OPP---`;
-      }
+      const scoutMsg = `You have been given three intelligence sources. Your job is to find 7 business opportunities that appear across multiple sources — ideally all three, minimum two. A strong opportunity shows up as a market trend AND addresses a real consumer problem AND has a proven hot product category behind it. Prioritize opportunities with the highest cross-source intersection. Single-source opportunities are lowest priority.
+
+${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}MARKET TRENDS:
+${trendBrief || 'No trend data available'}
+
+CONSUMER PROBLEMS:
+${problemBrief || 'No consumer problem data available'}
+
+HOT PRODUCTS:
+${hotBrief || 'No hot product data available'}
+
+For each opportunity, note which sources it draws from. Remember: approximately 50% should be physical product businesses. Give preferential consideration to opportunities with strong influencer and affiliate promotion potential.
+
+For each opportunity use this format:
+OPPORTUNITY_NAME: [clear specific name]
+SOURCE_TREND: [primary source name]
+SIGNAL: [3-4 sentences: what the business is, who it serves, why now, which signals confirm it]
+LIBRARY_INTERSECTION: [which of the 3 libraries this draws from — e.g. "Trends + Consumer Problems"]
+
+Separate with ---OPP---`;
 
       const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 8000, true);
       setAgentStatus('scout', 'done', 'Done ✓');
 
       const oppBlocks = scoutOutput.split('---OPP---').filter(o => o.trim().length > 50);
-      addActivity(`📡 Scout found ${oppBlocks.length} opportunities — running pipelines…`);
+      addActivity(`📡 Scout found ${oppBlocks.length} cross-library opportunities — running pipelines…`);
 
       for (const block of oppBlocks.slice(0, 7)) {
         const nameMatch = block.match(/OPPORTUNITY_NAME:\s*(.+)/);
         const trendMatch = block.match(/SOURCE_TREND:\s*(.+)/);
-        const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=TARGET_CUSTOMER:|$)/);
+        const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=LIBRARY_INTERSECTION:|TARGET_CUSTOMER:|$)/);
 
         const oppName = nameMatch ? nameMatch[1].trim() : 'New Opportunity';
         const sourceTrend = trendMatch ? trendMatch[1].trim() : '';
@@ -2190,25 +2196,6 @@ async function runPipeline() {
 
         const record = await createOpp(oppName, oppSignal, sourceTrend);
         addActivity(`🔍 Starting pipeline for: ${oppName}`);
-
-        // Mark source item as In Progress
-        if (currentLibrary === 'trends') {
-          const sourceTrendRecord = sourceItems.find(t => t['Name'] && t['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
-          if (sourceTrendRecord) {
-            await updateTrend(sourceTrendRecord.id, { 'Status': 'In Progress', 'Opportunities Found': (sourceTrendRecord['Opportunities Found'] || 0) + 1, 'Last Visited': new Date().toISOString().split('T')[0] });
-          }
-        } else if (currentLibrary === 'consumerproblems') {
-          const sourceRecord = sourceItems.find(p => sourceTrend && p['Name'] && p['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
-          if (sourceRecord) {
-            await fetch(`/api/consumerproblems/${sourceRecord.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 'Status': 'In Progress', 'Opportunities Found': (sourceRecord['Opportunities Found'] || 0) + 1 }) });
-          }
-        } else {
-          const sourceRecord = sourceItems.find(p => sourceTrend && p['Name'] && p['Name'].toLowerCase().includes(sourceTrend.toLowerCase().substring(0, 20)));
-          if (sourceRecord) {
-            await fetch(`/api/hotproducts/${sourceRecord.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ 'Status': 'In Progress', 'Opportunities Found': (sourceRecord['Opportunities Found'] || 0) + 1 }) });
-          }
-        }
-
         await runFullPipeline(record.id, oppName, oppSignal, sourceTrend);
       }
     }
