@@ -2038,9 +2038,10 @@ async function runFastMode() {
       fetch('/api/hotproducts').then(r => r.json()).catch(() => [])
     ]);
 
-    const trendItems = trendRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
-    const problemItems = problemRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
-    const hotItems = hotRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 7);
+    const libSlice = Math.max(targetCount, 10);
+    const trendItems = trendRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, libSlice);
+    const problemItems = problemRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, libSlice);
+    const hotItems = hotRecords.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, libSlice);
 
     addActivity(`🔭 Cross-referencing ${trendItems.length} trends, ${problemItems.length} problems, ${hotItems.length} hot products…`);
 
@@ -2063,14 +2064,14 @@ Remember: approximately 50% should be physical product businesses. Give preferen
 
 CATEGORY DIVERSITY REQUIRED: No more than 2 of the 7 opportunities should be in the same category. Spread across at least 4 different categories. Health & Wellness and Technology & SaaS may still lead if signals strongly support them, but must not crowd out other categories. Available categories: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle. If the library signals skew heavily toward one category, actively seek cross-category opportunities using web search to balance the output.
 
-For each opportunity:
+For each opportunity — keep each block concise (SIGNAL max 2 sentences when targeting 10+ opportunities):
 OPPORTUNITY_NAME: [clear specific name]
-SIGNAL: [2-3 sentences: what the business is, who it serves, why now]
+SIGNAL: [what the business is, who it serves, and why now]
 LIBRARY_INTERSECTION: [which libraries this draws from]
 
 Separate with ---OPP---`;
 
-    const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 7000, true);
+    const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 8000, true);
     setAgentStatus('scout', 'done', 'Done ✓');
 
     const oppBlocks = scoutOutput.split('---OPP---').filter(b => b.trim().length > 30);
