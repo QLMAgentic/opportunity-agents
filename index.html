@@ -209,12 +209,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
 
       <div class="card">
+        <div class="card-title">⚡ Fast Mode — High Volume Idea Discovery</div>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Finds and lightly vets multiple opportunities in parallel using Scout + AI Executability + Market Analysis + Business Model only. Brand, GTM, and AI Execution Design added later in Deep Mode for ideas worth pursuing. Bad ideas dropped automatically. Everything else goes to Review.</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <label style="font-size:13px;color:#555;font-weight:600">Opportunities:</label>
+          <select id="fastModeCount" style="font-size:13px;border:1.5px solid #E8EAF0;border-radius:8px;padding:6px 12px;background:#F8F9FC">
+            <option value="5">5</option>
+            <option value="7" selected>7</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+          </select>
+        </div>
+        <button class="btn-run" id="fastBtn" onclick="runFastMode()" style="background:#F59E0B;color:#0F1117">⚡ Run Fast Mode</button>
+      </div>
+
+      <div class="card">
         <div class="card-title">Run Opportunity Pipeline — Daily</div>
         <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px">Scout pulls from the Trend Library to find 7 business opportunities, then runs them through the full agent pipeline. Or enter a specific signal below to evaluate a manual idea.</p>
         <input class="opp-name-input" id="oppName" placeholder="Opportunity name (optional — leave blank for Scout to discover)">
         <textarea class="signal-input" id="signalInput" placeholder="Optional: Describe a specific opportunity signal to evaluate. Leave blank to let Scout pull from Trend Library…"></textarea>
         <div class="input-footer">
-          <button class="btn-run" id="runBtn" onclick="runPipeline()">▶ Run Opportunity Pipeline</button>
+          <button class="btn-run" id="runBtn" onclick="runPipeline()">🔬 Deep Mode — Full Blueprint (Brand + GTM + AI Stack)</button>
         </div>
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E8EAF0">
           <p style="font-size:12px;color:#AAA;margin-bottom:8px">Resume an interrupted pipeline by entering the Airtable record ID:</p>
@@ -1263,6 +1278,38 @@ SCORING GUIDANCE:
 5-6 — System design incomplete, key functions lack automation coverage, human time exceeds target, or stack cost threatens capital constraint.
 4 or below — Cannot achieve four hour workweek target, critical functions require ongoing human involvement, or stack cost makes business unviable.`;
 
+const QUICK_ANALYST_PROMPT = `You are a rapid business opportunity analyst. You receive an opportunity signal and produce a fast, honest assessment covering three areas in one response. Maximum 1,200 words total. Be specific and direct — no fluff or padding.
+
+LEAN OPERATIONS CHECK (300 words max):
+- Can this business run 90% on AI, outsourcing, white label, or third party services?
+- What combination of AI tools, outsourced contractors, white label suppliers, and third party services handles operations
+- Estimated human time per week at steady state
+- Key tools or services that would handle each major function
+- AI/Lean Operations Score: X/10
+
+MARKET VIABILITY CHECK (300 words max):
+- Is there real demand? Specific signals and evidence
+- Target customer in two sentences — who they are and why they buy
+- Main competitors and whether the market is open, lightly contested, or crowded
+- Specific market gap this opportunity can occupy
+- Biggest market risk
+- Market Score: X/10
+
+BUSINESS MODEL CHECK (300 words max):
+- Most logical revenue model for this opportunity
+- Specific pricing hypothesis with reasoning
+- Rough path to breakeven — realistic capital requirement itemized
+- Gross margin potential
+- Biggest financial risk
+- Business Score: X/10
+
+OVERALL ASSESSMENT (200 words max):
+- QUICK SCORE: X/10 (weighted average — lean operations 35%, market viability 35%, business model 30%)
+- VERDICT: PURSUE / CONSIDER / PASS
+- TOP CONCERN: the single most important thing to verify or fix before pursuing
+- WATCH POINTS: any stage scoring below 7 — flag specifically what is weak
+- INFLUENCER FIT: High / Medium / Low — does this lend itself to influencer and affiliate promotion and why`;
+
 async function callClaudeHaiku(systemPrompt, userMessage, maxTokens = 800) {
   const body = {
     model: 'claude-haiku-4-5-20251001',
@@ -1369,7 +1416,7 @@ async function runAgent(stageName, agentPrompt, userMessage, context, oppName = 
     attempts++;
     addActivity(`⚙️ ${stageName} working… (attempt ${attempts})`);
     const message = attempts === 1 ? userMessage : `${userMessage}\n\nPREVIOUS ATTEMPT REJECTED.\nREVISION INSTRUCTIONS: ${review.revisionInstructions}\n\nPlease revise accordingly.`;
-    output = await callClaude(agentPrompt, message, 4000, true);
+    output = await callClaude(agentPrompt, message, 2000, true);
     addActivity(`🔍 Orchestrator reviewing ${stageName}…`);
     setAgentStatus('orchestrator', 'working', 'Reviewing…');
     review = await orchestratorReview(stageName, output, context);
@@ -1870,6 +1917,190 @@ Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent)
   loadBoard();
   loadQueueBadge();
   return true;
+}
+
+// ─── FAST PIPELINE ────────────────────────────────────────────────────────────
+async function runFastPipeline(recordId, oppName, signal, sourceTrend) {
+  const baseSignal = signal ? signal.substring(0, 500) : '';
+  const focusCtx = getFocusCtx();
+  const ctx = focusCtx ? `Focus:\n${focusCtx}\n\nOpportunity: ${oppName}\nSignal: ${baseSignal}` : `Opportunity: ${oppName}\nSignal: ${baseSignal}`;
+
+  const categoryKeywords = {
+    'Health & Wellness': ['health','wellness','supplement','fitness','medical','mental','longevity','aging','gut','nutrition','sleep','weight','vitamin','probiotic'],
+    'Home & Living': ['home','house','garden','pet','outdoor','cleaning','decor','furniture','kitchen','lawn'],
+    'Consumer Goods': ['beauty','skincare','hair','apparel','clothing','fashion','baby','food','beverage','drink','candle'],
+    'B2B & Professional': ['b2b','business','professional','legal','accounting','compliance','enterprise','corporate','CFO'],
+    'Technology & SaaS': ['software','saas','app','platform','AI','tech','digital','automation','tool','dashboard'],
+    'Marketplace & Middleman': ['marketplace','middleman','broker','lead','aggregator','connector','arbitrage','sourcing'],
+    'Education & Media': ['course','coaching','education','learning','newsletter','content','media','community','training'],
+    'Finance & Wealth': ['finance','fintech','investing','wealth','insurance','real estate','credit','loan','tax'],
+    'Sustainability & Lifestyle': ['sustainable','eco','green','conscious','travel','experience','outdoor','adventure'],
+  };
+  const signalText = (oppName + ' ' + baseSignal).toLowerCase();
+  let autoCategory = 'Other';
+  let highScore = 0;
+  for (const [cat, kws] of Object.entries(categoryKeywords)) {
+    const s = kws.filter(k => signalText.includes(k)).length;
+    if (s > highScore) { highScore = s; autoCategory = cat; }
+  }
+
+  try {
+    await saveOpp(recordId, { 'Status': 'AI Executability', 'Category': autoCategory });
+    addActivity(`⚡ Fast analyzing: ${oppName.substring(0, 50)}…`);
+
+    // STAGE 1: AI EXECUTABILITY
+    const aiOutput = await callClaude(AI_ANALYST_PROMPT,
+      `Perform a concise AI Executability Analysis. Maximum 1,000 words. Focus on lean operations potential — AI, outsourcing, white label, third party services.\n\n${ctx}`,
+      1500, false);
+
+    const aiScoreMatch = aiOutput.match(/(?:AI\/Lean Operations Score|Overall AI Executability Score|Score):\s*(\d+(?:\.\d+)?)\/10/i);
+    const aiScore = aiScoreMatch ? parseFloat(aiScoreMatch[1]) : 6;
+    await saveOpp(recordId, { 'AI Executability Notes': aiOutput, 'AI Executability Score': aiScore, 'Status': 'Market Analysis' });
+
+    // STAGE 2: MARKET ANALYST — web search on for real signals
+    const marketOutput = await callClaude(MARKET_ANALYST_PROMPT,
+      `Perform a concise Market Analysis. Maximum 1,000 words. Focus on demand validation, target customer, and competitive gap.\n\n${ctx}\n\nAI EXECUTABILITY SUMMARY:\n${aiOutput.substring(0, 400)}`,
+      1500, true);
+
+    await saveOpp(recordId, { 'Market Analysis': marketOutput, 'Status': 'Business Design' });
+
+    // STAGE 3: BUSINESS ARCHITECT
+    const bizOutput = await callClaude(BUSINESS_ARCHITECT_PROMPT,
+      `Design a concise business model. Maximum 1,000 words. Focus on revenue model, path to breakeven, and capital requirements.\n\n${ctx}\n\nMARKET SUMMARY:\n${marketOutput.substring(0, 500)}`,
+      1500, false);
+
+    const bizScoreMatch = bizOutput.match(/(?:Financial Viability Score|Score):\s*(\d+(?:\.\d+)?)\/10/i);
+    const bizScore = bizScoreMatch ? parseFloat(bizScoreMatch[1]) : 6;
+    await saveOpp(recordId, { 'Business Model': bizOutput, 'Revenue Projections': bizOutput, 'Status': 'Blueprint Draft' });
+
+    // STAGE 4: QUICK ANALYST SUMMARY via Haiku
+    const quickAnalysis = await callClaudeHaiku(QUICK_ANALYST_PROMPT,
+      `Produce a fast overall assessment of this opportunity based on the analysis below.\n\nOpportunity: ${oppName}\n\nAI/LEAN OPERATIONS:\n${aiOutput.substring(0, 600)}\n\nMARKET:\n${marketOutput.substring(0, 600)}\n\nBUSINESS MODEL:\n${bizOutput.substring(0, 600)}`,
+      1200);
+
+    const quickScoreMatch = quickAnalysis.match(/QUICK SCORE:\s*(\d+(?:\.\d+)?)\/10/i);
+    const verdictMatch = quickAnalysis.match(/VERDICT:\s*(PURSUE|CONSIDER|PASS)/i);
+    const concernMatch = quickAnalysis.match(/TOP CONCERN:\s*(.+)/i);
+    const influencerMatch = quickAnalysis.match(/INFLUENCER FIT:\s*(High|Medium|Low)/i);
+
+    const quickScore = quickScoreMatch ? parseFloat(quickScoreMatch[1]) : ((aiScore + bizScore) / 2);
+    const verdict = verdictMatch ? verdictMatch[1] : 'CONSIDER';
+    const topConcern = concernMatch ? concernMatch[1].trim() : '';
+    const influencerFit = influencerMatch ? influencerMatch[1] : '';
+
+    if (quickScore < 4 || verdict === 'PASS') {
+      await saveOpp(recordId, {
+        'Status': 'Dropped',
+        'Opportunity Score': quickScore,
+        'Orchestrator Summary': `FAST MODE — DROPPED\nScore: ${quickScore}/10\nVerdict: ${verdict}\nTop Concern: ${topConcern}\n\n${quickAnalysis}`
+      });
+      addActivity(`❌ "${oppName.substring(0,40)}" dropped (${quickScore}/10)`);
+      return false;
+    }
+
+    await saveOpp(recordId, {
+      'Orchestrator Summary': `FAST MODE RESULT ⚡\n\nVERDICT: ${verdict}\nSCORE: ${quickScore}/10\nTOP CONCERN: ${topConcern}\nINFLUENCER FIT: ${influencerFit}\n\n${quickAnalysis}`,
+      'Opportunity Score': quickScore,
+      'Category': autoCategory,
+      'Influencer Affiliate Fit': influencerFit,
+      'Risks & Challenges': quickAnalysis,
+      'Status': 'Review'
+    });
+
+    addActivity(`✅ "${oppName.substring(0,40)}" → ${autoCategory} | ${quickScore}/10 | ${verdict} | Influencer: ${influencerFit}`);
+    return true;
+
+  } catch(err) {
+    addActivity(`❌ Error: "${oppName.substring(0,40)}" — ${err.message}`);
+    await saveOpp(recordId, { 'Status': 'Dropped', 'Orchestrator Summary': `Fast Mode Error: ${err.message}` });
+    return false;
+  }
+}
+
+async function runFastMode() {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+
+  const targetCount = parseInt(document.getElementById('fastModeCount')?.value || '7');
+  const runBtn = document.getElementById('fastBtn');
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Running…';
+  document.getElementById('systemStatus').textContent = `● Fast Mode running — ${targetCount} opportunities…`;
+  document.getElementById('systemStatus').className = 'system-status working';
+  setAgentStatus('scout', 'working', 'Discovering…');
+  addActivity(`⚡ Fast Mode: targeting ${targetCount} opportunities in parallel…`);
+
+  try {
+    const rotation = ['trends', 'consumerproblems', 'hotproducts'];
+    const rotIdx = parseInt(localStorage.getItem('libraryRotation') || '0');
+    const library = rotation[rotIdx % rotation.length];
+    localStorage.setItem('libraryRotation', (rotIdx + 1).toString());
+    addActivity(`📚 Drawing from: ${library} library`);
+
+    let libraryRecords = [];
+    try {
+      const res = await fetch(`/api/${library}`);
+      const records = await res.json();
+      libraryRecords = records.filter(r => r['Status'] === 'Unexplored' || !r['Status']).slice(0, 10);
+    } catch(e) { console.log('Library fetch error:', e); }
+
+    const trendBrief = libraryRecords.length > 0
+      ? libraryRecords.map((r, i) => `Signal ${i+1}: ${r['Name'] || ''} — ${(r['Description'] || r['Problem Description'] || r['Why Its Hot'] || '').substring(0, 150)}`).join('\n')
+      : 'Use general market knowledge and web search to find opportunities';
+
+    const scoutMsg = `Find exactly ${targetCount} specific business opportunities quickly. Each should be a distinct opportunity in a different market or niche.
+
+${getFocusCtx() ? `Focus Criteria:\n${getFocusCtx()}\n\n` : ''}LIBRARY SIGNALS TO DRAW FROM:
+${trendBrief}
+
+Remember: approximately 50% should be physical product businesses. Give preferential consideration to opportunities with strong influencer and affiliate promotion potential.
+
+For each opportunity:
+OPPORTUNITY_NAME: [clear specific name]
+SIGNAL: [2-3 sentences describing what the business is, who it serves, and why now]
+CONFIDENCE: [High/Medium/Speculative]
+
+Separate with ---OPP---`;
+
+    const scoutOutput = await callClaude(SCOUT_PROMPT, scoutMsg, 3000, true);
+    setAgentStatus('scout', 'done', 'Done ✓');
+
+    const oppBlocks = scoutOutput.split('---OPP---').filter(b => b.trim().length > 30);
+    addActivity(`📡 Scout found ${oppBlocks.length} opportunities — creating records…`);
+
+    const records = [];
+    for (const block of oppBlocks.slice(0, targetCount)) {
+      const nameMatch = block.match(/OPPORTUNITY_NAME:\s*(.+)/);
+      const signalMatch = block.match(/SIGNAL:\s*([\s\S]*?)(?=CONFIDENCE:|---OPP---|$)/);
+      const oppName = nameMatch ? nameMatch[1].replace(/\*\*/g, '').trim() : 'New Opportunity';
+      const oppSignal = signalMatch ? signalMatch[1].trim() : block.trim();
+      try {
+        const record = await createOpp(oppName, oppSignal);
+        if (record && record.id) records.push({ id: record.id, name: oppName, signal: oppSignal });
+      } catch(e) { console.log('Record creation error:', e); }
+    }
+
+    addActivity(`⚡ Running ${records.length} analyses in parallel — please wait…`);
+
+    const results = await Promise.all(
+      records.map(r => runFastPipeline(r.id, r.name, r.signal, ''))
+    );
+
+    const successes = results.filter(Boolean).length;
+    const dropped = results.filter(r => r === false).length;
+    addActivity(`🎉 Fast Mode complete! ${successes} ready for review, ${dropped} dropped. Total: ${records.length}`);
+    loadBoard();
+    loadQueueBadge();
+
+  } catch(err) {
+    addActivity(`❌ Fast Mode error: ${err.message}`);
+    console.error(err);
+  }
+
+  runBtn.disabled = false;
+  runBtn.textContent = '⚡ Run Fast Mode';
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+  setAgentStatus('scout', 'idle', 'Idle');
 }
 
 // ─── MAIN PIPELINE RUN ────────────────────────────────────────────────────────
