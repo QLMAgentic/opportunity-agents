@@ -22,7 +22,7 @@ app.post('/api/opportunities', async (req, res) => {
       'Name': name,
       'Status': 'Signal Captured',
       'Signal': signal,
-      'Created': new Date().toISOString().split('T')[0]
+      'Created': new Date().toISOString()
     };
     if (sourceTrend) fields['Source Trend'] = sourceTrend;
     const record = await base('Opportunities').create(fields);
@@ -238,7 +238,7 @@ app.post('/api/acquisitions', async (req, res) => {
       'Name': name,
       'Status': 'Signal Captured',
       'Source': source || '',
-      'Created': new Date().toISOString().split('T')[0]
+      'Created': new Date().toISOString()
     };
     const record = await base('Acquisitions').create(fields);
     res.json({ id: record.id, ...record.fields });
