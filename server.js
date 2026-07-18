@@ -3,8 +3,16 @@ const Airtable = require('airtable');
 const path = require('path');
 const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, PageBreak } = require('docx');
 
+// Loaded defensively - a broken optional dependency here must never crash the
+// whole server (it did once, taking down every API route, not just document
+// parsing). If either fails to load, that one file format is disabled instead.
+let mammoth = null;
+try { mammoth = require('mammoth'); } catch (e) { console.error('mammoth failed to load:', e.message); }
+let pdfParse = null;
+try { pdfParse = require('pdf-parse'); } catch (e) { console.error('pdf-parse failed to load:', e.message); }
+
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '15mb' })); // raised from default 100kb for base64 document attachments
 app.use(express.static(path.join(__dirname)));
 
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
@@ -14,10 +22,41 @@ app.get('/api/config', (req, res) => {
   res.json({ apiKey: process.env.ANTHROPIC_API_KEY });
 });
 
+// ─── DOCUMENT PARSING (Personalized Deep Mode attachment) ─────────────────────
+app.post('/api/parse-document', async (req, res) => {
+  try {
+    const { filename, mimeType, data } = req.body;
+    if (!data) return res.status(400).json({ error: 'No file data provided' });
+
+    const buffer = Buffer.from(data, 'base64');
+    const ext = (filename || '').toLowerCase().split('.').pop();
+
+    let text;
+    if (ext === 'docx' || (mimeType || '').includes('wordprocessingml')) {
+      if (!mammoth) return res.status(500).json({ error: '.docx parsing is currently unavailable on the server.' });
+      const result = await mammoth.extractRawText({ buffer });
+      text = result.value;
+    } else if (ext === 'pdf' || (mimeType || '').includes('pdf')) {
+      if (!pdfParse) return res.status(500).json({ error: '.pdf parsing is currently unavailable on the server.' });
+      const result = await pdfParse(buffer);
+      text = result.text;
+    } else if (ext === 'txt' || ext === 'md' || (mimeType || '').startsWith('text/')) {
+      text = buffer.toString('utf-8');
+    } else {
+      return res.status(400).json({ error: `Unsupported file type: ${ext || mimeType || 'unknown'}. Use .txt, .md, .docx, or .pdf.` });
+    }
+
+    res.json({ text: (text || '').trim() });
+  } catch (err) {
+    console.error('Document parse error:', err);
+    res.status(500).json({ error: `Could not read that document: ${err.message}` });
+  }
+});
+
 // ─── OPPORTUNITIES ────────────────────────────────────────────────────────────
 app.post('/api/opportunities', async (req, res) => {
   try {
-    const { name, signal, sourceTrend } = req.body;
+    const { name, signal, sourceTrend, sourceLibraries, differentiatesFrom, sourceMode, runType } = req.body;
     const fields = {
       'Name': name,
       'Status': 'Signal Captured',
@@ -25,7 +64,13 @@ app.post('/api/opportunities', async (req, res) => {
       'Created': new Date().toISOString()
     };
     if (sourceTrend) fields['Source Trend'] = sourceTrend;
-    const record = await base('Opportunities').create(fields);
+    if (sourceLibraries) fields['Source Libraries'] = sourceLibraries;
+    if (differentiatesFrom) fields['Differentiates From'] = differentiatesFrom;
+    if (sourceMode) fields['Source Mode'] = sourceMode;
+    if (runType) fields['Run Type'] = runType;
+    // typecast lets Airtable auto-create new Source Mode select options (e.g. "Wild Mode")
+    // instead of rejecting the write with an unknown-option error.
+    const record = await base('Opportunities').create(fields, { typecast: true });
     res.json({ id: record.id, ...record.fields });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -442,6 +487,92 @@ app.delete('/api/consumerproblems/:id', async (req, res) => {
 });
 
 // ─── HOT PRODUCTS ─────────────────────────────────────────────────────────────
+app.post('/api/hacks', async (req, res) => {
+  try {
+    const record = await base('Hacks').create(req.body, { typecast: true });
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/hacks/:id', async (req, res) => {
+  try {
+    const record = await base('Hacks').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/hacks', async (req, res) => {
+  try {
+    const records = await base('Hacks').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/hacks/:id', async (req, res) => {
+  try {
+    await base('Hacks').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── REFRESH LIBRARY ──────────────────────────────────────────────────────────
+app.post('/api/refreshlibrary', async (req, res) => {
+  try {
+    const record = await base('RefreshLibrary').create(req.body, { typecast: true });
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/refreshlibrary/:id', async (req, res) => {
+  try {
+    const record = await base('RefreshLibrary').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/refreshlibrary', async (req, res) => {
+  try {
+    const records = await base('RefreshLibrary').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/refreshlibrary/:id', async (req, res) => {
+  try {
+    const record = await base('RefreshLibrary').find(req.params.id);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/refreshlibrary/:id', async (req, res) => {
+  try {
+    await base('RefreshLibrary').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/hotproducts', async (req, res) => {
   try {
     const record = await base('HotProducts').create(req.body);
@@ -480,6 +611,115 @@ app.delete('/api/hotproducts/:id', async (req, res) => {
   }
 });
 
+// ─── NICHE MARKETS ────────────────────────────────────────────────────────────
+app.post('/api/nichemarkets', async (req, res) => {
+  try {
+    const record = await base('NicheMarkets').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/nichemarkets/:id', async (req, res) => {
+  try {
+    const record = await base('NicheMarkets').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/nichemarkets', async (req, res) => {
+  try {
+    const records = await base('NicheMarkets').select({
+      sort: [{ field: 'Date Identified', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/nichemarkets/:id', async (req, res) => {
+  try {
+    await base('NicheMarkets').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── IDEA SPARKS ──────────────────────────────────────────────────────────────
+app.post('/api/ideasparks', async (req, res) => {
+  try {
+    const record = await base('IdeaSparks').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/ideasparks/:id', async (req, res) => {
+  try {
+    const record = await base('IdeaSparks').update(req.params.id, req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/ideasparks', async (req, res) => {
+  try {
+    const records = await base('IdeaSparks').select({
+      sort: [{ field: 'Date Generated', direction: 'desc' }]
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/ideasparks/:id', async (req, res) => {
+  try {
+    await base('IdeaSparks').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── RUN HISTORY ──────────────────────────────────────────────────────────────
+app.post('/api/runhistory', async (req, res) => {
+  try {
+    const record = await base('RunHistory').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/runhistory', async (req, res) => {
+  try {
+    const records = await base('RunHistory').select({
+      sort: [{ field: 'Date', direction: 'desc' }],
+      maxRecords: 100
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/runhistory/:id', async (req, res) => {
+  try {
+    await base('RunHistory').destroy(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── PIPELINE LOGS ────────────────────────────────────────────────────────────
 app.post('/api/pipelinelogs', async (req, res) => {
   try {
@@ -498,6 +738,37 @@ app.get('/api/pipelinelogs', async (req, res) => {
     }
     const records = await base('PipelineLogs').select(opts).all();
     res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── PRODUCTION REPORTS ───────────────────────────────────────────────────────
+app.post('/api/productionreports', async (req, res) => {
+  try {
+    const record = await base('ProductionReports').create(req.body);
+    res.json({ id: record.id, ...record.fields });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/productionreports', async (req, res) => {
+  try {
+    const records = await base('ProductionReports').select({
+      sort: [{ field: 'Created', direction: 'desc' }],
+      maxRecords: 50
+    }).all();
+    res.json(records.map(r => ({ id: r.id, ...r.fields })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/productionreports/:id', async (req, res) => {
+  try {
+    await base('ProductionReports').destroy(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
