@@ -4595,12 +4595,13 @@ function buildCardActions(item) {
     <button class="btn-revise" onclick="printBlueprint('${id}')" title="Print or save as PDF">🖨️ Print PDF</button>
     <button class="btn-revise" onclick="downloadWord('${id}')" title="Download Word document">📄 Word Doc</button>
   `;
+  const guerrillaIntegrationBtn = `<button class="btn-revise" onclick="runGuerrillaIntegration('${id}')" style="background:#7C3AED;color:white;border:none;" title="Run Guerrilla Marketer, update GTM and Market Analysis, recompile Blueprint">⚡ Run Guerrilla Integration</button>`;
   const utilRow2 = `<div class="card-actions-row">${elevateBtn}${favBtn}${maybeBtn}${dislikeBtn}<span class="card-date" style="margin-left:0">${date}</span><button type="button" class="expand-btn" onclick="toggleCard('${id}')">▲</button>${del}</div>`;
   const canUpgrade = (item['Source Mode'] === 'Fast Mode' || item['Source Mode'] === 'Wild Mode') && !item['Brand Name & Positioning'];
   const upgradeBtn = canUpgrade ? `<button class="btn-revise" onclick="upgradeToFullBlueprint('${id}')" title="Run the remaining Deep Mode stages (Brand, GTM, AI Execution Design) on top of this result">🔬 Upgrade to Full Blueprint</button>` : '';
-  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" id="revise-${id}" onclick="reviseOpportunity('${id}')" title="Re-run the Orchestrator's blueprint compile using your notes as revision guidance">↩ Revise</button><button class="btn-revise" id="revise-biz-${id}" onclick="reviseBusinessModel('${id}')" title="Re-run Business Architecture, Brand, GTM, and AI Execution Design using your notes to actually change the business model, not just the summary">🔧 Revise Business Model</button>${upgradeBtn}${likesBox}${dislikesBox}<div class="card-actions-row">${holdBtn}${exportBtns}${copyId}</div>${utilRow2}`;
-  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${upgradeBtn}<div class="card-actions-row">${exportBtns}${copyId}</div>${utilRow2}`;
-  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button><div class="card-actions-row">${exportBtns}${copyId}</div>${utilRow2}`;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" id="revise-${id}" onclick="reviseOpportunity('${id}')" title="Re-run the Orchestrator's blueprint compile using your notes as revision guidance">↩ Revise</button><button class="btn-revise" id="revise-biz-${id}" onclick="reviseBusinessModel('${id}')" title="Re-run Business Architecture, Brand, GTM, and AI Execution Design using your notes to actually change the business model, not just the summary">🔧 Revise Business Model</button>${upgradeBtn}${likesBox}${dislikesBox}<div class="card-actions-row">${holdBtn}${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${upgradeBtn}<div class="card-actions-row">${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button><div class="card-actions-row">${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
   if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button><div class="card-actions-row">${copyId}</div>${utilRow2}`;
   return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button><div class="card-actions-row">${holdBtn}${copyId}</div>${utilRow2}`;
 }
@@ -5286,6 +5287,196 @@ Produce the revised Blueprint with Executive Summary including Agent Findings Su
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '🔧 Revise Business Model'; }
   }
+}
+
+// Runs a targeted 4-agent integration pass on a single completed opportunity:
+// Guerrilla Marketer produces a fresh Launch Plan, then GTM Strategy and Market
+// Analysis are re-run to weave guerrilla tactics/insights into those sections
+// specifically (rather than treating guerrilla as an isolated add-on), then the
+// Orchestrator recompiles the Blueprint summary and score. Business Model,
+// Brand, and AI Stack are left untouched - only the sections that benefit from
+// the guerrilla perspective are updated.
+async function runGuerrillaIntegration(id) {
+  if (!ANTHROPIC_API_KEY) { alert('API key not loaded.'); return; }
+
+  const btn = document.querySelector(`[onclick="runGuerrillaIntegration('${id}')"]`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Running Guerrilla Integration...'; }
+
+  addActivity(`⚡ Starting guerrilla integration for opportunity...`);
+  document.getElementById('systemStatus').textContent = '● Guerrilla Integration running…';
+  document.getElementById('systemStatus').className = 'system-status working';
+
+  try {
+    // Fetch full existing record from Airtable
+    const res = await fetch(`/api/opportunities/${id}`);
+    const item = await res.json();
+    const oppName = item['Name'] || 'Unnamed Opportunity';
+
+    addActivity(`⚡ Running guerrilla integration: "${oppName.substring(0, 50)}"`);
+
+    // Build base context from existing saved fields
+    const baseCtx = `Opportunity: ${oppName}
+Signal: ${(item['Signal'] || '').substring(0, 400)}
+Target Customer: ${(item['Market Analysis'] || '').substring(0, 500)}
+Business Model: ${(item['Business Model'] || '').substring(0, 400)}
+Brand: ${(item['Brand Name & Positioning'] || '').substring(0, 300)}
+Existing GTM Strategy: ${(item['GTM Plan'] || '').substring(0, 500)}`;
+
+    // ── STAGE 1: GUERRILLA MARKETER ──────────────────────────────────────
+    setAgentStatus('guerrilla', 'working', 'Planning…');
+    addActivity(`⚡ Guerrilla Marketer analyzing "${oppName.substring(0, 40)}"...`);
+
+    const guerrillaOutput = await callClaude(
+      GUERRILLA_MARKETER_PROMPT,
+      `Produce a complete Guerrilla Launch Plan for this opportunity.\n\n${baseCtx}`,
+      2000, false
+    );
+
+    setAgentStatus('guerrilla', 'done', 'Done ✓');
+
+    // Extract Guerrilla Viability Score
+    const guerrillaScoreMatch = guerrillaOutput.match(/GUERRILLA VIABILITY SCORE:\s*(\d+(?:\.\d+)?)\/10/i) ||
+                                guerrillaOutput.match(/GUERRILLA VIABILITY SCORE:\s*(\d+(?:\.\d+)?)/i);
+    const guerrillaScore = guerrillaScoreMatch ? parseFloat(guerrillaScoreMatch[1]) : 7;
+    addActivity(`📊 Guerrilla Viability Score: ${guerrillaScore}/10`);
+
+    // Save guerrilla plan immediately so it is not lost if later stages fail
+    await saveOpp(id, { 'Guerrilla Marketing Plan': guerrillaOutput });
+
+    // ── STAGE 2: GTM STRATEGIST RE-RUN ───────────────────────────────────
+    setAgentStatus('gtm', 'working', 'Integrating…');
+    addActivity(`🚀 GTM Strategist re-running with guerrilla context...`);
+
+    const gtmCtx = `${baseCtx}
+
+GUERRILLA MARKETING PLAN (integrate this into your GTM strategy):
+${guerrillaOutput.substring(0, 1500)}`;
+
+    const gtmOutput = await callClaude(
+      GTM_STRATEGIST_PROMPT,
+      `Re-run the GTM Strategy for this opportunity incorporating the Guerrilla Marketing Plan below.
+Your updated GTM strategy should weave guerrilla tactics into the launch sequence and channel strategy
+rather than treating them as separate. Show how guerrilla and conventional GTM work together.
+Maximum 1500 words.\n\n${gtmCtx}`,
+      2000, false
+    );
+
+    setAgentStatus('gtm', 'done', 'Done ✓');
+    addActivity(`📊 GTM Strategy updated with guerrilla integration`);
+
+    // Save updated GTM plan
+    await saveOpp(id, { 'GTM Plan': gtmOutput });
+
+    // ── STAGE 3: MARKET ANALYST RE-RUN ───────────────────────────────────
+    setAgentStatus('market', 'working', 'Refining…');
+    addActivity(`📊 Market Analyst refining with guerrilla community insights...`);
+
+    const marketCtx = `${baseCtx}
+
+GUERRILLA MARKETING PLAN — community and customer insights to incorporate:
+${guerrillaOutput.substring(0, 800)}
+
+EXISTING MARKET ANALYSIS TO REFINE:
+${(item['Market Analysis'] || '').substring(0, 800)}`;
+
+    const marketOutput = await callClaude(
+      MARKET_ANALYST_PROMPT,
+      `Refine the Market Analysis for this opportunity incorporating the community insights,
+customer behavior signals, and market angles revealed by the Guerrilla Marketing Plan.
+Focus specifically on: which communities the guerrilla plan targets and why,
+what this reveals about where the customer actually spends time,
+and how the guerrilla angle sharpens or changes the competitive positioning.
+Maximum 1500 words.\n\n${marketCtx}`,
+      2000, false
+    );
+
+    setAgentStatus('market', 'done', 'Done ✓');
+    addActivity(`📊 Market Analysis refined with community insights`);
+
+    // Save updated market analysis
+    await saveOpp(id, {
+      'Market Analysis': marketOutput,
+      'Competitive Landscape': marketOutput,
+      'Target Customer': marketOutput
+    });
+
+    // ── STAGE 4: ORCHESTRATOR RECOMPILATION ──────────────────────────────
+    setAgentStatus('orchestrator', 'working', 'Recompiling…');
+    addActivity(`📋 Orchestrator recompiling Blueprint with guerrilla integration...`);
+
+    // Recalculate score incorporating guerrilla at 10% weight
+    const existingScore = item['Opportunity Score'] || 7;
+    const updatedScore = Math.round(((existingScore * 0.90) + (guerrillaScore * 0.10)) * 10) / 10;
+
+    const orchCtx = `Opportunity: ${oppName}
+Original Opportunity Score: ${existingScore}/10
+Guerrilla Viability Score: ${guerrillaScore}/10
+Updated Weighted Score: ${updatedScore}/10
+
+GUERRILLA MARKETING PLAN:
+${guerrillaOutput.substring(0, 1200)}
+
+UPDATED GTM STRATEGY:
+${gtmOutput.substring(0, 1000)}
+
+REFINED MARKET ANALYSIS:
+${marketOutput.substring(0, 800)}
+
+EXISTING BUSINESS MODEL:
+${(item['Business Model'] || '').substring(0, 600)}
+
+EXISTING BRAND:
+${(item['Brand Name & Positioning'] || '').substring(0, 400)}
+
+EXISTING AI STACK:
+${(item['AI Stack Plan'] || '').substring(0, 400)}`;
+
+    const orchOutput = await callClaude(
+      ORCHESTRATOR_PROMPT,
+      `Recompile the Opportunity Blueprint for "${oppName}" incorporating the new Guerrilla Marketing Plan,
+updated GTM Strategy, and refined Market Analysis. This is a guerrilla integration update —
+the business model, brand, and AI stack have not changed.
+
+Produce an updated Blueprint summary that:
+1. UPDATED EXECUTIVE SUMMARY — rewrite to integrate guerrilla marketing as a core part of the launch strategy.
+   Show how this opportunity can reach first revenue primarily through guerrilla tactics.
+   Include the Agent Findings Summary with updated GTM and Market findings plus new Guerrilla Marketing finding.
+2. GUERRILLA MARKETING HIGHLIGHT — a dedicated callout on the top 3 guerrilla tactics and why they fit this opportunity
+3. UPDATED STAGE SCORES — include Guerrilla Marketing: ${guerrillaScore}/10 alongside existing scores
+4. UPDATED OVERALL SCORE — ${updatedScore}/10 with explanation of how guerrilla was incorporated
+5. KEY WATCH POINTS — flag any stages scoring below 7 including guerrilla if applicable
+6. UPDATED FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS incorporating the guerrilla dimension
+7. MOST IMPORTANT GUERRILLA ACTION — the single first guerrilla tactic to execute immediately if pursuing
+
+Format the updated score exactly as: OVERALL OPPORTUNITY SCORE: ${updatedScore}/10`,
+      3000, false
+    );
+
+    setAgentStatus('orchestrator', 'done', 'Done ✓');
+    addActivity(`📋 Orchestrator recompilation complete`);
+
+    // Save final updated summary and score
+    await saveOpp(id, {
+      'Orchestrator Summary': orchOutput,
+      'Opportunity Score': updatedScore,
+      'Risks & Challenges': orchOutput
+    });
+
+    addActivity(`🎉 Guerrilla integration complete for "${oppName.substring(0, 40)}" — Updated Score: ${updatedScore}/10`);
+    loadBoard();
+    loadQueueBadge();
+
+  } catch(err) {
+    addActivity(`❌ Guerrilla integration error: ${err.message}`);
+    console.error(err);
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '⚡ Run Guerrilla Integration'; }
+  document.getElementById('systemStatus').textContent = '● All agents ready';
+  document.getElementById('systemStatus').className = 'system-status';
+
+  // Reset agent statuses
+  ['guerrilla', 'gtm', 'market', 'orchestrator'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 }
 
 // ─── TREND LIBRARY ────────────────────────────────────────────────────────────
