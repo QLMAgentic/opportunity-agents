@@ -79,7 +79,10 @@ app.post('/api/opportunities', async (req, res) => {
 
 app.patch('/api/opportunities/:id', async (req, res) => {
   try {
-    const record = await base('Opportunities').update(req.params.id, req.body);
+    // typecast lets Airtable auto-create new single-select options (e.g. the
+    // "Guerrilla Marketing" Status value) instead of rejecting the write with
+    // an unknown-option error - same reasoning as the POST route above.
+    const record = await base('Opportunities').update(req.params.id, req.body, { typecast: true });
     res.json({ id: record.id, ...record.fields });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -181,6 +184,7 @@ app.get('/api/opportunities/:id/export', async (req, res) => {
       { label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
       { label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
       { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'Guerrilla Marketing Plan', field: 'Guerrilla Marketing Plan' },
       { label: 'AI Stack Plan', field: 'AI Stack Plan' },
       { label: 'Execution Roadmap', field: 'Execution Roadmap' },
       { label: 'Risks & Challenges', field: 'Risks & Challenges' },

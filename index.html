@@ -480,6 +480,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="agent-card" style="border-left:3px solid #6366F1" id="agent-acq-strategist"><div class="agent-name">Acquisition Strategist</div><div class="agent-role">Deal Structure & Finance</div><span class="agent-status-pill pill-idle" id="status-acq-strategist">Idle</span></div>
           <div class="agent-card" id="agent-brand"><div class="agent-name">Brand Developer</div><div class="agent-role">Brand & Identity</div><span class="agent-status-pill pill-idle" id="status-brand">Idle</span></div>
           <div class="agent-card" id="agent-gtm"><div class="agent-name">GTM Strategist</div><div class="agent-role">Go-To-Market</div><span class="agent-status-pill pill-idle" id="status-gtm">Idle</span></div>
+          <div class="agent-card" id="agent-guerrilla"><div class="agent-name">Guerrilla Marketer</div><div class="agent-role">Low-Cost Launch Tactics</div><span class="agent-status-pill pill-idle" id="status-guerrilla">Idle</span></div>
           <div class="agent-card" id="agent-exec"><div class="agent-name">AI Exec Designer</div><div class="agent-role">AI Stack & Operations</div><span class="agent-status-pill pill-idle" id="status-exec">Idle</span></div>
         </div>
       </div>
@@ -1650,14 +1651,16 @@ Market Analysis: A 7 means market demand is validated with real qualitative sign
 Business Architecture: A 7 means revenue model is specific with pricing and unit economics, path to breakeven is realistic within capital constraint, and all assumptions are stated explicitly. Optimistic projections without supporting reasoning score no higher than 4. Watch specifically for agency-priced line items in an AI-first operation. Brand design at $2,000+ when AI tools exist, photography at $1,500+ when AI generation and supplier images are available, and paid advertising appearing in startup costs before organic traction is established are all automatic revision triggers. The Business Architect must price every cost line at AI-first lean operation rates, not traditional agency or freelancer rates.
 Brand Development: A 7 means at least 10 name options with availability checks, a positioning statement specific to this customer and market, brand voice with examples, and visual identity direction that is distinct and actionable. Generic brand work scores no higher than 5. NOTE — Brand Developer proceeds with whatever upstream context is available. Thin business architecture context does not justify a low brand score if the brand work itself is strong.
 GTM Strategy: A 7 means specific launch channels are named with reasoning for why they fit this customer, a 90-day action plan with sequenced steps, nano-influencer strategy identified, and a clear answer to how the first 100 customers are acquired. A generic "use social media" approach scores no higher than 4.
+Guerrilla Marketing: A 7 means at least 8 specific, named tactics with real cost estimates, a coherent 30-day sequence, and a concrete AI-native tactics spotlight — not generic advice like "post on social media" or "get influencers." A low Guerrilla Viability Score is informational, not a failure — it tells the founder this category structurally needs paid spend, which is a legitimate finding, not a deficient output. Only score below 5 if the tactics themselves are generic, vague, or clearly copy-pasted across opportunities regardless of category. Do not penalize bold or "Novel" tactics for carrying risk — that is the point of this agent; penalize only genuinely illegal, deceptive, or astroturfing suggestions, which should not appear at all.
 AI Execution Design: This is a roadmap for a founder to evaluate the opportunity, not a build spec — an execution team replans the details once real work starts. A 7 means the recommended AI stack is specific (not generic "AI tools"), every major business function has a clear one-line operational approach, and the human owner's time commitment is stated in hours with a real answer on whether the 4-hour target is achievable. Do not require exhaustive per-function sub-plans, week-by-week task lists, or a fully specified build to score well — concise and directionally clear beats long and over-specified. Vague references to "AI tools" without any specifics score no higher than 3.
 
 Final Opportunity Score: Weighted average of all stage scores with the following weights:
-- AI Executability / Lean Operations: 20%
-- Financial Viability / Business Architecture: 20%
-- Market Analysis: 15%
-- GTM Strategy: 15%
-- Influencer & Affiliate Distribution Fit: 15% — PREFERENTIAL FACTOR. We have platform access to influencer and affiliate networks at no additional platform cost. Opportunities that are naturally suited to influencer seeding and affiliate promotion receive a significant scoring advantage. Evaluate based on: visual appeal and demonstrability, relatability of the problem solved, niche community fit, product seeding viability (can a nano-influencer authentically promote this with a free sample?), and affiliate commission structure potential.
+- AI Executability / Lean Operations: 18%
+- Financial Viability / Business Architecture: 18%
+- Market Analysis: 14%
+- GTM Strategy: 12%
+- Guerrilla Marketing: 10% — how well the opportunity lends itself to a low-cost or no-cost guerrilla launch, per the Guerrilla Marketer's Guerrilla Viability Score.
+- Influencer & Affiliate Distribution Fit: 13% — PREFERENTIAL FACTOR. We have platform access to influencer and affiliate networks at no additional platform cost. Opportunities that are naturally suited to influencer seeding and affiliate promotion receive a significant scoring advantage. Evaluate based on: visual appeal and demonstrability, relatability of the problem solved, niche community fit, product seeding viability (can a nano-influencer authentically promote this with a free sample?), and affiliate commission structure potential.
 - Brand Development: 10%
 - Scout Signal Quality: 5%
 
@@ -2070,6 +2073,66 @@ SCORING GUIDANCE:
 5-6 — Channel selection logical but tactics vague, acquisition plan lacks specificity, or budget does not add up.
 4 or below — Generic GTM strategy that could apply to any product. No specific tactics, no clear path to first customer, or budget exceeds capital constraint.`;
 
+const GUERRILLA_MARKETER_PROMPT = `You are an extensively-studied, foremost expert in guerrilla marketing — and among the best at executing it. You have deeply studied the history of guerrilla marketing across every industry and channel: what has succeeded, what has failed, why each outcome happened, and what principles separate genuine guerrilla thinking from stunts that fizzle. You are a foremost authority on low-cost, high-creativity growth.
+
+You are being asked to produce a Guerrilla Launch Plan for a business opportunity that does not yet exist. Your job is to identify how this specific business could launch and gain its first meaningful traction using little to no paid spend — guerrilla tactics, community seeding, earned attention, clever organic content, unconventional partnerships, referral mechanics, showing up where the audience already is, and AI-native tactics that others have not yet tried.
+
+YOUR MANDATE:
+You exist to counterbalance the default drift toward the scalable, spendy playbook — paid ads, paid influencers, agency campaigns. Left alone, nobody's job is to think scrappy. Your sole mandate is low and no-cost, high-creativity growth. Treat guerrilla marketing as a serious launch engine in its own right, not an afterthought to paid channels. The ambition is to grow this business on guerrilla tactics alone — or at least to get it to first revenue without paid spend.
+
+HOW TO THINK:
+- You are always looking for new ideas. You constantly scan what others are doing across industries and channels and pull ideas back toward this specific business and its specific customer.
+- You specialize in flipping conventional marketing into guerrilla angles — taking a traditional tactic and finding the scrappy, unconventional, low-cost version of it.
+- You actively hunt AI-native tactics. Because AI is changing fast, you look for new AI-enabled patterns and leverage them in ways that have not been tried yet, specifically to make this business successful at launch.
+- You think about the specific community this customer already belongs to and how to show up authentically within it before the brand is known.
+- You think about what this business could do that would be genuinely worth talking about — not because it paid for attention but because it earned it.
+
+RISK POSTURE — surface boldness, do not self-censor:
+A good guerrilla marketer understands brand and legal risk well enough to flag it — not well enough to suppress creativity. Bring bold and risky ideas forward for judgment rather than killing them prematurely. Clearly name the risk and the potential upside so the human reviewer can weigh the trade-off. Part of guerrilla marketing is that some tactics land and some do not — pre-filtering out boldness defeats the purpose.
+
+HARD LINE — never illegal, deceptive, astroturfing, or brand-damaging. Cheap and bold is the goal. Fake grassroots, unlawful stunts, and deception are permanently out.
+
+CAPITAL CONSTRAINT AWARENESS:
+This business is being evaluated for launch with minimal capital — ideally under $5,000 to breakeven. Every tactic you propose should be executable within this constraint. Tactics that require significant paid spend are explicitly not your domain — those belong to the GTM Strategist. Your domain is everything that costs creativity instead of money.
+
+INFLUENCER PLATFORM ADVANTAGE:
+We have existing platform access to influencer and affiliate networks at no additional platform cost. This is a genuine structural advantage for guerrilla tactics. Think carefully about how to use this advantage in ways that go beyond standard influencer seeding — what guerrilla angles does this access unlock that most brands cannot access?
+
+PRODUCE A GUERRILLA LAUNCH PLAN containing:
+
+GUERRILLA POSITIONING INSIGHT (one paragraph):
+The single core guerrilla insight for this business — what unconventional angle gives this brand its best chance of earning attention without paying for it? What does this business have, or what could it do, that would make people talk about it?
+
+LAUNCH TACTICS (minimum 8, maximum 12):
+For each tactic provide:
+- TACTIC NAME: [short memorable name]
+- WHAT IT IS: [2-3 sentences — exactly what this tactic involves]
+- WHY THIS BUSINESS: [why this specific tactic fits this specific opportunity, customer, and moment]
+- COST: [realistic total cost — aim for $0-500 per tactic]
+- EXPECTED UPSIDE: [what success looks like and why]
+- RISK FLAG: [brand or legal risk to weigh, or None if clean]
+- NOVEL OR PROVEN: [Novel — new for this business and needs human review before running / Proven Pattern — established guerrilla mechanic with predictable results]
+
+Include a mix of:
+- At least 2 community seeding tactics
+- At least 2 AI-native tactics that leverage current AI capabilities in ways most brands have not tried
+- At least 1 earned media or PR angle
+- At least 1 unconventional partnership or co-marketing play
+- At least 1 referral or word-of-mouth mechanic
+- At least 1 bold or surprising tactic that carries some risk but high potential upside — flag it clearly
+
+FIRST 30 DAYS GUERRILLA SEQUENCE:
+A specific week-by-week sequence for the first 30 days using only guerrilla tactics. What happens in week 1, week 2, week 3, week 4? What is the goal of each week? What does success look like at day 30?
+
+AI-NATIVE TACTICS SPOTLIGHT:
+Dedicate a specific section to tactics that are only possible because of current AI capabilities — things that could not have been done two years ago. At least 3 specific AI-native guerrilla tactics with implementation detail.
+
+TOTAL GUERRILLA BUDGET:
+Sum of all proposed tactics. Should be well under $2,000 for the full launch sequence. Flag any individual tactic over $500.
+
+GUERRILLA VIABILITY SCORE: X/10
+How well does this opportunity lend itself to guerrilla launch tactics? Score with reasoning. A 9-10 means this business could realistically reach first revenue on guerrilla alone. A 6-7 means guerrilla accelerates but cannot replace paid entirely. Below 5 means this category structurally requires paid spend to reach the customer.`;
+
 const AI_EXEC_DESIGNER_PROMPT = `You are a senior AI systems architect and operational designer with deep expertise in building businesses that run primarily on artificial intelligence. You are not a theorist — you are a builder. You have designed and implemented AI-powered operational systems across e-commerce, digital services, content businesses, customer service operations, and marketing automation.
 
 Your north star is the four hour workweek — the human owner of this business should spend no more than 4 hours per week managing it at steady state. You design toward that target relentlessly.
@@ -2110,7 +2173,7 @@ SCORING GUIDANCE:
 5-6 — Directionally reasonable but vague on key functions, or human time clearly exceeds target without acknowledgment.
 4 or below — Cannot achieve four hour workweek target, critical functions require ongoing human involvement, or stack cost makes business unviable.`;
 
-const QUICK_ANALYST_PROMPT = `You are a rapid business opportunity analyst. You receive an opportunity signal and produce a fast, honest assessment covering three areas in one response. Maximum 1,200 words total. Be specific and direct — no fluff or padding.
+const QUICK_ANALYST_PROMPT = `You are a rapid business opportunity analyst. You receive an opportunity signal and produce a fast, honest assessment covering three areas in one response. Maximum 1,400 words total. Be specific and direct — no fluff or padding.
 
 LEAN OPERATIONS CHECK (300 words max):
 - Can this business run 90% on AI, outsourcing, white label, or third party services?
@@ -2140,7 +2203,16 @@ OVERALL ASSESSMENT (200 words max):
 - VERDICT: PURSUE / CONSIDER / PASS
 - TOP CONCERN: the single most important thing to verify or fix before pursuing
 - WATCH POINTS: any stage scoring below 7 — flag specifically what is weak
-- INFLUENCER FIT: High / Medium / Low — does this lend itself to influencer and affiliate promotion and why`;
+- INFLUENCER FIT: High / Medium / Low — does this lend itself to influencer and affiliate promotion and why
+
+GUERRILLA LAUNCH CHECK (200 words max):
+You are also a guerrilla marketing expert. For this opportunity identify:
+- GUERRILLA CORE INSIGHT: The single best unconventional low-cost or no-cost tactic for this specific business and customer — be specific to this opportunity, not generic
+- TOP 3 TACTICS: Name three specific guerrilla tactics with one sentence each on what they involve and estimated cost (aim for $0-500 each)
+- AI-NATIVE ANGLE: One specific guerrilla tactic that is only possible because of current AI capabilities — something most brands have not tried yet
+- INFLUENCER GUERRILLA ANGLE: One specific way to leverage influencer platform access beyond standard seeding — a creative unconventional use of that access
+- TOTAL GUERRILLA BUDGET: Estimated total cost for all three tactics combined
+- GUERRILLA VIABILITY SCORE: X/10 — how well does this opportunity lend itself to low-cost guerrilla launch? 9-10 means it could reach first revenue on guerrilla alone. Below 5 means it structurally requires paid spend.`;
 
 async function callClaudeHaiku(systemPrompt, userMessage, maxTokens = 800) {
   const body = {
@@ -2177,10 +2249,15 @@ function buildAgentContext(oppName, signal, stageOutputs, forStage) {
       (stageOutputs.market ? `\n\nMarket & Customer:\n${stageOutputs.market.substring(0, 600)}` : '') +
       (stageOutputs.biz ? `\n\nBusiness Model:\n${stageOutputs.biz.substring(0, 500)}` : '') +
       (stageOutputs.brand ? `\n\nBrand:\n${stageOutputs.brand.substring(0, 400)}` : ''),
+    'Guerrilla Marketing': `Opportunity: ${oppName}\nOriginal Signal: ${signal ? signal.substring(0, 400) : ''}` +
+      (stageOutputs.market ? `\n\nTarget Customer:\n${stageOutputs.market.substring(0, 400)}` : '') +
+      (stageOutputs.gtm ? `\n\nGTM Strategy:\n${stageOutputs.gtm.substring(0, 500)}` : '') +
+      (stageOutputs.brand ? `\n\nBrand:\n${stageOutputs.brand.substring(0, 300)}` : ''),
     'AI Execution Design': base +
       (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 400)}` : '') +
       (stageOutputs.biz ? `\n\nBusiness Model:\n${stageOutputs.biz.substring(0, 500)}` : '') +
       (stageOutputs.gtm ? `\n\nGTM Strategy:\n${stageOutputs.gtm.substring(0, 600)}` : '') +
+      (stageOutputs.guerrilla ? `\n\nGuerrilla Marketing:\n${stageOutputs.guerrilla.substring(0, 400)}` : '') +
       (stageOutputs.aiExec ? `\n\nAI Executability:\n${stageOutputs.aiExec.substring(0, 400)}` : ''),
     'Blueprint Draft': base +
       (stageOutputs.scout ? `\n\nOpportunity:\n${stageOutputs.scout.substring(0, 600)}` : '') +
@@ -2189,6 +2266,7 @@ function buildAgentContext(oppName, signal, stageOutputs, forStage) {
       (stageOutputs.biz ? `\n\nFinancials:\n${stageOutputs.biz.substring(0, 600)}` : '') +
       (stageOutputs.brand ? `\n\nBrand:\n${stageOutputs.brand.substring(0, 500)}` : '') +
       (stageOutputs.gtm ? `\n\nGTM:\n${stageOutputs.gtm.substring(0, 500)}` : '') +
+      (stageOutputs.guerrilla ? `\n\nGuerrilla Marketing:\n${stageOutputs.guerrilla.substring(0, 600)}` : '') +
       (stageOutputs.exec ? `\n\nAI Execution:\n${stageOutputs.exec.substring(0, 500)}` : '')
   };
 
@@ -3131,7 +3209,23 @@ async function runFullPipeline(recordId, oppName, signal, sourceTrend = '') {
     addActivity(`❌ "${oppName}" dropped at GTM Strategy.`);
     return false;
   }
-  await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
+  await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'Guerrilla Marketing' });
+
+  // GUERRILLA MARKETER
+  setAgentStatus('guerrilla', 'working', 'Planning…');
+  const guerrillaCtx = buildAgentContext(oppName, baseSignal, stageOutputs, 'Guerrilla Marketing');
+  const guerrilla = await runAgent('Guerrilla Marketing', GUERRILLA_MARKETER_PROMPT, `Produce the Guerrilla Launch Plan.\n\n${guerrillaCtx}`, guerrillaCtx, oppName, 'Opportunity');
+  setAgentStatus('guerrilla', 'done', 'Done ✓');
+  scores.guerrilla = guerrilla.score;
+  stageOutputs.guerrilla = guerrilla.output;
+
+  // A low guerrilla score means this opportunity is harder to launch on guerrilla
+  // tactics alone - it does not mean the opportunity itself is unviable, so unlike
+  // every other stage this one never drops the opportunity, only flags it.
+  if (guerrilla.dropped) {
+    addActivity(`⚠️ Guerrilla Marketing scored low for "${oppName}" — proceeding anyway (low guerrilla score means harder to launch on guerrilla tactics alone, not that the opportunity is unviable).`);
+  }
+  await saveOpp(recordId, { 'Guerrilla Marketing Plan': guerrilla.output, 'Status': 'AI Execution Design' });
 
   // AI EXECUTION DESIGNER
   setAgentStatus('exec', 'working', 'Designing…');
@@ -3171,7 +3265,7 @@ STAGE SCORES: ${stageScoresSummary}
 CONTEXT:
 ${blueprintCtx}
 
-Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent). 2. STAGE SCORES SUMMARY — for each stage list the score and one sentence of reasoning. Flag any stage scoring below 7 as ⚠️ WATCH POINT with a specific note on what the gap is and what to verify before pursuing. 3. KEY STRENGTHS — 3-5 points. 4. KEY RISKS — 3-5 points. 5. CAPITAL SUMMARY. 6. CATEGORY: [one of: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle, Other]. 7. OVERALL OPPORTUNITY SCORE: [X]/10. 8. SCORE CONTEXT — one paragraph explaining what this score means in practical terms for this specific opportunity, not what the number means abstractly but what it means for this business. For example: a 7.2 driven by strong market validation and influencer fit but constrained by financial uncertainty means something very different from a 7.2 driven by clean financials but a crowded market. Help the human reviewer understand what the score is actually telling them about this specific opportunity. 9. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS. 10. MOST IMPORTANT ADVICE.`;
+Produce: 1. EXECUTIVE SUMMARY with AGENT FINDINGS SUMMARY (~100 words per agent, and specifically including a Guerrilla Marketing Finding covering: the key guerrilla insight identified, top 2-3 tactics, the guerrilla viability score, and the total guerrilla budget estimate). 2. STAGE SCORES SUMMARY — for each stage list the score and one sentence of reasoning. Flag any stage scoring below 7 as ⚠️ WATCH POINT with a specific note on what the gap is and what to verify before pursuing. 3. KEY STRENGTHS — 3-5 points. 4. KEY RISKS — 3-5 points. 5. CAPITAL SUMMARY. 6. CATEGORY: [one of: Health & Wellness, Home & Living, Consumer Goods, B2B & Professional, Technology & SaaS, Marketplace & Middleman, Education & Media, Finance & Wealth, Sustainability & Lifestyle, Other]. 7. OVERALL OPPORTUNITY SCORE: [X]/10. 8. SCORE CONTEXT — one paragraph explaining what this score means in practical terms for this specific opportunity, not what the number means abstractly but what it means for this business. For example: a 7.2 driven by strong market validation and influencer fit but constrained by financial uncertainty means something very different from a 7.2 driven by clean financials but a crowded market. Help the human reviewer understand what the score is actually telling them about this specific opportunity. 9. FINAL RECOMMENDATION — PURSUE, CONSIDER, or PASS. 10. MOST IMPORTANT ADVICE.`;
 
   const blueprint = await callClaude(ORCHESTRATOR_PROMPT, blueprintMsg, 4000, false);
   setAgentStatus('orchestrator', 'done', 'Done ✓');
@@ -3251,7 +3345,7 @@ async function runFastPipeline(recordId, oppName, signal, sourceTrend) {
     // STAGE 4: QUICK ANALYST SUMMARY via Haiku
     const quickAnalysis = await callClaudeHaiku(QUICK_ANALYST_PROMPT,
       `Produce a fast overall assessment of this opportunity based on the analysis below.\n\nOpportunity: ${oppName}\n\nAI/LEAN OPERATIONS:\n${aiOutput.substring(0, 600)}\n\nMARKET:\n${marketOutput.substring(0, 600)}\n\nBUSINESS MODEL:\n${bizOutput.substring(0, 600)}`,
-      1200);
+      1700);
 
     const quickScoreMatch = quickAnalysis.match(/QUICK SCORE:\s*(\d+(?:\.\d+)?)\/10/i);
     const verdictMatch = quickAnalysis.match(/VERDICT:\s*(PURSUE|CONSIDER|PASS)/i);
@@ -4033,7 +4127,7 @@ async function runDeepModeStandard() {
   runBtn.textContent = '⏳ Running…';
   document.getElementById('systemStatus').textContent = '● Pipeline running…';
   document.getElementById('systemStatus').className = 'system-status working';
-  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','guerrilla','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 
   resetUsageTracking();
   let processedCount = 0;
@@ -4176,7 +4270,7 @@ async function runDeepModePersonalized() {
   runBtn.textContent = '⏳ Running…';
   document.getElementById('systemStatus').textContent = '● Personalized pipeline running…';
   document.getElementById('systemStatus').className = 'system-status working';
-  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+  ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','guerrilla','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 
   resetUsageTracking();
   let signal = desc;
@@ -4246,7 +4340,7 @@ async function resumePipeline(recordId) {
 
     if (currentStatus === 'Review' || currentStatus === 'Approved') {
       addActivity(`✅ "${oppName}" is already complete — Status: ${currentStatus}`);
-      ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+      ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','guerrilla','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
       resumeBtn.disabled = false; resumeBtn.textContent = '↩ Resume';
       document.getElementById('systemStatus').textContent = '● All agents ready';
       document.getElementById('systemStatus').className = 'system-status';
@@ -4255,7 +4349,7 @@ async function resumePipeline(recordId) {
 
     if (currentStatus === 'Dropped') {
       addActivity(`❌ "${oppName}" was dropped. Reopen it in Airtable first if you want to retry.`);
-      ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+      ['orchestrator','scout','ai-analyst','market','architect','brand','gtm','guerrilla','exec'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
       resumeBtn.disabled = false; resumeBtn.textContent = '↩ Resume';
       document.getElementById('systemStatus').textContent = '● All agents ready';
       document.getElementById('systemStatus').className = 'system-status';
@@ -4273,6 +4367,7 @@ async function resumePipeline(recordId) {
     if (record['Business Model']) context += `\n\nBUSINESS ARCHITECTURE:\n${record['Business Model']}`;
     if (record['Brand Name & Positioning']) context += `\n\nBRAND DEVELOPMENT:\n${record['Brand Name & Positioning']}`;
     if (record['GTM Plan']) context += `\n\nGTM STRATEGY:\n${record['GTM Plan']}`;
+    if (record['Guerrilla Marketing Plan']) context += `\n\nGUERRILLA MARKETING:\n${record['Guerrilla Marketing Plan']}`;
     if (record['AI Stack Plan']) context += `\n\nAI EXECUTION DESIGN:\n${record['AI Stack Plan']}`;
 
     // Stages that already passed before this resume call won't re-run, so
@@ -4330,11 +4425,21 @@ async function resumePipeline(recordId) {
       setAgentStatus('gtm', 'done', 'Done ✓');
       scores.gtm = gtm.score;
       if (gtm.dropped) { await saveOpp(recordId, { 'Status': 'Dropped', 'GTM Plan': gtm.output }); addActivity(`❌ Dropped at GTM Strategy.`); return; }
-      await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'AI Execution Design' });
+      await saveOpp(recordId, { 'GTM Plan': gtm.output, 'Status': 'Guerrilla Marketing' });
       context += `\n\nGTM STRATEGY:\n${gtm.output}`;
     }
 
-    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development', 'GTM Strategy', 'AI Execution Design'].includes(currentStatus)) {
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development', 'GTM Strategy', 'Guerrilla Marketing'].includes(currentStatus)) {
+      setAgentStatus('guerrilla', 'working', 'Planning…');
+      const guerrilla = await runAgent('Guerrilla Marketing', GUERRILLA_MARKETER_PROMPT, `Produce the Guerrilla Launch Plan.\n\n${context}`, context, oppName, 'Opportunity');
+      setAgentStatus('guerrilla', 'done', 'Done ✓');
+      scores.guerrilla = guerrilla.score;
+      if (guerrilla.dropped) { addActivity(`⚠️ Guerrilla Marketing scored low — proceeding anyway (a low guerrilla score means this opportunity is harder to launch on guerrilla tactics alone, not that it's unviable).`); }
+      await saveOpp(recordId, { 'Guerrilla Marketing Plan': guerrilla.output, 'Status': 'AI Execution Design' });
+      context += `\n\nGUERRILLA MARKETING:\n${guerrilla.output}`;
+    }
+
+    if (['Signal Captured', 'AI Executability', 'Market Analysis', 'Business Design', 'Brand Development', 'GTM Strategy', 'Guerrilla Marketing', 'AI Execution Design'].includes(currentStatus)) {
       setAgentStatus('exec', 'working', 'Designing…');
       const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the AI execution roadmap.\n\n${context}`, context, oppName, 'Opportunity', 2, 5000, false);
       setAgentStatus('exec', 'done', 'Done ✓');
@@ -4427,6 +4532,7 @@ const SECTIONS = [
   { key: 'brand', icon: '🎨', label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
   { key: 'identity', icon: '✨', label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
   { key: 'gtm', icon: '🚀', label: 'GTM Plan', field: 'GTM Plan' },
+  { key: 'guerrilla', icon: '⚡', label: 'Guerrilla Marketing Plan', field: 'Guerrilla Marketing Plan' },
   { key: 'aistack', icon: '⚙️', label: 'AI Stack Plan', field: 'AI Stack Plan' },
   { key: 'roadmap', icon: '🗺️', label: 'Execution Roadmap', field: 'Execution Roadmap' },
   { key: 'risks', icon: '⚠️', label: 'Risks & Challenges', field: 'Risks & Challenges' },
@@ -4535,6 +4641,7 @@ async function printBlueprint(id) {
       { label: 'Brand Name & Positioning', field: 'Brand Name & Positioning' },
       { label: 'Brand Identity Direction', field: 'Brand Identity Direction' },
       { label: 'GTM Plan', field: 'GTM Plan' },
+      { label: 'Guerrilla Marketing Plan', field: 'Guerrilla Marketing Plan' },
       { label: 'AI Stack Plan', field: 'AI Stack Plan' },
       { label: 'Execution Roadmap', field: 'Execution Roadmap' },
       { label: 'Risks & Challenges', field: 'Risks & Challenges' },
@@ -4740,7 +4847,7 @@ const CATEGORY_COLUMNS = [
   { key: 'Other', id: 'other' },
 ];
 
-const PIPELINE_STATUSES = ['Signal Captured','AI Executability','Market Analysis','Business Design','Brand Development','GTM Strategy','AI Execution Design','Blueprint Draft'];
+const PIPELINE_STATUSES = ['Signal Captured','AI Executability','Market Analysis','Business Design','Brand Development','GTM Strategy','Guerrilla Marketing','AI Execution Design','Blueprint Draft'];
 
 // The 'Category' Airtable field is a single-select with a fixed set of options.
 // Raw AI-generated category text (e.g. "PRIVATE LABEL HEALTH & WELLNESS E-COMMERCE")
@@ -4772,6 +4879,7 @@ async function getPriorStageScores(oppName) {
     'Business Architecture': 'biz',
     'Brand Development': 'brand',
     'GTM Strategy': 'gtm',
+    'Guerrilla Marketing': 'guerrilla',
     'AI Execution Design': 'exec'
   };
   try {
@@ -5028,6 +5136,7 @@ async function reviseOpportunity(id) {
     if (record['Business Model']) context += `\n\nBUSINESS ARCHITECTURE:\n${record['Business Model']}`;
     if (record['Brand Name & Positioning']) context += `\n\nBRAND DEVELOPMENT:\n${record['Brand Name & Positioning']}`;
     if (record['GTM Plan']) context += `\n\nGTM STRATEGY:\n${record['GTM Plan']}`;
+    if (record['Guerrilla Marketing Plan']) context += `\n\nGUERRILLA MARKETING:\n${record['Guerrilla Marketing Plan']}`;
     if (record['AI Stack Plan']) context += `\n\nAI EXECUTION DESIGN:\n${record['AI Stack Plan']}`;
     if (record['Orchestrator Summary']) context += `\n\nPREVIOUS BLUEPRINT:\n${record['Orchestrator Summary']}`;
 
@@ -5078,7 +5187,7 @@ async function reviseBusinessModel(id) {
 
   const btn = document.getElementById('revise-biz-' + id);
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Rebuilding…'; }
-  ['architect','brand','gtm','exec','orchestrator'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
+  ['architect','brand','gtm','guerrilla','exec','orchestrator'].forEach(a => setAgentStatus(a, 'idle', 'Idle'));
 
   try {
     const res = await fetch(`/api/opportunities/${id}`);
@@ -5118,6 +5227,14 @@ async function reviseBusinessModel(id) {
     scores.gtm = gtm.score;
     await saveOpp(id, { 'GTM Plan': gtm.output });
     context += `\n\nGTM STRATEGY:\n${gtm.output}`;
+
+    setAgentStatus('guerrilla', 'working', 'Re-planning…');
+    const guerrilla = await runAgent('Guerrilla Marketing', GUERRILLA_MARKETER_PROMPT, `Produce the Guerrilla Launch Plan for this revised business model.\n\nNote: the business model was just revised per reviewer feedback: ${notes}\n\n${context}`, context, oppName, 'Opportunity');
+    setAgentStatus('guerrilla', 'done', 'Done ✓');
+    scores.guerrilla = guerrilla.score;
+    if (guerrilla.dropped) { addActivity(`⚠️ Guerrilla Marketing scored low on revision — proceeding anyway.`); }
+    await saveOpp(id, { 'Guerrilla Marketing Plan': guerrilla.output });
+    context += `\n\nGUERRILLA MARKETING:\n${guerrilla.output}`;
 
     setAgentStatus('exec', 'working', 'Redesigning…');
     const exec = await runAgent('AI Execution Design', AI_EXEC_DESIGNER_PROMPT, `Design the AI execution roadmap for this revised business model.\n\nNote: the business model was just revised per reviewer feedback: ${notes}\n\n${context}`, context, oppName, 'Opportunity', 2, 5000, false);
