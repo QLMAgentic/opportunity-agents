@@ -102,6 +102,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .library-badge.lib-hack { background: #84CC16; }
 .library-badge.lib-refresh { background: #EA580C; }
 .card-date { font-size: 10px; color: #CCC; margin-left: auto; }
+.card-date-top { font-size: 10px; color: #999; margin-bottom: 6px; }
 .expand-btn { background: none; border: none; cursor: pointer; color: #CCC; font-size: 12px; padding: 0; }
 .fast-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; font-style: italic; letter-spacing: 0.02em; padding: 5px 11px; border-radius: 8px; background: #DC2626; color: white; margin-left: auto; }
 .card-expanded { display: none; border-top: 1.5px solid #F0F2F6; }
@@ -4578,6 +4579,10 @@ function buildQuickActionButtons(item) {
   return { elevateBtn, favBtn, dislikeBtn, maybeBtn, del };
 }
 
+function guerrillaIntegrationBtnHtml(id) {
+  return `<button class="btn-revise" onclick="runGuerrillaIntegration('${id}')" style="background:#7C3AED;color:white;border:none;" title="Run Guerrilla Marketer, update GTM and Market Analysis, recompile Blueprint">⚡ Run Guerrilla Integration</button>`;
+}
+
 function buildCardActions(item) {
   const id = item.id;
   const status = item.Status || '';
@@ -4595,13 +4600,13 @@ function buildCardActions(item) {
     <button class="btn-revise" onclick="printBlueprint('${id}')" title="Print or save as PDF">🖨️ Print PDF</button>
     <button class="btn-revise" onclick="downloadWord('${id}')" title="Download Word document">📄 Word Doc</button>
   `;
-  const guerrillaIntegrationBtn = `<button class="btn-revise" onclick="runGuerrillaIntegration('${id}')" style="background:#7C3AED;color:white;border:none;" title="Run Guerrilla Marketer, update GTM and Market Analysis, recompile Blueprint">⚡ Run Guerrilla Integration</button>`;
-  const utilRow2 = `<div class="card-actions-row">${elevateBtn}${favBtn}${maybeBtn}${dislikeBtn}<span class="card-date" style="margin-left:0">${date}</span><button type="button" class="expand-btn" onclick="toggleCard('${id}')">▲</button>${del}</div>`;
+  const showGuerrilla = ['Review', 'Approved', 'On Hold'].includes(status);
+  const utilRow2 = `<div class="card-actions-row">${elevateBtn}${favBtn}${maybeBtn}${dislikeBtn}${showGuerrilla ? guerrillaIntegrationBtnHtml(id) : ''}<button type="button" class="expand-btn" onclick="toggleCard('${id}')">▲</button>${del}</div>`;
   const canUpgrade = (item['Source Mode'] === 'Fast Mode' || item['Source Mode'] === 'Wild Mode') && !item['Brand Name & Positioning'];
   const upgradeBtn = canUpgrade ? `<button class="btn-revise" onclick="upgradeToFullBlueprint('${id}')" title="Run the remaining Deep Mode stages (Brand, GTM, AI Execution Design) on top of this result">🔬 Upgrade to Full Blueprint</button>` : '';
-  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" id="revise-${id}" onclick="reviseOpportunity('${id}')" title="Re-run the Orchestrator's blueprint compile using your notes as revision guidance">↩ Revise</button><button class="btn-revise" id="revise-biz-${id}" onclick="reviseBusinessModel('${id}')" title="Re-run Business Architecture, Brand, GTM, and AI Execution Design using your notes to actually change the business model, not just the summary">🔧 Revise Business Model</button>${upgradeBtn}${likesBox}${dislikesBox}<div class="card-actions-row">${holdBtn}${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
-  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${upgradeBtn}<div class="card-actions-row">${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
-  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button><div class="card-actions-row">${exportBtns}${guerrillaIntegrationBtn}${copyId}</div>${utilRow2}`;
+  if (status === 'Review') return `${note}<button class="btn-approve" onclick="updateItem('${id}','Approved')">✓ Approve</button><button class="btn-revise" id="revise-${id}" onclick="reviseOpportunity('${id}')" title="Re-run the Orchestrator's blueprint compile using your notes as revision guidance">↩ Revise</button><button class="btn-revise" id="revise-biz-${id}" onclick="reviseBusinessModel('${id}')" title="Re-run Business Architecture, Brand, GTM, and AI Execution Design using your notes to actually change the business model, not just the summary">🔧 Revise Business Model</button>${upgradeBtn}${likesBox}${dislikesBox}<div class="card-actions-row">${holdBtn}${exportBtns}${copyId}</div>${utilRow2}`;
+  if (status === 'Approved') return `<span style="font-size:12px;color:#00C896;font-weight:700">✅ Approved</span>${upgradeBtn}<div class="card-actions-row">${exportBtns}${copyId}</div>${utilRow2}`;
+  if (status === 'On Hold') return `<button class="btn-approve" onclick="updateItem('${id}','Review')">↑ Back to Review</button><div class="card-actions-row">${exportBtns}${copyId}</div>${utilRow2}`;
   if (status === 'Dropped') return `<button class="btn-revise" onclick="updateItem('${id}','Signal Captured')">↺ Reopen</button><div class="card-actions-row">${copyId}</div>${utilRow2}`;
   return `<span style="font-size:12px;color:#AAA">Pipeline running…</span><button class="btn-drop" onclick="updateItem('${id}','Dropped')">🚫 Drop</button><div class="card-actions-row">${holdBtn}${copyId}</div>${utilRow2}`;
 }
@@ -4779,6 +4784,7 @@ function buildCard(item) {
 
   return `<div class="opp-card ${isFavorite ? 'is-favorite' : ''} ${isDisliked ? 'is-disliked' : ''} ${isMaybe ? 'is-maybe' : ''} ${isElevated ? 'is-elevated' : ''}" id="card-${item.id}">
     <div class="opp-card-header" onclick="toggleCard('${item.id}')">
+      ${date ? `<div class="card-date-top">${date}</div>` : ''}
       <div class="opp-card-name-row">
         ${isElevated ? elevateBadgeSvg(50) : ''}
         ${isFavorite ? favoriteBadgeSvg(50) : ''}
@@ -4800,7 +4806,7 @@ function buildCard(item) {
         ${isFastMode ? `<span class="fast-badge" title="Generated via Fast Mode">⚡ FAST</span>` : ''}
       </div>
     </div>
-    <div class="opp-card-quickactions">${(() => { const q = buildQuickActionButtons(item); return `${q.elevateBtn}${q.favBtn}${q.maybeBtn}${q.dislikeBtn}<span class="card-date" style="margin-left:0">${date}</span><button type="button" class="expand-btn" onclick="toggleCard('${item.id}')">▼</button>${q.del}`; })()}</div>
+    <div class="opp-card-quickactions">${(() => { const q = buildQuickActionButtons(item); const showGuerrilla = ['Review','Approved','On Hold'].includes(status); return `${q.elevateBtn}${q.favBtn}${q.maybeBtn}${q.dislikeBtn}${showGuerrilla ? guerrillaIntegrationBtnHtml(item.id) : ''}<button type="button" class="expand-btn" onclick="toggleCard('${item.id}')">▼</button>${q.del}`; })()}</div>
     <div class="card-expanded" id="expanded-${item.id}">
       ${signal ? `<div class="opp-description-box">
         <div class="opp-description-label">📄 Description</div>
